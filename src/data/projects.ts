@@ -1,0 +1,87 @@
+export interface Project {
+  id: string;
+  projectCode: string;
+  title: string;
+  description: string;
+  status: "on-track" | "at-risk" | "delayed" | "completed" | "not-started";
+  progress: number;
+  manager: string;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+}
+
+export const projects: Project[] = [
+  {
+    id: "1",
+    projectCode: "ITPMS-001",
+    title: "Network Infrastructure Upgrade",
+    description: "Upgrade core network switches and fibre backbone across municipal buildings.",
+    status: "on-track",
+    progress: 65,
+    manager: "Thabo Mokoena",
+    startDate: "2025-01-15",
+    endDate: "2025-06-30",
+    createdAt: "2025-01-10",
+  },
+  {
+    id: "2",
+    projectCode: "ITPMS-002",
+    title: "ERP System Migration",
+    description: "Migrate legacy financial system to cloud-based ERP platform.",
+    status: "at-risk",
+    progress: 40,
+    manager: "Naledi Dlamini",
+    startDate: "2025-02-01",
+    endDate: "2025-08-31",
+    createdAt: "2025-01-20",
+  },
+  {
+    id: "3",
+    projectCode: "ITPMS-003",
+    title: "Cybersecurity Framework Implementation",
+    description: "Deploy endpoint protection and establish SOC monitoring capabilities.",
+    status: "delayed",
+    progress: 20,
+    manager: "Sipho Nkosi",
+    startDate: "2025-01-01",
+    endDate: "2025-05-31",
+    createdAt: "2024-12-15",
+  },
+  {
+    id: "4",
+    projectCode: "ITPMS-004",
+    title: "Public Wi-Fi Expansion",
+    description: "Extend free public Wi-Fi coverage to community libraries and clinics.",
+    status: "completed",
+    progress: 100,
+    manager: "Thabo Mokoena",
+    startDate: "2024-08-01",
+    endDate: "2024-12-31",
+    createdAt: "2024-07-15",
+  },
+  {
+    id: "5",
+    projectCode: "ITPMS-005",
+    title: "Digital Services Portal",
+    description: "Develop citizen-facing portal for municipal service requests and payments.",
+    status: "not-started",
+    progress: 0,
+    manager: "Naledi Dlamini",
+    startDate: "2025-07-01",
+    endDate: "2025-12-31",
+    createdAt: "2025-05-01",
+  },
+  {
+    id: "6",
+    projectCode: "ITPMS-006",
+    title: "Data Centre Consolidation",
+    description: "Consolidate distributed server rooms into a centralised municipal data centre.",
+    status: "on-track",
+    progress: 50,
+    manager: "Sipho Nkosi",
+    startDate: "2025-03-01",
+    endDate: "2025-09-30",
+    createdAt: "2025-02-20",
+  },
+];
