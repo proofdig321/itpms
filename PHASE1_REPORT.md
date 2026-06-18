@@ -8,6 +8,8 @@
 
 Phase 1 of the ITPMS frontend is complete. The system is architecturally stable, builds cleanly, and is ready for stakeholder demonstration and backend integration planning.
 
+**Live Demo:** https://itpms.vercel.app/dashboard/monitoring
+
 ---
 
 ## What Was Delivered
@@ -113,6 +115,14 @@ itpms/
 | 4 | **Authentication timeline** | When does RBAC come in? Frontend routing guards depend on this. |
 | 5 | **Laravel API base URL** | Where will the API be hosted? Needed for integration bridge. |
 | 6 | **API contract review** | Does `API_CONTRACT.md` align with Laravel architecture decisions? |
+
+---
+
+## Repository Access
+
+**Frontend Repo:** https://github.com/proofdig321/itpms
+
+The repo contains all source code, architecture documentation, and this report. Access is available if needed for code review or integration reference.
 
 ---
 
