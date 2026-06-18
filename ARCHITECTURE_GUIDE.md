@@ -255,7 +255,8 @@ _components/wbs-tree.tsx  → Client builds tree from flat data, renders recursi
 
 Rules:
 - Data is always flat (mirrors API response shape)
-- Tree construction is a UI responsibility (`buildTree` utility)
+- For mock data and moderate datasets, tree construction may occur in the client via `useMemo`
+- For large production datasets, the tree should be precomputed in a Server Component before being passed to interactive client components
 - No scheduling, dependency, or critical path logic in frontend
 - Backend will own computation; frontend owns visualization
 
@@ -286,6 +287,73 @@ Rules:
 - No speculative abstractions — build only what's needed
 - Keep components focused and modular
 - Preserve this pattern across all modules
+
+---
+
+## Backend Authority Principle
+
+The Laravel backend is the system of record for:
+
+- Authentication
+- Authorization
+- Validation
+- Business rules
+- Persistence
+- Identifier generation
+- Scheduling calculations
+- Audit history
+
+The Next.js frontend is responsible only for:
+
+- Presentation
+- User interaction
+- Client-side validation for UX
+- Visualization
+- Temporary local UI state
+
+Any frontend validation or permission checks are advisory and must never be relied upon for security.
+
+---
+
+## Immutable Fields
+
+The following backend-managed fields must never be editable through frontend forms:
+
+- `id`
+- `projectCode`
+- `createdAt`
+- `updatedAt`
+- audit fields
+- backend-generated reference numbers
+
+---
+
+## List Views
+
+Large datasets should support:
+
+- Pagination
+- Searching
+- Sorting
+- Filtering
+
+When backend APIs become available, these operations should be performed server-side. The frontend should render the returned results rather than filtering complete datasets in memory.
+
+---
+
+## API Versioning
+
+Frontend services should target versioned endpoints:
+
+```
+/api/v1/projects
+/api/v1/planning
+/api/v1/monitoring
+/api/v1/wbs
+/api/v1/auth/me
+```
+
+Version changes should be isolated within `lib/api/client.ts` and the service layer without affecting UI components.
 
 ---
 
