@@ -44,8 +44,19 @@ Build full create/read/update/delete for Projects.
 
 **Architecture:**
 - Service layer gets `createProject()`, `updateProject()`, `deleteProject()`
-- Mock implementations store in-memory (or local state via Zustand)
+- Mock implementations operate on in-memory array (no Zustand — keep it simple)
+- Shared form component reused for both Create and Edit
 - Forms use React Hook Form + Zod schema matching `Project` interface
+- When Laravel arrives, replace service internals with `fetch()` only
+
+**Execution order:**
+1. Shared Project form component (React Hook Form)
+2. Zod validation schema
+3. Create Project page/dialog
+4. Edit Project (reuses shared form)
+5. Project Detail page
+6. Archive/Delete confirmation
+7. Extend service layer with create/update/delete
 
 ---
 
