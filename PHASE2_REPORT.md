@@ -209,8 +209,29 @@ Full contract details in `API_CONTRACT.md`.
 | TypeScript errors | 0 |
 | Biome lint errors | 0 |
 | Build status | ✅ Passes |
-| Git tags | `phase1-complete`, `phase2a-crud-complete` |
+| Git tags | `phase1-complete`, `phase2a-crud-complete`, `phase2-complete` |
 | Total routes | 8 (projects: 4, planning: 1, monitoring: 1, dashboard: 1, create: 1) |
+
+---
+
+## Architecture Hardening (Post Phase 2)
+
+After Phase 2 completion, the following structural improvements were applied:
+
+| Improvement | Status |
+|-------------|--------|
+| `server-only` enforcement on read-only data/services | ✅ |
+| Domain types extracted to `src/types/` | ✅ |
+| Client components import types from `@/types/` (not `@/data/`) | ✅ |
+| Centralized API client (`src/lib/api/client.ts`) | ✅ Created, unused until Laravel |
+| `ARCHITECTURE_GUIDE.md` updated with new rules | ✅ |
+
+### Why this matters for Laravel integration
+
+- `server-only` prevents mock data from leaking into client bundles
+- Separated types allow client components to reference domain models without importing server modules
+- API client provides a single point of change when Laravel endpoints come online
+- No raw `fetch()` calls will be scattered across service files
 
 ---
 

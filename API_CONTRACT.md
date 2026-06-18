@@ -406,4 +406,40 @@ All will follow the same response format, error format, and naming conventions d
 
 ---
 
+## 11. FRONTEND INTEGRATION ARCHITECTURE
+
+### API Client
+
+All service files must use the centralized API client (`src/lib/api/client.ts`) when calling Laravel:
+
+```typescript
+import { apiClient } from "@/lib/api/client";
+
+export async function getProjects(): Promise<Project[]> {
+  return apiClient.get<Project[]>("/projects");
+}
+```
+
+The API client handles:
+- Base URL configuration (`API_BASE_URL` environment variable)
+- Default headers (Content-Type, Accept)
+- Bearer token injection (future AD integration)
+- Consistent error handling and formatting
+- Response unwrapping (`response.data`)
+
+### Environment Configuration
+
+```
+API_BASE_URL=http://localhost:8000/api/v1   # Local Laravel
+API_BASE_URL=https://api.itpms.example/api/v1  # Production
+```
+
+### Server-Only Enforcement
+
+Read-only services use `import "server-only"` to prevent client-side bundle inclusion.
+
+Mutation services (create/update/delete) will migrate to Next.js Server Actions when Laravel is ready, at which point they will also become server-only.
+
+---
+
 END OF CONTRACT
