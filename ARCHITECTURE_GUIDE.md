@@ -216,9 +216,66 @@ export function Table() {
 
 ## Modules Using This Pattern
 
-- [x] Projects (reference implementation)
-- [ ] Planning
-- [ ] Monitoring
+- [x] Projects (reference implementation + full CRUD)
+- [x] Planning (milestones + WBS tree)
+- [x] Monitoring (aggregation dashboard)
+
+---
+
+## Form Pattern (Phase 2)
+
+CRUD modules use a shared form component:
+
+```
+lib/schemas/{module}.ts       → Zod schema + FormValues type
+_components/{module}-form.tsx → Shared form (presentation-only)
+create/page.tsx               → Create page (owns submission)
+[id]/edit/page.tsx            → Edit page (reuses form)
+[id]/(view)/page.tsx          → Detail page (read-only)
+```
+
+Rules:
+- Form component accepts `defaultValues` + `onSubmit` callback
+- Form never imports from `lib/services`
+- Form never performs navigation
+- Form never edits backend-managed fields (id, projectCode, timestamps)
+- Validation lives in the Zod schema (including cross-field rules via `superRefine`)
+
+---
+
+## WBS Pattern (Phase 2B)
+
+Hierarchical modules use a flat-data tree pattern:
+
+```
+data/wbs.ts               → Flat WbsNode[] with parentId references
+lib/services/wbs.ts       → Service returns flat array
+_components/wbs-tree.tsx  → Client builds tree from flat data, renders recursively
+```
+
+Rules:
+- Data is always flat (mirrors API response shape)
+- Tree construction is a UI responsibility (`buildTree` utility)
+- No scheduling, dependency, or critical path logic in frontend
+- Backend will own computation; frontend owns visualization
+
+---
+
+## RBAC Pattern (Phase 2C)
+
+Permission-aware UI uses a containment pattern:
+
+```
+lib/auth/permissions.ts      → Types, roles, can() helper, mock context
+components/permission-gate.tsx → Show/hide wrapper component
+```
+
+Rules:
+- RBAC is UI visibility only — never data filtering
+- `PermissionGate` wraps actions (buttons, links)
+- Backend (Laravel + AD) is the security authority
+- Frontend mock context will be replaced by `/api/v1/auth/me` response
+- Service layer must NEVER branch on permissions
 
 ---
 
