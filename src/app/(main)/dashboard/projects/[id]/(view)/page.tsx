@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { Pencil } from "lucide-react";
 
+import { PermissionGate } from "@/components/permission-gate";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,13 +59,17 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           <p className="text-muted-foreground text-sm">{project.projectCode}</p>
         </div>
         <div className="flex gap-2">
-          <Button asChild variant="outline">
-            <Link href={`/dashboard/projects/${project.id}/edit`}>
-              <Pencil className="h-4 w-4" />
-              Edit
-            </Link>
-          </Button>
-          <DeleteProjectDialog projectId={project.id} projectTitle={project.title} />
+          <PermissionGate permission="projects.edit">
+            <Button asChild variant="outline">
+              <Link href={`/dashboard/projects/${project.id}/edit`}>
+                <Pencil className="h-4 w-4" />
+                Edit
+              </Link>
+            </Button>
+          </PermissionGate>
+          <PermissionGate permission="projects.delete">
+            <DeleteProjectDialog projectId={project.id} projectTitle={project.title} />
+          </PermissionGate>
         </div>
       </div>
 

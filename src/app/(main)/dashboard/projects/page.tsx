@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { Plus } from "lucide-react";
 
+import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
 import { getProjects } from "@/lib/services/projects";
 
@@ -23,12 +24,14 @@ export default function ProjectsPage() {
           <h1 className="font-semibold text-2xl tracking-tight">Projects</h1>
           <p className="text-muted-foreground text-sm">Manage and monitor ICT project portfolio.</p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/projects/create">
-            <Plus className="h-4 w-4" />
-            Create Project
-          </Link>
-        </Button>
+        <PermissionGate permission="projects.create">
+          <Button asChild>
+            <Link href="/dashboard/projects/create">
+              <Plus className="h-4 w-4" />
+              Create Project
+            </Link>
+          </Button>
+        </PermissionGate>
       </div>
       <Suspense fallback={<ProjectsTableSkeleton />}>
         <ProjectsContent />
