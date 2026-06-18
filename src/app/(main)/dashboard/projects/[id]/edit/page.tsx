@@ -1,0 +1,49 @@
+import { notFound } from "next/navigation";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getProjectById } from "@/lib/services/projects";
+
+import { EditProjectForm } from "./_components/edit-project-form";
+
+interface EditProjectPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function EditProjectPage({ params }: EditProjectPageProps) {
+  const { id } = await params;
+  const project = await getProjectById(id);
+
+  if (!project) {
+    notFound();
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="font-semibold text-2xl tracking-tight">Edit Project</h1>
+        <p className="text-muted-foreground text-sm">
+          {project.projectCode} — {project.title}
+        </p>
+      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Project Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EditProjectForm
+            projectId={project.id}
+            defaultValues={{
+              title: project.title,
+              description: project.description,
+              status: project.status,
+              progress: project.progress,
+              manager: project.manager,
+              startDate: project.startDate,
+              endDate: project.endDate,
+            }}
+          />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

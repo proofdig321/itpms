@@ -1,8 +1,12 @@
 "use client";
 
+import Link from "next/link";
+
 import type { ColumnDef } from "@tanstack/react-table";
+import { Pencil } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { Project } from "@/data/projects";
 
@@ -39,6 +43,14 @@ export const columns: ColumnDef<Project>[] = [
   {
     accessorKey: "title",
     header: "Title",
+    cell: ({ row }) => {
+      const project = row.original;
+      return (
+        <Link href={`/dashboard/projects/${project.id}`} className="hover:underline">
+          {project.title}
+        </Link>
+      );
+    },
   },
   {
     accessorKey: "status",
@@ -76,6 +88,20 @@ export const columns: ColumnDef<Project>[] = [
         month: "short",
         day: "numeric",
       });
+    },
+  },
+  {
+    id: "actions",
+    header: "",
+    cell: ({ row }) => {
+      const project = row.original;
+      return (
+        <Button asChild variant="ghost" size="icon-sm" aria-label={`Edit ${project.title}`}>
+          <Link href={`/dashboard/projects/${project.id}/edit`}>
+            <Pencil className="h-3.5 w-3.5" />
+          </Link>
+        </Button>
+      );
     },
   },
 ];
