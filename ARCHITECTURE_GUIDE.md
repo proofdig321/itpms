@@ -286,3 +286,59 @@ Rules:
 - No speculative abstractions — build only what's needed
 - Keep components focused and modular
 - Preserve this pattern across all modules
+
+---
+
+## Server-Only Enforcement
+
+Files under `src/data/` and `src/lib/services/` that are read-only (no client-side mutations) must include:
+
+```typescript
+import "server-only";
+```
+
+This prevents accidental imports into client components at build time.
+
+**Exception:** Services that expose mutation functions called from client components (e.g., `createProject`) cannot use `server-only` until mutations are converted to Server Actions in a future phase.
+
+---
+
+## Domain Types
+
+Shared TypeScript interfaces live in `src/types/`:
+
+```
+src/types/
+├── project.ts
+├── planning.ts
+├── monitoring.ts
+└── wbs.ts
+```
+
+Rules:
+- Types are importable by both server and client components
+- Data files (`src/data/`) re-export types from `src/types/` for backward compatibility
+- Client components must import types from `@/types/`, never from `@/data/`
+
+---
+
+## API Client
+
+When replacing mock data with Laravel endpoints, services must use `src/lib/api/client.ts`:
+
+```typescript
+import { apiClient } from "@/lib/api/client";
+
+export async function getProjects(): Promise<Project[]> {
+  return apiClient.get<Project[]>("/projects");
+}
+```
+
+The API client provides:
+- Centralized base URL configuration
+- Default headers (Content-Type, Accept)
+- Future bearer token injection (AD integration)
+- Consistent error handling
+- Single point of change for all API configuration
+
+Do NOT call `fetch()` directly in service files.

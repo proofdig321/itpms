@@ -4,7 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import type { Milestone } from "@/data/planning";
+import type { Milestone } from "@/types/planning";
 
 const statusConfig: Record<Milestone["status"], { label: string; className: string }> = {
   "on-track": {

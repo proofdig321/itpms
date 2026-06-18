@@ -6,7 +6,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import type { WbsNode, WbsStatus } from "@/data/wbs";
+import type { WbsNode, WbsStatus } from "@/types/wbs";
 
 const statusConfig: Record<WbsStatus, { label: string; className: string }> = {
   "not-started": {

@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { StatusDistribution } from "@/data/monitoring";
+import type { StatusDistribution } from "@/types/monitoring";
 
 interface StatusDistributionProps {
   data: StatusDistribution[];

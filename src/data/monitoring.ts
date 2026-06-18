@@ -1,30 +1,8 @@
-export interface PortfolioSummary {
-  totalProjects: number;
-  activeProjects: number;
-  delayedProjects: number;
-  completedProjects: number;
-  notStartedProjects: number;
-}
+import "server-only";
 
-export interface StatusDistribution {
-  status: "on-track" | "at-risk" | "delayed";
-  count: number;
-  percentage: number;
-}
+import type { MilestoneOverview, PortfolioSummary, RecentActivity, StatusDistribution } from "@/types/monitoring";
 
-export interface MilestoneOverview {
-  totalMilestones: number;
-  completedMilestones: number;
-  overdueMilestones: number;
-  averageProgress: number;
-}
-
-export interface RecentActivity {
-  id: string;
-  projectCode: string;
-  description: string;
-  timestamp: string;
-}
+export type { MilestoneOverview, PortfolioSummary, RecentActivity, StatusDistribution };
 
 export const portfolioSummary: PortfolioSummary = {
   totalProjects: 6,

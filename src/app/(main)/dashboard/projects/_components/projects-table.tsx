@@ -14,7 +14,7 @@ import { FolderOpen } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { Project } from "@/data/projects";
+import type { Project } from "@/types/project";
 
 import { columns } from "./columns";
 

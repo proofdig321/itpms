@@ -1,7 +1,7 @@
 import { AlertTriangle, CheckCircle2, FolderKanban, TrendingUp } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { PortfolioSummary } from "@/data/monitoring";
+import type { PortfolioSummary } from "@/types/monitoring";
 
 interface KpiCardsProps {
   data: PortfolioSummary;

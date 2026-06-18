@@ -1,3 +1,5 @@
+import "server-only";
+
 import { wbsNodes as mockWbsNodes, type WbsNode } from "@/data/wbs";
 
 export async function getWbsByProject(projectCode: string): Promise<WbsNode[]> {

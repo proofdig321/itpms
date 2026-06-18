@@ -8,7 +8,7 @@ import { Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import type { Project } from "@/data/projects";
+import type { Project } from "@/types/project";
 
 const statusConfig: Record<Project["status"], { label: string; className: string }> = {
   "on-track": {

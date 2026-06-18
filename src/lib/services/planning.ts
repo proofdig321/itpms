@@ -1,3 +1,5 @@
+import "server-only";
+
 import { type Milestone, milestones as mockMilestones } from "@/data/planning";
 
 export async function getMilestones(): Promise<Milestone[]> {

@@ -2,7 +2,7 @@ import { AlertTriangle, CheckCircle2, Target } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import type { MilestoneOverview } from "@/data/monitoring";
+import type { MilestoneOverview } from "@/types/monitoring";
 
 interface MilestoneOverviewProps {
   data: MilestoneOverview;

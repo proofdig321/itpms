@@ -1,3 +1,5 @@
+import "server-only";
+
 import {
   type MilestoneOverview,
   milestoneOverview as mockMilestoneOverview,

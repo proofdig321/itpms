@@ -14,7 +14,7 @@ import { ClipboardList } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { Milestone } from "@/data/planning";
+import type { Milestone } from "@/types/planning";
 
 import { columns } from "./columns";
 

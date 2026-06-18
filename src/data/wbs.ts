@@ -1,21 +1,8 @@
-export type WbsLevel = "project" | "phase" | "deliverable" | "work-package" | "task" | "sub-task";
+import "server-only";
 
-export type WbsStatus = "not-started" | "in-progress" | "completed";
+import type { WbsLevel, WbsNode, WbsStatus } from "@/types/wbs";
 
-export interface WbsNode {
-  id: string;
-  projectCode: string;
-  parentId: string | null;
-  code: string;
-  name: string;
-  description?: string;
-  level: WbsLevel;
-  status: WbsStatus;
-  startDate?: string;
-  endDate?: string;
-  progress: number;
-  assignee?: string;
-}
+export type { WbsLevel, WbsNode, WbsStatus };
 
 export const wbsNodes: WbsNode[] = [
   {

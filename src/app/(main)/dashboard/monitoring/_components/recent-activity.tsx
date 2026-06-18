@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { RecentActivity } from "@/data/monitoring";
+import type { RecentActivity } from "@/types/monitoring";
 
 interface RecentActivityFeedProps {
   data: RecentActivity[];
