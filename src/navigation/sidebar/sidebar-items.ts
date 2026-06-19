@@ -1,4 +1,15 @@
-import { CheckSquare, ClipboardList, FolderKanban, Gauge, LayoutDashboard, type LucideIcon } from "lucide-react";
+import {
+  AlertTriangle,
+  Banknote,
+  CheckSquare,
+  ClipboardList,
+  FolderKanban,
+  Gauge,
+  LayoutDashboard,
+  type LucideIcon,
+  ShoppingCart,
+  Users,
+} from "lucide-react";
 
 export interface NavSubItem {
   title: string;
@@ -60,6 +71,32 @@ export const sidebarItems: NavGroup[] = [
         title: "Monitoring",
         url: "/dashboard/monitoring",
         icon: Gauge,
+      },
+    ],
+  },
+  {
+    id: 3,
+    label: "Planning Support",
+    items: [
+      {
+        title: "Resources",
+        url: "/dashboard/planning/resources",
+        icon: Users,
+      },
+      {
+        title: "Cost Plan",
+        url: "/dashboard/planning/costs",
+        icon: Banknote,
+      },
+      {
+        title: "Procurement",
+        url: "/dashboard/planning/procurement",
+        icon: ShoppingCart,
+      },
+      {
+        title: "Risks",
+        url: "/dashboard/planning/risks",
+        icon: AlertTriangle,
       },
     ],
   },
