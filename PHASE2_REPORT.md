@@ -6,9 +6,9 @@
 
 ## Summary
 
-Phase 2 of the ITPMS frontend is fully complete, including the Phase 2B Extension that achieves 100% frontend representation of the Planning Module SRS.
+Phase 2 of the ITPMS frontend is fully complete, including the Phase 2B Extension that provides UI coverage for the Planning Module SRS, with computational logic and authoritative business rules delegated to the Laravel backend.
 
-The system now contains 21 pages covering project CRUD, hierarchical planning, resource/cost/procurement/risk management, analytics (EVM, critical path, baselines, forecasting), scenario planning, reports, notifications, and audit history.
+The system now provides dedicated interfaces covering project CRUD, planning, analytics, governance, reporting, notifications, and audit functionality.
 
 **Live Demo:** https://itpms.vercel.app/dashboard/monitoring
 
@@ -98,6 +98,8 @@ Our initial delivery covered approximately 15% of the SRS. The extension was und
 
 ## What the Backend Now Needs to Implement
 
+The following endpoint groups are recommended to support the current frontend implementation and remain subject to confirmation during Laravel development.
+
 ### Priority 1: Projects CRUD
 
 ```
@@ -166,9 +168,9 @@ Full contract details in `API_CONTRACT.md`.
 | TypeScript errors | 0 |
 | Biome lint errors | 0 |
 | Build status | ✅ Passes |
-| Total ITPMS pages | 21 |
-| Total routes registered | 51 (including template) |
-| SRS requirements with frontend representation | 42/42 (100%) |
+| SRS coverage | UI representation exists for all 42 functional requirements |
+
+**Note:** UI representation means input/display interfaces exist. Functional behaviour for computed features (CPM, EVM, scheduling, approvals) will be delivered by the Laravel backend.
 
 ---
 
