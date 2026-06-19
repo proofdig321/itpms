@@ -1,0 +1,101 @@
+import "server-only";
+
+import type { AuditEntry, Notification } from "@/types/system";
+
+export const notifications: Notification[] = [
+  {
+    id: "n1",
+    type: "milestone-due",
+    title: "Milestone Due",
+    message: "Core Switch Procurement due in 3 days.",
+    projectCode: "ITPMS-001",
+    isRead: false,
+    createdAt: "2025-03-28T08:00:00Z",
+  },
+  {
+    id: "n2",
+    type: "task-delayed",
+    title: "Task Delayed",
+    message: "Endpoint Agent Deployment is 15 days overdue.",
+    projectCode: "ITPMS-003",
+    isRead: false,
+    createdAt: "2025-03-27T14:30:00Z",
+  },
+  {
+    id: "n3",
+    type: "baseline-approval",
+    title: "Approval Required",
+    message: "ERP Migration baseline v1 awaiting ICT Director approval.",
+    projectCode: "ITPMS-002",
+    isRead: true,
+    createdAt: "2025-03-25T09:00:00Z",
+  },
+  {
+    id: "n4",
+    type: "schedule-slippage",
+    title: "Schedule Slippage",
+    message: "Network Upgrade projected to finish 15 days late.",
+    projectCode: "ITPMS-001",
+    isRead: true,
+    createdAt: "2025-03-24T11:00:00Z",
+  },
+  {
+    id: "n5",
+    type: "resource-conflict",
+    title: "Resource Conflict",
+    message: "Thabo Mokoena is over-allocated across 2 projects.",
+    projectCode: "ITPMS-001",
+    isRead: false,
+    createdAt: "2025-03-23T16:00:00Z",
+  },
+];
+
+export const auditEntries: AuditEntry[] = [
+  {
+    id: "a1",
+    user: "Thabo Mokoena",
+    action: "Updated",
+    entity: "Project",
+    entityId: "ITPMS-001",
+    timestamp: "2025-03-28T09:15:00Z",
+    previousValue: "progress: 60",
+    newValue: "progress: 65",
+  },
+  {
+    id: "a2",
+    user: "Sipho Nkosi",
+    action: "Updated",
+    entity: "Task",
+    entityId: "t2",
+    timestamp: "2025-03-27T14:00:00Z",
+    previousValue: "percentComplete: 30",
+    newValue: "percentComplete: 40",
+  },
+  {
+    id: "a3",
+    user: "Naledi Dlamini",
+    action: "Created",
+    entity: "Risk",
+    entityId: "rk2",
+    timestamp: "2025-03-26T10:30:00Z",
+  },
+  {
+    id: "a4",
+    user: "Mzo Nkosi",
+    action: "Approved",
+    entity: "Baseline",
+    entityId: "bl1",
+    timestamp: "2025-01-20T15:00:00Z",
+    reason: "Baseline approved for execution",
+  },
+  {
+    id: "a5",
+    user: "Kagiso Mabena",
+    action: "Updated",
+    entity: "WBS",
+    entityId: "w1-2-2",
+    timestamp: "2025-03-25T11:00:00Z",
+    previousValue: "progress: 40",
+    newValue: "progress: 50",
+  },
+];

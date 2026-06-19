@@ -1,11 +1,14 @@
 import {
   AlertTriangle,
   Banknote,
+  Bell,
   CheckSquare,
   ClipboardList,
+  FileText,
   FolderKanban,
   Gauge,
   GitBranch,
+  History,
   LayoutDashboard,
   type LucideIcon,
   Route,
@@ -122,6 +125,27 @@ export const sidebarItems: NavGroup[] = [
         title: "Critical Path",
         url: "/dashboard/planning/critical-path",
         icon: Route,
+      },
+    ],
+  },
+  {
+    id: 5,
+    label: "System",
+    items: [
+      {
+        title: "Reports",
+        url: "/dashboard/reports",
+        icon: FileText,
+      },
+      {
+        title: "Notifications",
+        url: "/dashboard/notifications",
+        icon: Bell,
+      },
+      {
+        title: "Audit History",
+        url: "/dashboard/audit",
+        icon: History,
       },
     ],
   },
