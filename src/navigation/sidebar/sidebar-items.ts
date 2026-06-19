@@ -1,4 +1,4 @@
-import { ClipboardList, FolderKanban, Gauge, LayoutDashboard, type LucideIcon } from "lucide-react";
+import { CheckSquare, ClipboardList, FolderKanban, Gauge, LayoutDashboard, type LucideIcon } from "lucide-react";
 
 export interface NavSubItem {
   title: string;
@@ -50,6 +50,11 @@ export const sidebarItems: NavGroup[] = [
         title: "Planning",
         url: "/dashboard/planning",
         icon: ClipboardList,
+      },
+      {
+        title: "Tasks",
+        url: "/dashboard/planning/tasks",
+        icon: CheckSquare,
       },
       {
         title: "Monitoring",
