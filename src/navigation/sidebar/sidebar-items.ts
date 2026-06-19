@@ -5,9 +5,13 @@ import {
   ClipboardList,
   FolderKanban,
   Gauge,
+  GitBranch,
   LayoutDashboard,
   type LucideIcon,
+  Route,
   ShoppingCart,
+  Target,
+  TrendingUp,
   Users,
 } from "lucide-react";
 
@@ -97,6 +101,27 @@ export const sidebarItems: NavGroup[] = [
         title: "Risks",
         url: "/dashboard/planning/risks",
         icon: AlertTriangle,
+      },
+    ],
+  },
+  {
+    id: 4,
+    label: "Analytics",
+    items: [
+      {
+        title: "Baselines",
+        url: "/dashboard/planning/baselines",
+        icon: Target,
+      },
+      {
+        title: "EVM",
+        url: "/dashboard/planning/evm",
+        icon: TrendingUp,
+      },
+      {
+        title: "Critical Path",
+        url: "/dashboard/planning/critical-path",
+        icon: Route,
       },
     ],
   },
