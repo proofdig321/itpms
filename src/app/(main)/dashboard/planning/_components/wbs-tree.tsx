@@ -4,9 +4,12 @@ import { useMemo, useState } from "react";
 
 import { ChevronDown, ChevronRight } from "lucide-react";
 
+import { PermissionGate } from "@/components/permission-gate";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import type { WbsNode, WbsStatus } from "@/types/wbs";
+
+import { AddWbsNodeDialog, DeleteWbsNodeDialog, EditWbsNodeDialog } from "./wbs-actions";
 
 const statusConfig: Record<WbsStatus, { label: string; className: string }> = {
   "not-started": {
@@ -37,9 +40,10 @@ function buildTree(nodes: WbsNode[]): TreeNode[] {
   }
 
   for (const node of nodes) {
-    const treeNode = map.get(node.id)!;
+    const treeNode = map.get(node.id);
+    if (!treeNode) continue;
     if (node.parentId && map.has(node.parentId)) {
-      map.get(node.parentId)!.children.push(treeNode);
+      map.get(node.parentId)?.children.push(treeNode);
     } else {
       roots.push(treeNode);
     }
@@ -50,9 +54,10 @@ function buildTree(nodes: WbsNode[]): TreeNode[] {
 
 interface WbsTreeProps {
   nodes: WbsNode[];
+  projectCode: string;
 }
 
-export function WbsTree({ nodes }: WbsTreeProps) {
+export function WbsTree({ nodes, projectCode }: WbsTreeProps) {
   const tree = useMemo(() => buildTree(nodes), [nodes]);
 
   if (nodes.length === 0) {
@@ -60,6 +65,11 @@ export function WbsTree({ nodes }: WbsTreeProps) {
       <div className="flex flex-col items-center justify-center rounded-md border py-16 text-center">
         <p className="font-medium text-sm">No WBS structure defined</p>
         <p className="mt-1 text-muted-foreground text-sm">Work breakdown structure will appear here.</p>
+        <div className="mt-4">
+          <PermissionGate permission="wbs.edit">
+            <AddWbsNodeDialog projectCode={projectCode} parentId={null} />
+          </PermissionGate>
+        </div>
       </div>
     );
   }
@@ -68,7 +78,7 @@ export function WbsTree({ nodes }: WbsTreeProps) {
     <div className="rounded-md border">
       <div className="p-4">
         {tree.map((node) => (
-          <WbsTreeNode key={node.id} node={node} depth={0} />
+          <WbsTreeNode key={node.id} node={node} depth={0} projectCode={projectCode} />
         ))}
       </div>
     </div>
@@ -78,9 +88,10 @@ export function WbsTree({ nodes }: WbsTreeProps) {
 interface WbsTreeNodeProps {
   node: TreeNode;
   depth: number;
+  projectCode: string;
 }
 
-function WbsTreeNode({ node, depth }: WbsTreeNodeProps) {
+function WbsTreeNode({ node, depth, projectCode }: WbsTreeNodeProps) {
   const [expanded, setExpanded] = useState(depth < 2);
   const hasChildren = node.children.length > 0;
 
@@ -111,17 +122,22 @@ function WbsTreeNode({ node, depth }: WbsTreeNodeProps) {
         <span className="shrink-0 font-mono text-muted-foreground text-xs">{node.code}</span>
         <span className="flex-1 truncate text-sm">{node.name}</span>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1">
           <Progress value={node.progress} className="hidden h-1.5 w-16 sm:block" />
           <span className="w-8 text-right text-muted-foreground text-xs tabular-nums">{node.progress}%</span>
           <Badge className={`${statusConfig[node.status].className} text-xs`}>{statusConfig[node.status].label}</Badge>
+          <PermissionGate permission="wbs.edit">
+            <AddWbsNodeDialog projectCode={projectCode} parentId={node.id} parentName={node.name} />
+            <EditWbsNodeDialog node={node} />
+            <DeleteWbsNodeDialog node={node} />
+          </PermissionGate>
         </div>
       </div>
 
       {expanded && hasChildren && (
         <div>
           {node.children.map((child) => (
-            <WbsTreeNode key={child.id} node={child} depth={depth + 1} />
+            <WbsTreeNode key={child.id} node={child} depth={depth + 1} projectCode={projectCode} />
           ))}
         </div>
       )}

@@ -1,5 +1,3 @@
-import "server-only";
-
 import type { WbsLevel, WbsNode, WbsStatus } from "@/types/wbs";
 
 export type { WbsLevel, WbsNode, WbsStatus };

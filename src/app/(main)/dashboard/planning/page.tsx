@@ -15,7 +15,7 @@ async function MilestonesContent() {
 
 async function WbsContent() {
   const nodes = await getWbsByProject("ITPMS-001");
-  return <WbsTree nodes={nodes} />;
+  return <WbsTree nodes={nodes} projectCode="ITPMS-001" />;
 }
 
 export default function PlanningPage() {
