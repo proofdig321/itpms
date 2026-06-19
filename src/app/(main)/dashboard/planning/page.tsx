@@ -1,9 +1,12 @@
 import { Suspense } from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getDependenciesByProject } from "@/lib/services/dependencies";
 import { getMilestones } from "@/lib/services/planning";
+import { getTasksByProject } from "@/lib/services/tasks";
 import { getWbsByProject } from "@/lib/services/wbs";
 
+import { GanttTimeline } from "./_components/gantt-timeline";
 import { PlanningTable } from "./_components/planning-table";
 import { PlanningTableSkeleton } from "./_components/planning-table-skeleton";
 import { WbsTree } from "./_components/wbs-tree";
@@ -18,6 +21,13 @@ async function WbsContent() {
   return <WbsTree nodes={nodes} projectCode="ITPMS-001" />;
 }
 
+async function GanttContent() {
+  const tasks = await getTasksByProject("ITPMS-001");
+  const taskIds = tasks.map((t) => t.id);
+  const deps = await getDependenciesByProject(taskIds);
+  return <GanttTimeline tasks={tasks} dependencies={deps} />;
+}
+
 export default function PlanningPage() {
   return (
     <div className="flex flex-col gap-6">
@@ -28,11 +38,17 @@ export default function PlanningPage() {
       <Tabs defaultValue="wbs">
         <TabsList>
           <TabsTrigger value="wbs">Work Breakdown</TabsTrigger>
+          <TabsTrigger value="gantt">Timeline</TabsTrigger>
           <TabsTrigger value="milestones">Milestones</TabsTrigger>
         </TabsList>
         <TabsContent value="wbs" className="mt-4">
           <Suspense fallback={<PlanningTableSkeleton />}>
             <WbsContent />
+          </Suspense>
+        </TabsContent>
+        <TabsContent value="gantt" className="mt-4">
+          <Suspense fallback={<PlanningTableSkeleton />}>
+            <GanttContent />
           </Suspense>
         </TabsContent>
         <TabsContent value="milestones" className="mt-4">
