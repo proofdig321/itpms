@@ -216,9 +216,23 @@ export function Table() {
 
 ## Modules Using This Pattern
 
-- [x] Projects (reference implementation + full CRUD)
-- [x] Planning (milestones + WBS tree)
+- [x] Projects (full CRUD + detail + delete)
+- [x] Planning (WBS tree + Gantt + milestones + tasks)
 - [x] Monitoring (aggregation dashboard)
+- [x] Resources (table view)
+- [x] Costs (table with ZAR formatting)
+- [x] Procurement (SCM stage tracking)
+- [x] Risks (probability/impact register)
+- [x] Baselines (read-only with status)
+- [x] EVM + Forecasting (metric cards)
+- [x] Critical Path (task table with highlighting)
+- [x] Change Impact (baseline comparison)
+- [x] Scenarios (what-if cards)
+- [x] Calendars (working days + shutdowns)
+- [x] Planning Dashboards (PM + Director views)
+- [x] Reports (export trigger page)
+- [x] Notifications (notification center)
+- [x] Audit History (immutable log)
 
 ---
 
@@ -380,13 +394,27 @@ src/types/
 ├── project.ts
 ├── planning.ts
 ├── monitoring.ts
-└── wbs.ts
+├── wbs.ts
+├── task.ts
+├── dependency.ts
+├── resource.ts
+├── cost.ts
+├── procurement.ts
+├── risk.ts
+├── analytics.ts
+└── system.ts
 ```
 
 Rules:
 - Types are importable by both server and client components
 - Data files (`src/data/`) re-export types from `src/types/` for backward compatibility
 - Client components must import types from `@/types/`, never from `@/data/`
+
+---
+
+## Known Template Exceptions
+
+`src/app/(main)/dashboard/layout.tsx` and `src/app/(main)/dashboard/_components/sidebar/app-sidebar.tsx` import from `@/data/users` directly. This is **template infrastructure code** that predates our architecture. It was intentionally left unmodified per our "template is immutable infrastructure" rule. When authentication is implemented, user data will come from the Laravel `/api/v1/auth/me` endpoint instead.
 
 ---
 

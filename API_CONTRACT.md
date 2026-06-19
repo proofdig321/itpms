@@ -396,11 +396,19 @@ These will follow the same pattern when implemented:
 | Module | Type | Endpoint Pattern |
 |--------|------|-----------------|
 | Budget | Entity | `/api/v1/budgets` |
-| Risk | Entity | `/api/v1/risks` |
-| Procurement | Entity | `/api/v1/procurement` |
-| Resources | Entity | `/api/v1/resources` |
-| Documents | Entity | `/api/v1/documents` |
+| Resources | Entity | `/api/v1/resources?projectCode={code}` |
+| Costs | Entity | `/api/v1/costs?projectCode={code}` |
+| Procurement | Entity | `/api/v1/procurement?projectCode={code}` |
+| Risks | Entity | `/api/v1/risks?projectCode={code}` |
+| Dependencies | Relationship | `/api/v1/dependencies?taskIds={ids}` |
+| Tasks | Entity | `/api/v1/tasks` |
+| Baselines | Entity | `/api/v1/baselines?projectCode={code}` |
+| Analytics (EVM) | Computed | `/api/v1/analytics/evm?projectCode={code}` |
+| Analytics (CPM) | Computed | `/api/v1/analytics/critical-path?projectCode={code}` |
+| Analytics (Forecast) | Computed | `/api/v1/analytics/forecast?projectCode={code}` |
+| Notifications | Read-only | `/api/v1/notifications` |
 | Audit | Read-only | `/api/v1/audit` |
+| Reports | Export | `/api/v1/reports/{type}/export?format=pdf\|excel` |
 
 All will follow the same response format, error format, and naming conventions defined above.
 
