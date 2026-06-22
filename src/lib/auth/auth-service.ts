@@ -86,7 +86,7 @@ export function getSessionUser(): AuthUser | null {
 
 export function getUserPermissionsContext(): UserPermissionsContext | null {
   const user = getSessionUser();
-  if (!user) return null;
+  if (!user || !user.role || !user.permissions) return null;
   return {
     role: user.role as UserPermissionsContext["role"],
     permissions: user.permissions as UserPermissionsContext["permissions"],
