@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -11,40 +11,50 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { exchangeAzureToken, setSession } from "@/lib/auth/auth-service";
 import { loginRequest, msalConfig } from "@/lib/auth/msal-config";
 
+const msalInstance = new PublicClientApplication(msalConfig);
+
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Handle redirect response when returning from Microsoft
+  useEffect(() => {
+    const handleRedirectResponse = async () => {
+      try {
+        await msalInstance.initialize();
+        const response = await msalInstance.handleRedirectPromise();
+
+        if (response?.accessToken) {
+          setIsLoading(true);
+          const authResponse = await exchangeAzureToken(response.accessToken);
+          setSession(authResponse.token, authResponse.user);
+          router.push("/dashboard/monitoring");
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Authentication failed. Please try again.";
+        setError(message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void handleRedirectResponse();
+  }, [router]);
 
   const handleLogin = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const msalInstance = new PublicClientApplication(msalConfig);
       await msalInstance.initialize();
-
-      const response = await msalInstance.loginPopup(loginRequest);
-
-      if (!response.accessToken) {
-        throw new Error("No access token received from Microsoft");
-      }
-
-      // Exchange Azure token with Laravel backend
-      const authResponse = await exchangeAzureToken(response.accessToken);
-
-      // Store session
-      setSession(authResponse.token, authResponse.user);
-
-      // Redirect to dashboard
-      router.push("/dashboard/monitoring");
+      await msalInstance.loginRedirect(loginRequest);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Authentication failed. Please try again.";
       setError(message);
-    } finally {
       setIsLoading(false);
     }
-  }, [router]);
+  }, []);
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-background p-4">
