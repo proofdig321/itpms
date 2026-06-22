@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cookies } from "next/headers";
+
 const BASE_URL = process.env.API_BASE_URL || "http://localhost:8000/api/v1";
 
 interface ApiResponse<T> {
@@ -28,15 +30,18 @@ class ApiClient {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+
     const headers: HeadersInit = {
       "Content-Type": "application/json",
       Accept: "application/json",
       ...options.headers,
     };
 
-    // Future: inject Bearer token from auth session
-    // const token = await getSessionToken();
-    // if (token) headers["Authorization"] = `Bearer ${token}`;
+    if (token) {
+      (headers as Record<string, string>).Authorization = `Bearer ${token}`;
+    }
 
     const response = await fetch(url, { ...options, headers });
 

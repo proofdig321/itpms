@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 
+import { getUserPermissionsContext } from "@/lib/auth/auth-service";
 import { can, mockUserContext, type Permission } from "@/lib/auth/permissions";
 
 interface PermissionGateProps {
@@ -11,8 +12,10 @@ interface PermissionGateProps {
 }
 
 export function PermissionGate({ permission, children, fallback = null }: PermissionGateProps) {
-  // Uses mock context now. Will later consume from auth provider / Laravel session.
-  if (!can(permission, mockUserContext)) {
+  // Use real session if available, otherwise fall back to mock for development
+  const context = getUserPermissionsContext() ?? mockUserContext;
+
+  if (!can(permission, context)) {
     return fallback;
   }
   return children;
