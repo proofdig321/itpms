@@ -271,20 +271,51 @@ Frontend mapping:
 
 ---
 
-## 7. AUTHENTICATION & RBAC (AD Integration)
+## 7. AUTHENTICATION & RBAC (Azure AD Integration)
 
-When auth is implemented:
+The frontend uses Microsoft's MSAL library to authenticate via Azure AD popup. The flow is:
 
 ```
-POST   /api/v1/auth/login
-POST   /api/v1/auth/logout
-GET    /api/v1/auth/me
-POST   /api/v1/auth/refresh
+User clicks "Login with Microsoft"
+    ↓
+MSAL popup → Microsoft login page
+    ↓
+Microsoft returns access_token
+    ↓
+Frontend sends access_token to Laravel
+    ↓
+Laravel validates, creates/updates user, returns app token
 ```
 
-Token: Bearer token in Authorization header.
+### POST /api/v1/auth/azure-login
 
-### GET /api/v1/auth/me Response
+Request:
+```json
+{
+  "access_token": "eyJ0eXAiOiJKV1Q..."
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "token": "app-bearer-token",
+    "user": {
+      "id": "uuid",
+      "name": "Bheki Simelane",
+      "email": "bheki@municipality.gov.za",
+      "role": "ict-admin",
+      "permissions": ["projects.create", "projects.edit", ...]
+    }
+  }
+}
+```
+
+### GET /api/v1/auth/me
+
+Returns current authenticated user (uses Bearer token from header).
 
 ```typescript
 interface AuthUser {
@@ -294,24 +325,29 @@ interface AuthUser {
   role: "ict-admin" | "ict-manager" | "project-manager" | "viewer";
   permissions: Permission[];
 }
-
-type Permission =
-  | "projects.create"
-  | "projects.edit"
-  | "projects.delete"
-  | "planning.view"
-  | "planning.edit"
-  | "monitoring.view"
-  | "wbs.view"
-  | "wbs.edit";
 ```
 
-Frontend uses this response to:
-- Show/hide UI elements via `PermissionGate` component
-- Display user context in sidebar
-- Never filter data or alter business logic
+### POST /api/v1/auth/logout
 
-Laravel + Microsoft AD is the security authority. Frontend is presentation only.
+Invalidates the app token.
+
+### Frontend Environment Variables Required
+
+```
+NEXT_PUBLIC_AZURE_CLIENT_ID     — from Azure App Registration
+NEXT_PUBLIC_AZURE_TENANT_ID     — Azure AD tenant ID
+NEXT_PUBLIC_AZURE_REDIRECT_URI  — https://itpms.vercel.app/login
+NEXT_PUBLIC_API_BASE_URL        — Laravel API base URL
+```
+
+### Azure App Registration Requirements
+
+The Azure App Registration must have:
+- Redirect URI set to `https://itpms.vercel.app/login`
+- `openid`, `profile`, `email` scopes enabled
+- Single-page application (SPA) platform configured
+
+Frontend stores the app token in cookies and injects it as `Authorization: Bearer {token}` on all API requests.
 
 ---
 

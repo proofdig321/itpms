@@ -276,20 +276,33 @@ Rules:
 
 ---
 
-## RBAC Pattern (Phase 2C)
+## RBAC & Authentication Pattern
 
-Permission-aware UI uses a containment pattern:
+Permission-aware UI with Azure AD authentication:
 
 ```
-lib/auth/permissions.ts      → Types, roles, can() helper, mock context
+lib/auth/msal-config.ts        → Azure AD OAuth configuration
+lib/auth/auth-service.ts       → Token exchange, session management
+lib/auth/permissions.ts        → Types, roles, can() helper, mock context
 components/permission-gate.tsx → Show/hide wrapper component
+app/(external)/login/page.tsx  → Login with Microsoft page
+```
+
+Authentication flow:
+```
+/login → MSAL popup → Microsoft → access_token
+    → POST /api/v1/auth/azure-login (Laravel)
+    → app token + user → cookie session
+    → redirect to /dashboard/monitoring
 ```
 
 Rules:
 - RBAC is UI visibility only — never data filtering
 - `PermissionGate` wraps actions (buttons, links)
-- Backend (Laravel + AD) is the security authority
-- Frontend mock context will be replaced by `/api/v1/auth/me` response
+- Backend (Laravel + Azure AD) is the security authority
+- Session stored in cookies (accessible by server components via `cookies()`)
+- API client automatically injects Bearer token from cookies
+- System works without authentication (mock context fallback for development)
 - Service layer must NEVER branch on permissions
 
 ---
