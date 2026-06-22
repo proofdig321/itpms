@@ -30,7 +30,15 @@ export async function exchangeAzureToken(azureAccessToken: string): Promise<Auth
   }
 
   const json = await response.json();
-  return json.data as AuthResponse;
+
+  // Handle both { data: { token, user } } and { token, user } formats
+  const payload = json.data ?? json;
+
+  if (!payload.token) {
+    throw new Error("Invalid response from server");
+  }
+
+  return payload as AuthResponse;
 }
 
 export function setSession(token: string, user: AuthUser): void {
