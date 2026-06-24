@@ -80,6 +80,8 @@ Our initial delivery covered approximately 15% of the SRS. The extension was und
 | Reports | `/dashboard/reports` | SRS Section 22 |
 | Notifications | `/dashboard/notifications` | SRS Section 23 |
 | Audit History | `/dashboard/audit` | SRS Section 24 |
+| Profile | `/dashboard/profile` | Read-only AD user info |
+| Login | `/login` | Azure AD authentication |
 
 ---
 
@@ -225,9 +227,18 @@ No Phase 3 has been formally defined. The frontend is now feature-complete for t
 Potential next steps (pending Mr Nkosi's direction):
 1. Laravel API integration (as endpoints come online)
 2. Interactive Gantt enhancements (drag/resize — requires backend)
-3. Authentication flow (AD + token management)
+3. User Management page (list AD users, assign roles — requires RBAC backend)
 4. Additional FRS modules (Budget Management, Issue Management, etc.)
 5. Report generation backend integration
+
+## Modules Not Needed
+
+| Module | Reason |
+|--------|--------|
+| Settings page | No user-configurable settings in SRS — AD/backend owns config |
+| Billing | Not applicable — municipal system |
+| User registration | AD handles user provisioning |
+| Theme customization | Built into template already |
 
 ---
 

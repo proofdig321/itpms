@@ -233,6 +233,8 @@ export function Table() {
 - [x] Reports (export trigger page)
 - [x] Notifications (notification center)
 - [x] Audit History (immutable log)
+- [x] Profile (read-only AD user info)
+- [x] Login (Azure AD authentication)
 
 ---
 
