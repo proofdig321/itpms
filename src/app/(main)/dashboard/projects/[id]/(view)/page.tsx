@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { getProjectById } from "@/lib/services/projects";
+import { getUsers } from "@/lib/services/users";
 
 import { DeleteProjectDialog } from "./_components/delete-project-dialog";
 
@@ -43,13 +44,16 @@ interface ProjectDetailPageProps {
 
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { id } = await params;
-  const project = await getProjectById(id);
+  const [project, users] = await Promise.all([getProjectById(id), getUsers()]);
 
   if (!project) {
     notFound();
   }
 
   const status = statusConfig[project.status];
+  const managerName = project.managerId
+    ? (users.find((u) => u.id === project.managerId)?.name ?? project.managerId)
+    : "Unassigned";
 
   return (
     <div className="flex flex-col gap-6">
@@ -98,7 +102,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             <CardTitle className="font-normal text-muted-foreground text-sm">Project Manager</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-medium text-sm">{project.managerId ?? "Unassigned"}</p>
+            <p className="font-medium text-sm">{managerName}</p>
           </CardContent>
         </Card>
 
