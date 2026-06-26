@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDependenciesByProject } from "@/lib/services/dependencies";
 import { getMilestones } from "@/lib/services/planning";
+import { getProjects } from "@/lib/services/projects";
 import { getTasksByProject } from "@/lib/services/tasks";
 import { getUsers } from "@/lib/services/users";
 import { getWbsByProject } from "@/lib/services/wbs";
@@ -10,31 +11,26 @@ import { getWbsByProject } from "@/lib/services/wbs";
 import { GanttTimeline } from "./_components/gantt-timeline";
 import { PlanningTable } from "./_components/planning-table";
 import { PlanningTableSkeleton } from "./_components/planning-table-skeleton";
+import { ProjectSelector } from "./_components/project-selector";
 import { WbsTree } from "./_components/wbs-tree";
 
-async function MilestonesContent() {
-  const milestones = await getMilestones();
-  return <PlanningTable data={milestones} />;
+interface PlanningPageProps {
+  searchParams: Promise<{ project?: string }>;
 }
 
-async function WbsContent() {
-  const [nodes, users] = await Promise.all([getWbsByProject("ITP-2026-0001"), getUsers()]);
-  return <WbsTree nodes={nodes} projectCode="ITP-2026-0001" users={users} />;
-}
+export default async function PlanningPage({ searchParams }: PlanningPageProps) {
+  const params = await searchParams;
+  const projects = await getProjects();
+  const selectedCode = params.project ?? projects[0]?.projectCode ?? "";
 
-async function GanttContent() {
-  const tasks = await getTasksByProject("ITP-2026-0001");
-  const taskIds = tasks.map((t) => t.id);
-  const deps = await getDependenciesByProject(taskIds);
-  return <GanttTimeline tasks={tasks} dependencies={deps} />;
-}
-
-export default function PlanningPage() {
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-semibold text-2xl tracking-tight">Planning</h1>
-        <p className="text-muted-foreground text-sm">Project milestones, scheduling, and work breakdown structure.</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="font-semibold text-2xl tracking-tight">Planning</h1>
+          <p className="text-muted-foreground text-sm">Project milestones, scheduling, and work breakdown structure.</p>
+        </div>
+        <ProjectSelector projects={projects} selectedCode={selectedCode} />
       </div>
       <Tabs defaultValue="wbs">
         <TabsList>
@@ -44,12 +40,12 @@ export default function PlanningPage() {
         </TabsList>
         <TabsContent value="wbs" className="mt-4">
           <Suspense fallback={<PlanningTableSkeleton />}>
-            <WbsContent />
+            <WbsContent projectCode={selectedCode} />
           </Suspense>
         </TabsContent>
         <TabsContent value="gantt" className="mt-4">
           <Suspense fallback={<PlanningTableSkeleton />}>
-            <GanttContent />
+            <GanttContent projectCode={selectedCode} />
           </Suspense>
         </TabsContent>
         <TabsContent value="milestones" className="mt-4">
@@ -60,4 +56,21 @@ export default function PlanningPage() {
       </Tabs>
     </div>
   );
+}
+
+async function WbsContent({ projectCode }: { projectCode: string }) {
+  const [nodes, users] = await Promise.all([getWbsByProject(projectCode), getUsers()]);
+  return <WbsTree nodes={nodes} projectCode={projectCode} users={users} />;
+}
+
+async function GanttContent({ projectCode }: { projectCode: string }) {
+  const tasks = await getTasksByProject(projectCode);
+  const taskIds = tasks.map((t) => t.id);
+  const deps = await getDependenciesByProject(taskIds);
+  return <GanttTimeline tasks={tasks} dependencies={deps} />;
+}
+
+async function MilestonesContent() {
+  const milestones = await getMilestones();
+  return <PlanningTable data={milestones} />;
 }
