@@ -77,6 +77,10 @@ export const columns: ColumnDef<Project>[] = [
   {
     accessorKey: "managerId",
     header: "Manager",
+    cell: ({ row }) => {
+      const managerId = row.getValue("managerId") as string | null;
+      return managerId ?? "Unassigned";
+    },
   },
   {
     accessorKey: "endDate",
@@ -105,3 +109,19 @@ export const columns: ColumnDef<Project>[] = [
     },
   },
 ];
+
+export function createColumns(userMap: Map<string, string>): ColumnDef<Project>[] {
+  return columns.map((col) => {
+    if ("accessorKey" in col && col.accessorKey === "managerId") {
+      return {
+        ...col,
+        cell: ({ row }: { row: { getValue: (key: string) => unknown } }) => {
+          const managerId = row.getValue("managerId") as string | null;
+          if (!managerId) return "Unassigned";
+          return userMap.get(managerId) ?? managerId;
+        },
+      };
+    }
+    return col;
+  });
+}

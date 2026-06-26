@@ -7,13 +7,15 @@ import { Plus } from "lucide-react";
 import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
 import { getProjects } from "@/lib/services/projects";
+import { getUsers } from "@/lib/services/users";
 
 import { ProjectsTable } from "./_components/projects-table";
 import { ProjectsTableSkeleton } from "./_components/projects-table-skeleton";
 
 async function ProjectsContent() {
-  const projects = await getProjects();
-  return <ProjectsTable data={projects} />;
+  const [projects, users] = await Promise.all([getProjects(), getUsers()]);
+  const userMap = new Map(users.map((u) => [u.id, u.name]));
+  return <ProjectsTable data={projects} userMap={userMap} />;
 }
 
 export default function ProjectsPage() {

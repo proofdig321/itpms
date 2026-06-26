@@ -16,18 +16,20 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Project } from "@/types/project";
 
-import { columns } from "./columns";
+import { columns, createColumns } from "./columns";
 
 interface ProjectsTableProps {
   data: Project[];
+  userMap?: Map<string, string>;
 }
 
-export function ProjectsTable({ data }: ProjectsTableProps) {
+export function ProjectsTable({ data, userMap }: ProjectsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const tableColumns = userMap ? createColumns(userMap) : columns;
 
   const table = useReactTable({
     data,
-    columns,
+    columns: tableColumns,
     state: { sorting },
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
