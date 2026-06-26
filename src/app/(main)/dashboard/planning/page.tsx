@@ -18,12 +18,12 @@ async function MilestonesContent() {
 }
 
 async function WbsContent() {
-  const [nodes, users] = await Promise.all([getWbsByProject("ITPMS-001"), getUsers()]);
-  return <WbsTree nodes={nodes} projectCode="ITPMS-001" users={users} />;
+  const [nodes, users] = await Promise.all([getWbsByProject("ITP-2026-0001"), getUsers()]);
+  return <WbsTree nodes={nodes} projectCode="ITP-2026-0001" users={users} />;
 }
 
 async function GanttContent() {
-  const tasks = await getTasksByProject("ITPMS-001");
+  const tasks = await getTasksByProject("ITP-2026-0001");
   const taskIds = tasks.map((t) => t.id);
   const deps = await getDependenciesByProject(taskIds);
   return <GanttTimeline tasks={tasks} dependencies={deps} />;
