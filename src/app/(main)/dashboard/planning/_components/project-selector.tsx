@@ -1,5 +1,7 @@
 "use client";
 
+import { Suspense } from "react";
+
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,6 +13,14 @@ interface ProjectSelectorProps {
 }
 
 export function ProjectSelector({ projects, selectedCode }: ProjectSelectorProps) {
+  return (
+    <Suspense fallback={<div className="h-8 w-64 animate-pulse rounded-md bg-muted" />}>
+      <ProjectSelectorInner projects={projects} selectedCode={selectedCode} />
+    </Suspense>
+  );
+}
+
+function ProjectSelectorInner({ projects, selectedCode }: ProjectSelectorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -19,6 +29,8 @@ export function ProjectSelector({ projects, selectedCode }: ProjectSelectorProps
     params.set("project", code);
     router.push(`/dashboard/planning?${params.toString()}`);
   };
+
+  if (projects.length === 0) return null;
 
   return (
     <Select value={selectedCode} onValueChange={handleChange}>
