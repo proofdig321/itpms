@@ -6,7 +6,7 @@ export interface AuthUser {
   id: string;
   name: string;
   email: string;
-  role: string;
+  roles: string[];
   permissions: string[];
 }
 
@@ -86,9 +86,9 @@ export function getSessionUser(): AuthUser | null {
 
 export function getUserPermissionsContext(): UserPermissionsContext | null {
   const user = getSessionUser();
-  if (!user || !user.role || !user.permissions) return null;
+  if (!user || !user.roles || !user.permissions) return null;
   return {
-    role: user.role as UserPermissionsContext["role"],
+    roles: user.roles,
     permissions: user.permissions as UserPermissionsContext["permissions"],
   };
 }

@@ -11,12 +11,16 @@ export type Permission =
   | "wbs.edit";
 
 export interface UserPermissionsContext {
-  role: Role;
+  roles: string[];
   permissions: Permission[];
 }
 
 export function can(permission: Permission, user: UserPermissionsContext): boolean {
   return user.permissions.includes(permission);
+}
+
+export function hasRole(role: string, user: UserPermissionsContext): boolean {
+  return user.roles.includes(role);
 }
 
 export const roleDefaults: Record<Role, Permission[]> = {
@@ -36,6 +40,6 @@ export const roleDefaults: Record<Role, Permission[]> = {
 };
 
 export const mockUserContext: UserPermissionsContext = {
-  role: "ict-admin",
+  roles: ["ict-admin"],
   permissions: roleDefaults["ict-admin"],
 };

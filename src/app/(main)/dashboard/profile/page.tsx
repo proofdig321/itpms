@@ -11,7 +11,7 @@ export default function ProfilePage() {
 
   const displayName = user?.name ?? "Bheki Simelane";
   const displayEmail = user?.email ?? "info@unamifoundation.org";
-  const displayRole = user?.role ?? "ict-admin";
+  const displayRole = user?.roles?.join(", ") ?? "ict-admin";
 
   return (
     <div className="flex flex-col gap-6">
