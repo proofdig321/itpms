@@ -450,39 +450,64 @@ All will follow the same response format, error format, and naming conventions d
 
 ---
 
-## 11. FRONTEND INTEGRATION ARCHITECTURE
+## 11. FRONTEND INTEGRATION STATUS
 
-### API Client
+### Connected to Laravel (live with mock fallback)
 
-All service files must use the centralized API client (`src/lib/api/client.ts`) when calling Laravel:
+| Endpoint | Frontend Service | Status |
+|----------|-----------------|--------|
+| `GET /api/v1/projects` | `lib/services/projects.ts` | ✅ Live |
+| `POST /api/v1/projects` | `lib/services/projects.ts` | ✅ Live |
+| `PATCH /api/v1/projects/{id}` | `lib/services/projects.ts` | ✅ Live |
+| `DELETE /api/v1/projects/{id}` | `lib/services/projects.ts` | ✅ Live |
+| `GET /api/v1/wbs?projectCode={code}` | `lib/services/wbs.ts` | ✅ Live |
+| `GET /api/v1/users` | `lib/services/users.ts` | ✅ Live |
+| `POST /api/v1/auth/azure-login` | `lib/auth/auth-service.ts` | ✅ Live |
+
+### Awaiting Backend Implementation (using mock data)
+
+| Endpoint | Frontend Service | Status |
+|----------|-----------------|--------|
+| `GET /api/v1/tasks` | `lib/services/tasks.ts` | Mock |
+| `GET /api/v1/resources` | `lib/services/resources.ts` | Mock |
+| `GET /api/v1/costs` | `lib/services/costs.ts` | Mock |
+| `GET /api/v1/procurement` | `lib/services/procurement.ts` | Mock |
+| `GET /api/v1/risks` | `lib/services/risks.ts` | Mock |
+| `GET /api/v1/dependencies` | `lib/services/dependencies.ts` | Mock |
+| `GET /api/v1/baselines` | `lib/services/analytics.ts` | Mock |
+| `GET /api/v1/analytics/*` | `lib/services/analytics.ts` | Mock |
+| `GET /api/v1/monitoring/summary` | `lib/services/monitoring.ts` | Mock |
+| `GET /api/v1/notifications` | `lib/services/system.ts` | Mock |
+| `GET /api/v1/audit` | `lib/services/system.ts` | Mock |
+
+### Integration Pattern
+
+All services follow the same pattern:
 
 ```typescript
-import { apiClient } from "@/lib/api/client";
+async function getItems(): Promise<Item[]> {
+  // 1. Try live API
+  const data = await fetchApi("/endpoint");
+  if (data) return data.map(mapApiItem);
 
-export async function getProjects(): Promise<Project[]> {
-  return apiClient.get<Project[]>("/projects");
+  // 2. Fall back to mock
+  return mockItems;
 }
 ```
 
-The API client handles:
-- Base URL configuration (`API_BASE_URL` environment variable)
-- Default headers (Content-Type, Accept)
-- Bearer token injection (future AD integration)
-- Consistent error handling and formatting
-- Response unwrapping (`response.data`)
+When Mr Nkosi builds an endpoint, we swap that service using this pattern. Zero UI changes required.
 
-### Environment Configuration
+### Field Mapping (Laravel → Frontend)
 
-```
-API_BASE_URL=http://localhost:8000/api/v1   # Local Laravel
-API_BASE_URL=https://api.itpms.example/api/v1  # Production
-```
-
-### Server-Only Enforcement
-
-Read-only services use `import "server-only"` to prevent client-side bundle inclusion.
-
-Mutation services (create/update/delete) will migrate to Next.js Server Actions when Laravel is ready, at which point they will also become server-only.
+| Laravel Field | Frontend Field | Notes |
+|---------------|---------------|-------|
+| `managerId` | `managerId` | UUID from users table |
+| `ownerId` | `ownerId` | UUID from users table |
+| `created_at` | `createdAt` | snake_case → camelCase mapping |
+| `sequence` | `sequence` | Backend auto-assigns |
+| `depth` | `depth` | Backend computes |
+| `code` | `code` | Backend computes from depth/sequence |
+| `startDate` (datetime) | `startDate` (date only) | Stripped to YYYY-MM-DD |
 
 ---
 
