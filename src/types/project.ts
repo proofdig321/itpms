@@ -5,7 +5,7 @@ export interface Project {
   description: string;
   status: "on-track" | "at-risk" | "delayed" | "completed" | "not-started";
   progress: number;
-  manager: string;
+  managerId: string | null;
   startDate: string;
   endDate: string;
   createdAt: string;

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { type ProjectFormValues, projectFormSchema, projectStatuses } from "@/lib/schemas/project";
+import type { User } from "@/types/user";
 
 const statusLabels: Record<(typeof projectStatuses)[number], string> = {
   "on-track": "On Track",
@@ -23,6 +24,7 @@ interface ProjectFormProps {
   onSubmit: (values: ProjectFormValues) => void;
   submitLabel?: string;
   isSubmitting?: boolean;
+  users: User[];
 }
 
 export function ProjectForm({
@@ -30,6 +32,7 @@ export function ProjectForm({
   onSubmit,
   submitLabel = "Save Project",
   isSubmitting = false,
+  users,
 }: ProjectFormProps) {
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectFormSchema),
@@ -38,7 +41,7 @@ export function ProjectForm({
       description: "",
       status: "not-started",
       progress: 0,
-      manager: "",
+      managerId: "",
       startDate: "",
       endDate: "",
       ...defaultValues,
@@ -134,11 +137,22 @@ export function ProjectForm({
 
         <Controller
           control={form.control}
-          name="manager"
+          name="managerId"
           render={({ field, fieldState }) => (
             <Field className="gap-1.5" data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor="project-manager">Project Manager</FieldLabel>
-              <Input {...field} id="project-manager" placeholder="Assigned manager" aria-invalid={fieldState.invalid} />
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger id="project-manager" className="w-full" aria-invalid={fieldState.invalid}>
+                  <SelectValue placeholder="Select manager" />
+                </SelectTrigger>
+                <SelectContent>
+                  {users.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}

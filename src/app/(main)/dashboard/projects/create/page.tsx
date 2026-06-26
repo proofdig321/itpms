@@ -1,8 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getUsers } from "@/lib/services/users";
 
 import { CreateProjectForm } from "./_components/create-project-form";
 
-export default function CreateProjectPage() {
+export default async function CreateProjectPage() {
+  const users = await getUsers();
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -14,7 +17,7 @@ export default function CreateProjectPage() {
           <CardTitle>Project Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <CreateProjectForm />
+          <CreateProjectForm users={users} />
         </CardContent>
       </Card>
     </div>

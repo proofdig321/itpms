@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import type { WbsNodeFormValues } from "@/lib/schemas/wbs";
 import { createWbsNode, deleteWbsNode, updateWbsNode } from "@/lib/services/wbs-mutations";
+import type { User } from "@/types/user";
 import type { WbsNode } from "@/types/wbs";
 
 import { WbsNodeForm } from "./wbs-node-form";
@@ -30,9 +31,10 @@ interface AddWbsNodeDialogProps {
   projectCode: string;
   parentId: string | null;
   parentName?: string;
+  users?: User[];
 }
 
-export function AddWbsNodeDialog({ projectCode, parentId, parentName }: AddWbsNodeDialogProps) {
+export function AddWbsNodeDialog({ projectCode, parentId, parentName, users = [] }: AddWbsNodeDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,6 +69,7 @@ export function AddWbsNodeDialog({ projectCode, parentId, parentName }: AddWbsNo
           submitLabel="Create"
           isSubmitting={isSubmitting}
           defaultValues={{ parentId }}
+          users={users}
         />
       </DialogContent>
     </Dialog>
@@ -75,9 +78,10 @@ export function AddWbsNodeDialog({ projectCode, parentId, parentName }: AddWbsNo
 
 interface EditWbsNodeDialogProps {
   node: WbsNode;
+  users?: User[];
 }
 
-export function EditWbsNodeDialog({ node }: EditWbsNodeDialogProps) {
+export function EditWbsNodeDialog({ node, users = [] }: EditWbsNodeDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -117,11 +121,12 @@ export function EditWbsNodeDialog({ node }: EditWbsNodeDialogProps) {
             level: node.level,
             status: node.status,
             progress: node.progress,
-            assignee: node.assignee ?? "",
+            ownerId: node.ownerId,
             startDate: node.startDate ?? "",
             endDate: node.endDate ?? "",
             parentId: node.parentId,
           }}
+          users={users}
         />
       </DialogContent>
     </Dialog>

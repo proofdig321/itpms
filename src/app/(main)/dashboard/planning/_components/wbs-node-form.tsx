@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { type WbsNodeFormValues, wbsLevels, wbsNodeFormSchema, wbsStatuses } from "@/lib/schemas/wbs";
+import type { User } from "@/types/user";
 
 const levelLabels: Record<(typeof wbsLevels)[number], string> = {
   project: "Project",
@@ -30,9 +31,16 @@ interface WbsNodeFormProps {
   onSubmit: (values: WbsNodeFormValues) => void;
   submitLabel?: string;
   isSubmitting?: boolean;
+  users?: User[];
 }
 
-export function WbsNodeForm({ defaultValues, onSubmit, submitLabel = "Save", isSubmitting = false }: WbsNodeFormProps) {
+export function WbsNodeForm({
+  defaultValues,
+  onSubmit,
+  submitLabel = "Save",
+  isSubmitting = false,
+  users = [],
+}: WbsNodeFormProps) {
   const form = useForm<WbsNodeFormValues>({
     resolver: zodResolver(wbsNodeFormSchema),
     defaultValues: {
@@ -41,7 +49,7 @@ export function WbsNodeForm({ defaultValues, onSubmit, submitLabel = "Save", isS
       level: "task",
       status: "not-started",
       progress: 0,
-      assignee: "",
+      ownerId: null,
       startDate: "",
       endDate: "",
       parentId: null,
@@ -153,11 +161,22 @@ export function WbsNodeForm({ defaultValues, onSubmit, submitLabel = "Save", isS
 
           <Controller
             control={form.control}
-            name="assignee"
+            name="ownerId"
             render={({ field, fieldState }) => (
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="wbs-assignee">Responsible Person</FieldLabel>
-                <Input {...field} id="wbs-assignee" placeholder="Assignee" aria-invalid={fieldState.invalid} />
+                <FieldLabel htmlFor="wbs-owner">Responsible Person</FieldLabel>
+                <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                  <SelectTrigger id="wbs-owner" className="w-full" aria-invalid={fieldState.invalid}>
+                    <SelectValue placeholder="Select person" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
             )}

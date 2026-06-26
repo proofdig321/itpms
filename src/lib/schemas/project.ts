@@ -11,7 +11,7 @@ const baseProjectFormSchema = z.object({
     .int({ message: "Progress must be a whole number." })
     .min(0, { message: "Progress cannot be less than 0." })
     .max(100, { message: "Progress cannot exceed 100." }),
-  manager: z.string().min(1, { message: "Manager is required." }),
+  managerId: z.string().min(1, { message: "Manager is required." }),
   startDate: z.string().min(1, { message: "Start date is required." }),
   endDate: z.string().min(1, { message: "End date is required." }),
 });

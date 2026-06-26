@@ -98,7 +98,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             <CardTitle className="font-normal text-muted-foreground text-sm">Project Manager</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-medium text-sm">{project.manager}</p>
+            <p className="font-medium text-sm">{project.managerId ?? "Unassigned"}</p>
           </CardContent>
         </Card>
 

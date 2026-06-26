@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDependenciesByProject } from "@/lib/services/dependencies";
 import { getMilestones } from "@/lib/services/planning";
 import { getTasksByProject } from "@/lib/services/tasks";
+import { getUsers } from "@/lib/services/users";
 import { getWbsByProject } from "@/lib/services/wbs";
 
 import { GanttTimeline } from "./_components/gantt-timeline";
@@ -17,8 +18,8 @@ async function MilestonesContent() {
 }
 
 async function WbsContent() {
-  const nodes = await getWbsByProject("ITPMS-001");
-  return <WbsTree nodes={nodes} projectCode="ITPMS-001" />;
+  const [nodes, users] = await Promise.all([getWbsByProject("ITPMS-001"), getUsers()]);
+  return <WbsTree nodes={nodes} projectCode="ITPMS-001" users={users} />;
 }
 
 async function GanttContent() {

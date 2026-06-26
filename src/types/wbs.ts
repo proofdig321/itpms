@@ -6,13 +6,15 @@ export interface WbsNode {
   id: string;
   projectCode: string;
   parentId: string | null;
+  ownerId: string | null;
+  sequence: number;
+  depth: number;
   code: string;
   name: string;
   description?: string;
   level: WbsLevel;
   status: WbsStatus;
+  progress: number;
   startDate?: string;
   endDate?: string;
-  progress: number;
-  assignee?: string;
 }

@@ -8,10 +8,15 @@ import { toast } from "sonner";
 
 import type { ProjectFormValues } from "@/lib/schemas/project";
 import { createProject } from "@/lib/services/projects";
+import type { User } from "@/types/user";
 
 import { ProjectForm } from "../../_components/project-form";
 
-export function CreateProjectForm() {
+interface CreateProjectFormProps {
+  users: User[];
+}
+
+export function CreateProjectForm({ users }: CreateProjectFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -28,5 +33,5 @@ export function CreateProjectForm() {
     }
   };
 
-  return <ProjectForm onSubmit={handleSubmit} submitLabel="Create Project" isSubmitting={isSubmitting} />;
+  return <ProjectForm onSubmit={handleSubmit} submitLabel="Create Project" isSubmitting={isSubmitting} users={users} />;
 }

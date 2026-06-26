@@ -75,7 +75,7 @@ export const columns: ColumnDef<Project>[] = [
     },
   },
   {
-    accessorKey: "manager",
+    accessorKey: "managerId",
     header: "Manager",
   },
   {

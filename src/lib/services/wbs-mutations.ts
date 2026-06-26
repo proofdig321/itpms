@@ -6,11 +6,19 @@ export async function createWbsNode(projectCode: string, values: WbsNodeFormValu
   const node: WbsNode = {
     id: crypto.randomUUID(),
     projectCode,
-    code: "", // Backend generates WBS codes
-    ...values,
-    parentId: values.parentId || null,
-    createdAt: new Date().toISOString(),
-  } as WbsNode;
+    code: "",
+    sequence: 0,
+    depth: 0,
+    name: values.name,
+    description: values.description,
+    level: values.level,
+    status: values.status,
+    progress: values.progress,
+    ownerId: values.ownerId ?? null,
+    parentId: values.parentId ?? null,
+    startDate: values.startDate,
+    endDate: values.endDate,
+  };
   mockWbsNodes.push(node);
   return node;
 }
@@ -25,7 +33,6 @@ export async function updateWbsNode(id: string, values: Partial<WbsNodeFormValue
 export async function deleteWbsNode(id: string): Promise<void> {
   const index = mockWbsNodes.findIndex((n) => n.id === id);
   if (index === -1) return;
-  // Remove node and all children
   const idsToRemove = new Set<string>();
   const collectChildren = (parentId: string) => {
     idsToRemove.add(parentId);

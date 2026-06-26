@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getProjectById } from "@/lib/services/projects";
+import { getUsers } from "@/lib/services/users";
 
 import { EditProjectForm } from "./_components/edit-project-form";
 
@@ -11,7 +12,7 @@ interface EditProjectPageProps {
 
 export default async function EditProjectPage({ params }: EditProjectPageProps) {
   const { id } = await params;
-  const project = await getProjectById(id);
+  const [project, users] = await Promise.all([getProjectById(id), getUsers()]);
 
   if (!project) {
     notFound();
@@ -37,10 +38,11 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
               description: project.description,
               status: project.status,
               progress: project.progress,
-              manager: project.manager,
+              managerId: project.managerId ?? "",
               startDate: project.startDate,
               endDate: project.endDate,
             }}
+            users={users}
           />
         </CardContent>
       </Card>
