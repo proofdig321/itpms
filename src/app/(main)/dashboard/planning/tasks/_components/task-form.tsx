@@ -9,6 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { type TaskFormValues, taskFormSchema, taskPriorities, taskStatuses, taskTypes } from "@/lib/schemas/task";
+import type { Project } from "@/types/project";
+import type { User } from "@/types/user";
+import type { WbsNode } from "@/types/wbs";
 
 const typeLabels: Record<(typeof taskTypes)[number], string> = {
   planning: "Planning",
@@ -20,15 +23,14 @@ const typeLabels: Record<(typeof taskTypes)[number], string> = {
   documentation: "Documentation",
   closure: "Closure",
 };
-
 const priorityLabels: Record<(typeof taskPriorities)[number], string> = {
   critical: "Critical",
   high: "High",
   medium: "Medium",
   low: "Low",
 };
-
 const statusLabels: Record<(typeof taskStatuses)[number], string> = {
+  draft: "Draft",
   "not-started": "Not Started",
   "in-progress": "In Progress",
   completed: "Completed",
@@ -40,25 +42,33 @@ interface TaskFormProps {
   onSubmit: (values: TaskFormValues) => void;
   submitLabel?: string;
   isSubmitting?: boolean;
+  projects: Project[];
+  wbsNodes: WbsNode[];
+  users: User[];
 }
 
-export function TaskForm({ defaultValues, onSubmit, submitLabel = "Save Task", isSubmitting = false }: TaskFormProps) {
+export function TaskForm({
+  defaultValues,
+  onSubmit,
+  submitLabel = "Save Task",
+  isSubmitting = false,
+  projects,
+  wbsNodes,
+  users,
+}: TaskFormProps) {
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
+      projectCode: "",
+      wbsNodeId: "",
       name: "",
       description: "",
       type: "implementation",
       priority: "medium",
-      status: "not-started",
-      duration: 1,
+      status: "draft",
       plannedStart: "",
       plannedFinish: "",
-      actualStart: "",
-      actualFinish: "",
-      percentComplete: 0,
-      assignee: "",
-      wbsNodeId: "",
+      assigneeId: "",
       ...defaultValues,
     },
   });
@@ -66,6 +76,54 @@ export function TaskForm({ defaultValues, onSubmit, submitLabel = "Save Task", i
   return (
     <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
       <FieldGroup className="gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Controller
+            control={form.control}
+            name="projectCode"
+            render={({ field, fieldState }) => (
+              <Field className="gap-1.5" data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="task-project">Project</FieldLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="task-project" className="w-full" aria-invalid={fieldState.invalid}>
+                    <SelectValue placeholder="Select project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects.map((p) => (
+                      <SelectItem key={p.projectCode} value={p.projectCode}>
+                        {p.projectCode} — {p.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="wbsNodeId"
+            render={({ field, fieldState }) => (
+              <Field className="gap-1.5" data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="task-wbs">WBS Node</FieldLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="task-wbs" className="w-full" aria-invalid={fieldState.invalid}>
+                    <SelectValue placeholder="Select WBS node" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {wbsNodes.map((n) => (
+                      <SelectItem key={n.id} value={n.id}>
+                        {n.code} — {n.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+        </div>
+
         <Controller
           control={form.control}
           name="name"
@@ -104,7 +162,7 @@ export function TaskForm({ defaultValues, onSubmit, submitLabel = "Save Task", i
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="task-type">Type</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger id="task-type" className="w-full" aria-invalid={fieldState.invalid}>
+                  <SelectTrigger id="task-type" className="w-full">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -127,7 +185,7 @@ export function TaskForm({ defaultValues, onSubmit, submitLabel = "Save Task", i
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="task-priority">Priority</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger id="task-priority" className="w-full" aria-invalid={fieldState.invalid}>
+                  <SelectTrigger id="task-priority" className="w-full">
                     <SelectValue placeholder="Select priority" />
                   </SelectTrigger>
                   <SelectContent>
@@ -150,7 +208,7 @@ export function TaskForm({ defaultValues, onSubmit, submitLabel = "Save Task", i
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="task-status">Status</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger id="task-status" className="w-full" aria-invalid={fieldState.invalid}>
+                  <SelectTrigger id="task-status" className="w-full">
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -161,59 +219,6 @@ export function TaskForm({ defaultValues, onSubmit, submitLabel = "Save Task", i
                     ))}
                   </SelectContent>
                 </Select>
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Controller
-            control={form.control}
-            name="duration"
-            render={({ field, fieldState }) => (
-              <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="task-duration">Duration (days)</FieldLabel>
-                <Input
-                  id="task-duration"
-                  type="number"
-                  min={1}
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber || 1)}
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="percentComplete"
-            render={({ field, fieldState }) => (
-              <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="task-percent">Complete (%)</FieldLabel>
-                <Input
-                  id="task-percent"
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="assignee"
-            render={({ field, fieldState }) => (
-              <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="task-assignee">Assignee</FieldLabel>
-                <Input {...field} id="task-assignee" placeholder="Assigned person" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
             )}
@@ -245,6 +250,29 @@ export function TaskForm({ defaultValues, onSubmit, submitLabel = "Save Task", i
             )}
           />
         </div>
+
+        <Controller
+          control={form.control}
+          name="assigneeId"
+          render={({ field, fieldState }) => (
+            <Field className="gap-1.5" data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="task-assignee">Assignee</FieldLabel>
+              <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                <SelectTrigger id="task-assignee" className="w-full">
+                  <SelectValue placeholder="Select assignee" />
+                </SelectTrigger>
+                <SelectContent>
+                  {users.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
       </FieldGroup>
 
       <div className="flex justify-end">

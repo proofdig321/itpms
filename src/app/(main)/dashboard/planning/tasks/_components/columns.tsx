@@ -11,6 +11,10 @@ import { Progress } from "@/components/ui/progress";
 import type { Task, TaskPriority, TaskStatus } from "@/types/task";
 
 const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
+  draft: {
+    label: "Draft",
+    className: "border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400",
+  },
   "not-started": {
     label: "Not Started",
     className: "border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400",

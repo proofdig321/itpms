@@ -8,17 +8,26 @@ import { toast } from "sonner";
 
 import type { TaskFormValues } from "@/lib/schemas/task";
 import { createTask } from "@/lib/services/tasks";
+import type { Project } from "@/types/project";
+import type { User } from "@/types/user";
+import type { WbsNode } from "@/types/wbs";
 
 import { TaskForm } from "../../_components/task-form";
 
-export function CreateTaskForm() {
+interface CreateTaskFormProps {
+  projects: Project[];
+  wbsNodes: WbsNode[];
+  users: User[];
+}
+
+export function CreateTaskForm({ projects, wbsNodes, users }: CreateTaskFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (values: TaskFormValues) => {
     setIsSubmitting(true);
     try {
-      await createTask("ITPMS-001", values);
+      await createTask(values.projectCode, values);
       toast.success("Task created successfully.");
       router.push("/dashboard/planning/tasks");
     } catch {
@@ -28,5 +37,14 @@ export function CreateTaskForm() {
     }
   };
 
-  return <TaskForm onSubmit={handleSubmit} submitLabel="Create Task" isSubmitting={isSubmitting} />;
+  return (
+    <TaskForm
+      onSubmit={handleSubmit}
+      submitLabel="Create Task"
+      isSubmitting={isSubmitting}
+      projects={projects}
+      wbsNodes={wbsNodes}
+      users={users}
+    />
+  );
 }

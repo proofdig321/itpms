@@ -8,15 +8,21 @@ import { toast } from "sonner";
 
 import type { TaskFormValues } from "@/lib/schemas/task";
 import { updateTask } from "@/lib/services/tasks";
+import type { Project } from "@/types/project";
+import type { User } from "@/types/user";
+import type { WbsNode } from "@/types/wbs";
 
 import { TaskForm } from "../../../_components/task-form";
 
 interface EditTaskFormProps {
   taskId: string;
   defaultValues: TaskFormValues;
+  projects: Project[];
+  wbsNodes: WbsNode[];
+  users: User[];
 }
 
-export function EditTaskForm({ taskId, defaultValues }: EditTaskFormProps) {
+export function EditTaskForm({ taskId, defaultValues, projects, wbsNodes, users }: EditTaskFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,6 +45,9 @@ export function EditTaskForm({ taskId, defaultValues }: EditTaskFormProps) {
       onSubmit={handleSubmit}
       submitLabel="Update Task"
       isSubmitting={isSubmitting}
+      projects={projects}
+      wbsNodes={wbsNodes}
+      users={users}
     />
   );
 }
