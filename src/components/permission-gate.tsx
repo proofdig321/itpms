@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import { getUserPermissionsContext } from "@/lib/auth/auth-service";
+import { getSessionUser, getUserPermissionsContext } from "@/lib/auth/auth-service";
 import { can, mockUserContext, type Permission } from "@/lib/auth/permissions";
 
 interface PermissionGateProps {
@@ -12,11 +12,22 @@ interface PermissionGateProps {
 }
 
 export function PermissionGate({ permission, children, fallback = null }: PermissionGateProps) {
-  // Use real session if available, otherwise fall back to mock for development
-  const context = getUserPermissionsContext() ?? mockUserContext;
+  const sessionUser = getSessionUser();
 
-  if (!can(permission, context)) {
-    return fallback;
+  // Not authenticated at all — use mock context (development mode)
+  if (!sessionUser) {
+    const context = mockUserContext;
+    if (!can(permission, context)) return fallback;
+    return children;
   }
+
+  // Authenticated — use real permissions from session
+  const context = getUserPermissionsContext();
+  if (!context) {
+    // User is logged in but has no permissions assigned — show all (temporary until roles configured)
+    return children;
+  }
+
+  if (!can(permission, context)) return fallback;
   return children;
 }

@@ -5,7 +5,6 @@ import { cookies } from "next/headers";
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { users } from "@/data/users";
 import { SIDEBAR_COLLAPSIBLE_VALUES, SIDEBAR_VARIANT_VALUES } from "@/lib/preferences/layout";
 import { cn } from "@/lib/utils";
 import { getPreference } from "@/server/server-actions";
@@ -18,6 +17,26 @@ import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
+
+  const authUserCookie = cookieStore.get("auth_user")?.value;
+  let sessionUser = { id: "1", name: "User", email: "", avatar: "", role: "" };
+  if (authUserCookie) {
+    try {
+      const parsed = JSON.parse(decodeURIComponent(authUserCookie));
+      sessionUser = {
+        id: parsed.id ?? "1",
+        name: parsed.name ?? "User",
+        email: parsed.email ?? "",
+        avatar: "",
+        role: parsed.roles?.[0] ?? "",
+      };
+    } catch {
+      // Invalid cookie data — use defaults
+    }
+  }
+
+  const users = [sessionUser];
+
   const [variant, collapsible] = await Promise.all([
     getPreference("sidebar_variant", SIDEBAR_VARIANT_VALUES, "inset"),
     getPreference("sidebar_collapsible", SIDEBAR_COLLAPSIBLE_VALUES, "icon"),
