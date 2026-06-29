@@ -7,8 +7,8 @@ import { CreateTaskForm } from "./_components/create-task-form";
 
 export default async function CreateTaskPage() {
   const [projects, users] = await Promise.all([getProjects(), getUsers()]);
-  // Get WBS nodes for the first project as default (form will re-fetch on project change)
-  const wbsNodes = projects.length > 0 ? await getWbsByProject(projects[0].projectCode) : [];
+  const wbsResults = await Promise.all(projects.map((p) => getWbsByProject(p.projectCode)));
+  const wbsNodes = wbsResults.flat();
 
   return (
     <div className="flex flex-col gap-6">

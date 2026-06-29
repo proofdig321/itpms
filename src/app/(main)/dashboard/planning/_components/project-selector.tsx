@@ -10,24 +10,25 @@ import type { Project } from "@/types/project";
 interface ProjectSelectorProps {
   projects: Project[];
   selectedCode: string;
+  basePath?: string;
 }
 
-export function ProjectSelector({ projects, selectedCode }: ProjectSelectorProps) {
+export function ProjectSelector({ projects, selectedCode, basePath = "/dashboard/planning" }: ProjectSelectorProps) {
   return (
     <Suspense fallback={<div className="h-8 w-64 animate-pulse rounded-md bg-muted" />}>
-      <ProjectSelectorInner projects={projects} selectedCode={selectedCode} />
+      <ProjectSelectorInner projects={projects} selectedCode={selectedCode} basePath={basePath} />
     </Suspense>
   );
 }
 
-function ProjectSelectorInner({ projects, selectedCode }: ProjectSelectorProps) {
+function ProjectSelectorInner({ projects, selectedCode, basePath }: ProjectSelectorProps & { basePath: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const handleChange = (code: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("project", code);
-    router.push(`/dashboard/planning?${params.toString()}`);
+    router.push(`${basePath}?${params.toString()}`);
   };
 
   if (projects.length === 0) return null;

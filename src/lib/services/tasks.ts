@@ -40,11 +40,9 @@ function mapApiTask(raw: Record<string, unknown>): Task {
   };
 }
 
-export async function getTasks(): Promise<Task[]> {
-  const data = await fetchApi<Record<string, unknown>>("/tasks");
-  if (data) {
-    const items = Array.isArray(data) ? data : (data.data as Record<string, unknown>[] | undefined);
-    if (items && Array.isArray(items)) return items.map(mapApiTask);
+export async function getTasks(projectCode?: string): Promise<Task[]> {
+  if (projectCode) {
+    return getTasksByProject(projectCode);
   }
   return mockTasks;
 }

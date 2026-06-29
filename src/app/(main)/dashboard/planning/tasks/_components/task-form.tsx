@@ -73,6 +73,9 @@ export function TaskForm({
     },
   });
 
+  const selectedProjectCode = form.watch("projectCode");
+  const filteredWbsNodes = wbsNodes.filter((n) => n.projectCode === selectedProjectCode);
+
   return (
     <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
       <FieldGroup className="gap-4">
@@ -111,7 +114,7 @@ export function TaskForm({
                     <SelectValue placeholder="Select WBS node" />
                   </SelectTrigger>
                   <SelectContent>
-                    {wbsNodes.map((n) => (
+                    {filteredWbsNodes.map((n) => (
                       <SelectItem key={n.id} value={n.id}>
                         {n.code} — {n.name}
                       </SelectItem>
