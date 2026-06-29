@@ -42,29 +42,15 @@ export async function exchangeAzureToken(azureAccessToken: string): Promise<Auth
 }
 
 export function setSession(token: string, user: AuthUser): void {
-  if (typeof window !== "undefined" && "cookieStore" in window) {
-    (window as unknown as { cookieStore: { set: (opts: Record<string, unknown>) => void } }).cookieStore.set({
-      name: "auth_token",
-      value: token,
-      path: "/",
-      maxAge: 60 * 60 * 8,
-      sameSite: "lax",
-    });
-    (window as unknown as { cookieStore: { set: (opts: Record<string, unknown>) => void } }).cookieStore.set({
-      name: "auth_user",
-      value: encodeURIComponent(JSON.stringify(user)),
-      path: "/",
-      maxAge: 60 * 60 * 8,
-      sameSite: "lax",
-    });
-  }
+  if (typeof document === "undefined") return;
+  document.cookie = `auth_token=${token}; path=/; max-age=${60 * 60 * 8}; SameSite=Lax`;
+  document.cookie = `auth_user=${encodeURIComponent(JSON.stringify(user))}; path=/; max-age=${60 * 60 * 8}; SameSite=Lax`;
 }
 
 export function clearSession(): void {
-  if (typeof window !== "undefined" && "cookieStore" in window) {
-    (window as unknown as { cookieStore: { delete: (name: string) => void } }).cookieStore.delete("auth_token");
-    (window as unknown as { cookieStore: { delete: (name: string) => void } }).cookieStore.delete("auth_user");
-  }
+  if (typeof document === "undefined") return;
+  document.cookie = "auth_token=; path=/; max-age=0";
+  document.cookie = "auth_user=; path=/; max-age=0";
 }
 
 export function getSessionToken(): string | null {
