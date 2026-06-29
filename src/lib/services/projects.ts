@@ -62,7 +62,7 @@ export async function createProject(values: ProjectFormValues): Promise<Project>
       });
       if (response.ok) {
         const raw = await response.json();
-        return mapApiProject(raw.data ?? raw);
+        return mapApiProject(raw.data ?? raw.project ?? raw);
       }
     } catch {
       // Fall through to mock
@@ -93,7 +93,7 @@ export async function updateProject(id: string, values: Partial<ProjectFormValue
       });
       if (response.ok) {
         const raw = await response.json();
-        return mapApiProject(raw.data ?? raw);
+        return mapApiProject(raw.data ?? raw.project ?? raw);
       }
     } catch {
       // Fall through to mock
