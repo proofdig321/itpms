@@ -454,21 +454,24 @@ All will follow the same response format, error format, and naming conventions d
 
 ### Connected to Laravel (live with mock fallback)
 
-| Endpoint | Frontend Service | Status |
-|----------|-----------------|--------|
-| `GET /api/v1/projects` | `lib/services/projects.ts` | ✅ Live |
-| `POST /api/v1/projects` | `lib/services/projects.ts` | ✅ Live |
-| `PATCH /api/v1/projects/{id}` | `lib/services/projects.ts` | ✅ Live |
-| `DELETE /api/v1/projects/{id}` | `lib/services/projects.ts` | ✅ Live |
-| `GET /api/v1/wbs?projectCode={code}` | `lib/services/wbs.ts` | ✅ Live |
-| `GET /api/v1/users` | `lib/services/users.ts` | ✅ Live |
-| `POST /api/v1/auth/azure-login` | `lib/auth/auth-service.ts` | ✅ Live |
+| Endpoint | Method | Frontend Service | Status | Notes |
+|----------|--------|-----------------|--------|-------|
+| `/api/v1/projects` | GET | `lib/services/projects.ts` | ✅ Live | |
+| `/api/v1/projects/{id}` | GET | `lib/services/projects.ts` | ✅ Live | |
+| `/api/v1/projects` | POST | `lib/services/projects.ts` | ⚠️ Backend issue | `managerId` field mapping error |
+| `/api/v1/projects/{id}` | PATCH | `lib/services/projects.ts` | ✅ Live | |
+| `/api/v1/projects/{id}` | DELETE | `lib/services/projects.ts` | ✅ Live | |
+| `/api/v1/wbs?projectCode={code}` | GET | `lib/services/wbs.ts` | ✅ Live | Paginated response |
+| `/api/v1/wbs` | POST | `lib/services/wbs-mutations.ts` | ✅ Live | Returns computed code/depth/sequence |
+| `/api/v1/tasks?projectCode={code}` | GET | `lib/services/tasks.ts` | ✅ Live | Wrapped in `{ data: [...] }` |
+| `/api/v1/tasks` | POST | `lib/services/tasks.ts` | ✅ Live | Returns taskCode, full object |
+| `/api/v1/users` | GET | `lib/services/users.ts` | ✅ Live | Used for dropdowns |
+| `/api/v1/auth/azure-login` | POST | `lib/auth/auth-service.ts` | ✅ Live | Azure AD flow |
 
 ### Awaiting Backend Implementation (using mock data)
 
 | Endpoint | Frontend Service | Status |
 |----------|-----------------|--------|
-| `GET /api/v1/tasks` | `lib/services/tasks.ts` | Mock |
 | `GET /api/v1/resources` | `lib/services/resources.ts` | Mock |
 | `GET /api/v1/costs` | `lib/services/costs.ts` | Mock |
 | `GET /api/v1/procurement` | `lib/services/procurement.ts` | Mock |
