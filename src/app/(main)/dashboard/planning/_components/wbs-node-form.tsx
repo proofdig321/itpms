@@ -165,9 +165,9 @@ export function WbsNodeForm({
             render={({ field, fieldState }) => (
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="wbs-owner">Responsible Person</FieldLabel>
-                <Select value={field.value ?? ""} onValueChange={field.onChange} disabled>
+                <Select value={field.value ?? ""} onValueChange={field.onChange}>
                   <SelectTrigger id="wbs-owner" className="w-full" aria-invalid={fieldState.invalid}>
-                    <SelectValue placeholder="Backend schema issue - contact Mr Nkosi" />
+                    <SelectValue placeholder="Select person" />
                   </SelectTrigger>
                   <SelectContent>
                     {users.map((user) => (
