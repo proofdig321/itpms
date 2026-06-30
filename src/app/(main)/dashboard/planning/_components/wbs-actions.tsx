@@ -46,8 +46,9 @@ export function AddWbsNodeDialog({ projectCode, parentId, parentName, users = []
       toast.success("WBS node created.");
       setOpen(false);
       router.refresh();
-    } catch {
-      toast.error("Failed to create WBS node.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to create WBS node.";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -68,7 +69,7 @@ export function AddWbsNodeDialog({ projectCode, parentId, parentName, users = []
           onSubmit={handleSubmit}
           submitLabel="Create"
           isSubmitting={isSubmitting}
-          defaultValues={{ parentId }}
+          defaultValues={{ parentId, level: parentId ? "phase" : "project" }}
           users={users}
         />
       </DialogContent>

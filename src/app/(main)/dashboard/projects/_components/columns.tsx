@@ -118,7 +118,7 @@ export function createColumns(userMap: Map<string, string>): ColumnDef<Project>[
         cell: ({ row }: { row: { getValue: (key: string) => unknown } }) => {
           const managerId = row.getValue("managerId") as string | null;
           if (!managerId) return "Unassigned";
-          return userMap.get(managerId) ?? managerId;
+          return userMap.get(managerId) ?? "Unknown";
         },
       };
     }
