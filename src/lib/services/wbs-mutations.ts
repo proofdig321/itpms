@@ -4,6 +4,23 @@ import type { WbsNode } from "@/types/wbs";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
+// Backend bug: validation expects integer but DB constraint expects UUID
+// Map user UUIDs to their array index + 1 until backend is fixed
+const uuidToIntegerMap = new Map([
+  ["019eefc5-dfc9-7084-a1a8-714fde2f463a", 1], // Developer
+  ["019efb29-5327-7228-bc6b-06cd9186c5ae", 2], // Mzomuhle Nkosi
+  ["019efb49-4a7a-7221-8c6e-dfd385d5e511", 3], // ICT
+  ["019efb66-e73b-729e-8c28-6704f787c072", 4], // admin
+  ["019f12d8-aa7f-715a-8298-402c55708b9d", 5], // Zama Nkala
+  ["019f12de-18eb-7249-ac97-05859bf4e06e", 6], // Wikus Potgieter
+  ["019f1358-f038-7016-92cf-1e41cf276871", 7], // Sindiswa Mazibuko
+]);
+
+function convertOwnerIdForBackend(ownerId: string | null): number | null {
+  if (!ownerId) return null;
+  return uuidToIntegerMap.get(ownerId) ?? null;
+}
+
 function mapApiWbsNode(raw: Record<string, unknown>): WbsNode {
   return {
     id: raw.id as string,
@@ -32,7 +49,7 @@ export async function createWbsNode(projectCode: string, values: WbsNodeFormValu
       level: values.level,
       status: values.status,
       progress: values.progress,
-      ownerId: values.ownerId || null,
+      ownerId: null, // Backend bug: validation expects integer but FK constraint expects UUID - disabled until fixed
       parentId: values.parentId || null,
       startDate: values.startDate || null,
       endDate: values.endDate || null,
@@ -81,6 +98,11 @@ export async function createWbsNode(projectCode: string, values: WbsNodeFormValu
 
 export async function updateWbsNode(id: string, values: Partial<WbsNodeFormValues>): Promise<WbsNode | undefined> {
   if (API_BASE_URL) {
+    const updatePayload = { ...values };
+    if (values.ownerId !== undefined) {
+      updatePayload.ownerId = null; // Backend bug: can't assign owners until schema is fixed
+    }
+
     const response = await fetch(`${API_BASE_URL}/wbs/${id}`, {
       method: "PUT",
       headers: {
@@ -88,7 +110,7 @@ export async function updateWbsNode(id: string, values: Partial<WbsNodeFormValue
         Accept: "application/json",
         "ngrok-skip-browser-warning": "true",
       },
-      body: JSON.stringify(values),
+      body: JSON.stringify(updatePayload),
     });
 
     if (!response.ok) {
