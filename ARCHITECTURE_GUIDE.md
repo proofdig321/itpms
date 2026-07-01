@@ -489,21 +489,4 @@ Rules:
 
 ## API Client
 
-When replacing mock data with Laravel endpoints, services must use `src/lib/api/client.ts`:
-
-```typescript
-import { apiClient } from "@/lib/api/client";
-
-export async function getProjects(): Promise<Project[]> {
-  return apiClient.get<Project[]>("/projects");
-}
-```
-
-The API client provides:
-- Centralized base URL configuration
-- Default headers (Content-Type, Accept)
-- Future bearer token injection (AD integration)
-- Consistent error handling
-- Single point of change for all API configuration
-
-Do NOT call `fetch()` directly in service files.
+Services currently call `fetch()` directly. `src/lib/api/client.ts` exists for future use when bearer token injection is needed (Azure AD integration). Migration to the API client will happen at that point — it is a single-layer change inside `lib/services/` with no UI impact.

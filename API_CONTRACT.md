@@ -487,7 +487,7 @@ interface Task {
 
 ---
 
-## 11. FUTURE MODULES (Contract Placeholder)
+## 12. FUTURE MODULES (Contract Placeholder)
 
 These will follow the same pattern when implemented:
 
@@ -499,7 +499,6 @@ These will follow the same pattern when implemented:
 | Procurement | Entity | `/api/v1/procurement?projectCode={code}` |
 | Risks | Entity | `/api/v1/risks?projectCode={code}` |
 | Dependencies | Relationship | `/api/v1/dependencies?taskIds={ids}` |
-| Tasks | Entity | `/api/v1/tasks` |
 | Baselines | Entity | `/api/v1/baselines?projectCode={code}` |
 | Analytics (EVM) | Computed | `/api/v1/analytics/evm?projectCode={code}` |
 | Analytics (CPM) | Computed | `/api/v1/analytics/critical-path?projectCode={code}` |
@@ -512,7 +511,7 @@ All will follow the same response format, error format, and naming conventions d
 
 ---
 
-## 11. FRONTEND INTEGRATION STATUS
+## 13. FRONTEND INTEGRATION STATUS
 
 ### Connected to Laravel (live with mock fallback)
 
@@ -531,6 +530,7 @@ All will follow the same response format, error format, and naming conventions d
 | `/api/v1/tasks/{id}` | GET | `lib/services/tasks.ts` | ✅ Live | Wrapped in `{ data: {} }` |
 | `/api/v1/tasks` | POST | `lib/services/tasks.ts` | ✅ Live | Returns taskCode, full object |
 | `/api/v1/tasks/{id}` | PUT | `lib/services/tasks.ts` | ✅ Live | Requires `projectCode` + `wbsNodeId` in body |
+| `/api/v1/tasks/{id}` | DELETE | `lib/services/tasks.ts` | ✅ Live | Soft delete |
 | `/api/v1/users` | GET | `lib/services/users.ts` | ✅ Live | Used for dropdowns |
 | `/api/v1/auth/azure-login` | POST | `lib/auth/auth-service.ts` | ✅ Live | Azure AD flow |
 
