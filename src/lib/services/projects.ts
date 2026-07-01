@@ -42,9 +42,8 @@ export async function getProjects(): Promise<Project[]> {
 
 export async function getProjectById(id: string): Promise<Project | undefined> {
   const data = await fetchApi<Record<string, unknown>>(`/projects/${id}`);
-  if (data && data.id) {
-    return mapApiProject(data);
-  }
+  const raw = (data?.data as Record<string, unknown>) ?? data;
+  if (raw?.id) return mapApiProject(raw);
   return mockProjects.find((p) => p.id === id);
 }
 
@@ -83,7 +82,7 @@ export async function updateProject(id: string, values: Partial<ProjectFormValue
   if (API_BASE_URL) {
     try {
       const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
-        method: "PATCH",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
@@ -91,12 +90,11 @@ export async function updateProject(id: string, values: Partial<ProjectFormValue
         },
         body: JSON.stringify(values),
       });
-      if (response.ok) {
-        const raw = await response.json();
-        return mapApiProject(raw.data ?? raw.project ?? raw);
-      }
-    } catch {
-      // Fall through to mock
+      const raw = await response.json();
+      if (response.ok) return mapApiProject(raw.data ?? raw.project ?? raw);
+      throw new Error(raw.message ?? "Failed to update project");
+    } catch (err) {
+      throw err;
     }
   }
 

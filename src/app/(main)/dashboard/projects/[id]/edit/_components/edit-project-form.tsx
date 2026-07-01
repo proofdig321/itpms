@@ -28,8 +28,8 @@ export function EditProjectForm({ projectId, defaultValues, users }: EditProject
       await updateProject(projectId, values);
       toast.success("Project updated successfully.");
       router.push("/dashboard/projects");
-    } catch {
-      toast.error("Failed to update project. Please try again.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update project. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
