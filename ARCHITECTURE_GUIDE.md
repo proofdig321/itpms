@@ -37,26 +37,30 @@ data/{module}.ts  →  lib/services/{module}.ts  →  page.tsx  →  _components
 ## Service Layer Contract
 
 ```typescript
-// All functions are async (mirrors real API behaviour)
-// All functions have try/catch with safe fallbacks
+// All functions are async
+// Live API is called first, mock data is the fallback
 // UI only imports from lib/services/, never from data/
 
 export async function getItems(): Promise<Item[]> {
-  try {
-    return mockItems;
-  } catch {
-    return [];
-  }
+  const data = await fetchApi("/items");
+  if (data) return data.map(mapApiItem);
+  return mockItems; // fallback
 }
 
-export async function getItemById(id: string): Promise<Item | undefined> {
-  try {
-    return mockItems.find((item) => item.id === id);
-  } catch {
-    return undefined;
-  }
+export async function createItem(values: ItemFormValues): Promise<Item> {
+  // No try/catch — errors propagate to the calling component
+  const response = await fetch(`${API_BASE_URL}/items`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(values),
+  });
+  const raw = await response.json();
+  if (response.ok) return mapApiItem(raw.data ?? raw);
+  throw new Error(raw.message ?? "Request failed");
 }
 ```
+
+> Note: Services call `fetch()` directly. `src/lib/api/client.ts` exists but is not yet used — migration planned when auth token injection is needed.
 
 ---
 
@@ -306,6 +310,56 @@ Rules:
 - API client automatically injects Bearer token from cookies
 - System works without authentication (mock context fallback for development)
 - Service layer must NEVER branch on permissions
+
+---
+
+## Cross-Module State (Zustand)
+
+For state that must persist across route navigations, use Zustand with `localStorage` persistence:
+
+```
+src/stores/
+├── preferences/
+│   └── preferences-store.ts   # Theme, layout, sidebar preferences
+└── planning/
+    └── planning-store.ts      # Selected project code (persists across planning modules)
+```
+
+### Pattern
+
+```typescript
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+export const usePlanningStore = create<PlanningState>()(
+  persist(
+    (set) => ({ selectedProjectCode: "", setSelectedProjectCode: (code) => set({ selectedProjectCode: code }) }),
+    { name: "planning-project" }, // localStorage key
+  ),
+);
+```
+
+### ProjectSync Component
+
+When a page loads without a `?project=` URL param, `ProjectSync` reads the store and redirects automatically:
+
+```
+src/app/(main)/dashboard/planning/_components/project-sync.tsx
+```
+
+This ensures the selected project persists when navigating between Planning, Tasks, WBS, and Timeline tabs.
+
+---
+
+## HTTP Methods
+
+The Laravel backend uses `PUT` for updates (not `PATCH`). All frontend services must use `PUT` for update operations.
+
+| Operation | Method |
+|-----------|--------|
+| Create | POST |
+| Update | PUT |
+| Delete | DELETE |
 
 ---
 

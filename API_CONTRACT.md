@@ -75,7 +75,7 @@ All endpoints follow:
 | GET | `/api/v1/projects` | List all projects |
 | GET | `/api/v1/projects/{id}` | Get single project |
 | POST | `/api/v1/projects` | Create project |
-| PATCH | `/api/v1/projects/{id}` | Update project |
+| PUT | `/api/v1/projects/{id}` | Update project |
 | DELETE | `/api/v1/projects/{id}` | Delete project |
 
 ### Project Object
@@ -361,9 +361,9 @@ Frontend stores the app token in cookies and injects it as `Authorization: Beare
 |--------|----------|-------------|
 | GET | `/api/v1/wbs?projectCode=ITP-2026-0001` | Get WBS nodes for a project |
 | GET | `/api/v1/wbs/{id}` | Get single WBS node |
-| POST | `/api/v1/wbs` | Create WBS node (future) |
-| PATCH | `/api/v1/wbs/{id}` | Update WBS node (future) |
-| DELETE | `/api/v1/wbs/{id}` | Delete WBS node (future) |
+| POST | `/api/v1/wbs` | Create WBS node |
+| PUT | `/api/v1/wbs/{id}` | Update WBS node |
+| DELETE | `/api/v1/wbs/{id}` | Delete WBS node |
 
 ### WbsNode Object
 
@@ -425,7 +425,60 @@ Laravel must store and return these exact string values.
 
 ---
 
-## 10. FUTURE MODULES (Contract Placeholder)
+## 10. TASKS MODULE
+
+> "What work needs to be done?"
+
+### Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/tasks?projectCode=ITP-2026-0001` | Get tasks for a project |
+| GET | `/api/v1/tasks/{id}` | Get single task |
+| POST | `/api/v1/tasks` | Create task |
+| PUT | `/api/v1/tasks/{id}` | Update task |
+| DELETE | `/api/v1/tasks/{id}` | Delete task |
+
+### Task Object
+
+```typescript
+type TaskType = "planning" | "design" | "procurement" | "implementation" | "testing" | "training" | "documentation" | "closure";
+type TaskPriority = "critical" | "high" | "medium" | "low";
+type TaskStatus = "draft" | "not-started" | "in-progress" | "completed" | "on-hold";
+
+interface Task {
+  id: string;
+  projectCode: string;
+  wbsNodeId: string;         // Required — references WBS node
+  taskCode: string;          // Auto-generated globally unique e.g. TSK-00001
+  name: string;
+  description: string;
+  type: TaskType;
+  priority: TaskPriority;
+  status: TaskStatus;
+  duration: number;
+  milestone: boolean;
+  plannedStart: string;      // ISO 8601 date
+  plannedFinish: string;     // ISO 8601 date
+  actualStart?: string;
+  actualFinish?: string;
+  percentComplete: number;   // 0-100
+  assignee?: string;         // UUID from users table
+  createdAt: string;
+}
+```
+
+### Backend Rules
+
+- `taskCode` auto-generated globally unique — counter must exclude soft-deleted records
+- `wbsNodeId` is required — tasks must belong to a WBS node
+- `status` must use exact enum values above — do NOT use `"todo"` or other variants
+- `PUT /tasks/{id}` must NOT require ownership authorization — same open policy as WBS
+- Single task response wrapped in `{ data: {} }`, list wrapped in `{ data: [] }`
+
+---
+
+## 11. FUTURE MODULES (Contract Placeholder)
 
 These will follow the same pattern when implemented:
 
@@ -458,13 +511,17 @@ All will follow the same response format, error format, and naming conventions d
 |----------|--------|-----------------|--------|-------|
 | `/api/v1/projects` | GET | `lib/services/projects.ts` | ✅ Live | |
 | `/api/v1/projects/{id}` | GET | `lib/services/projects.ts` | ✅ Live | |
-| `/api/v1/projects` | POST | `lib/services/projects.ts` | ⚠️ Backend issue | `managerId` field mapping error |
-| `/api/v1/projects/{id}` | PATCH | `lib/services/projects.ts` | ✅ Live | |
+| `/api/v1/projects` | POST | `lib/services/projects.ts` | ✅ Live | |
+| `/api/v1/projects/{id}` | PUT | `lib/services/projects.ts` | ✅ Live | Backend uses PUT not PATCH |
 | `/api/v1/projects/{id}` | DELETE | `lib/services/projects.ts` | ✅ Live | |
 | `/api/v1/wbs?projectCode={code}` | GET | `lib/services/wbs.ts` | ✅ Live | Paginated response |
 | `/api/v1/wbs` | POST | `lib/services/wbs-mutations.ts` | ✅ Live | Returns computed code/depth/sequence |
+| `/api/v1/wbs/{id}` | PUT | `lib/services/wbs-mutations.ts` | ✅ Live | |
+| `/api/v1/wbs/{id}` | DELETE | `lib/services/wbs-mutations.ts` | ✅ Live | |
 | `/api/v1/tasks?projectCode={code}` | GET | `lib/services/tasks.ts` | ✅ Live | Wrapped in `{ data: [...] }` |
+| `/api/v1/tasks/{id}` | GET | `lib/services/tasks.ts` | ✅ Live | Wrapped in `{ data: {} }` |
 | `/api/v1/tasks` | POST | `lib/services/tasks.ts` | ✅ Live | Returns taskCode, full object |
+| `/api/v1/tasks/{id}` | PUT | `lib/services/tasks.ts` | ❌ Unauthorized | Backend policy blocks update — Mzo to fix |
 | `/api/v1/users` | GET | `lib/services/users.ts` | ✅ Live | Used for dropdowns |
 | `/api/v1/auth/azure-login` | POST | `lib/auth/auth-service.ts` | ✅ Live | Azure AD flow |
 
