@@ -107,7 +107,7 @@ export async function updateTask(id: string, values: Partial<TaskFormValues>): P
   if (API_BASE_URL) {
     try {
       const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
-        method: "PATCH",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
