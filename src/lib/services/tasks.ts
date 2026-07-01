@@ -119,8 +119,10 @@ export async function updateTask(id: string, values: Partial<TaskFormValues>): P
         const raw = await response.json();
         return mapApiTask(raw.data ?? raw);
       }
-    } catch {
-      // Fall through to mock
+      const err = await response.json();
+      throw new Error(err.message ?? "Failed to update task");
+    } catch (err) {
+      throw err;
     }
   }
 

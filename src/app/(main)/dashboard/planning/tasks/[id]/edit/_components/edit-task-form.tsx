@@ -32,8 +32,8 @@ export function EditTaskForm({ taskId, defaultValues, projects, wbsNodes, users 
       await updateTask(taskId, values);
       toast.success("Task updated successfully.");
       router.push("/dashboard/planning/tasks");
-    } catch {
-      toast.error("Failed to update task.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update task.");
     } finally {
       setIsSubmitting(false);
     }
