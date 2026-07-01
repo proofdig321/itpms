@@ -27,15 +27,27 @@ interface GanttTimelineProps {
 }
 
 export function GanttTimeline({ tasks, dependencies }: GanttTimelineProps) {
-  const { startDate, endDate, totalDays } = useMemo(() => {
-    if (tasks.length === 0) return { startDate: new Date(), endDate: new Date(), totalDays: 1 };
+  const validTasks = useMemo(
+    () =>
+      tasks.filter(
+        (t) =>
+          t.plannedStart &&
+          t.plannedFinish &&
+          !Number.isNaN(new Date(t.plannedStart).getTime()) &&
+          !Number.isNaN(new Date(t.plannedFinish).getTime()),
+      ),
+    [tasks],
+  );
 
-    const dates = tasks.flatMap((t) => [new Date(t.plannedStart), new Date(t.plannedFinish)]);
+  const { startDate, endDate, totalDays } = useMemo(() => {
+    if (validTasks.length === 0) return { startDate: new Date(), endDate: new Date(), totalDays: 1 };
+
+    const dates = validTasks.flatMap((t) => [new Date(t.plannedStart), new Date(t.plannedFinish)]);
     const min = new Date(Math.min(...dates.map((d) => d.getTime())));
     const max = new Date(Math.max(...dates.map((d) => d.getTime())));
     const days = Math.max(1, Math.ceil((max.getTime() - min.getTime()) / (1000 * 60 * 60 * 24)));
     return { startDate: min, endDate: max, totalDays: days };
-  }, [tasks]);
+  }, [validTasks]);
 
   const taskDeps = useMemo(() => {
     const map = new Map<string, TaskDependency[]>();
@@ -64,7 +76,7 @@ export function GanttTimeline({ tasks, dependencies }: GanttTimelineProps) {
     return result;
   }, [startDate, endDate, totalDays]);
 
-  if (tasks.length === 0) {
+  if (validTasks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-md border py-16 text-center">
         <p className="font-medium text-sm">No tasks to display</p>
@@ -105,8 +117,9 @@ export function GanttTimeline({ tasks, dependencies }: GanttTimelineProps) {
         {/* Task rows */}
         <div className="divide-y">
           {tasks.map((task) => {
-            const left = getPosition(task.plannedStart);
-            const width = getWidth(task.plannedStart, task.plannedFinish);
+            const hasdates = task.plannedStart && task.plannedFinish;
+            const left = hasdates ? getPosition(task.plannedStart) : 0;
+            const width = hasdates ? getWidth(task.plannedStart, task.plannedFinish) : 0;
             const deps = taskDeps.get(task.id);
 
             return (
