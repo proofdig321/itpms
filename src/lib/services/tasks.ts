@@ -130,15 +130,15 @@ export async function updateTask(id: string, values: Partial<TaskFormValues>): P
 
 export async function deleteTask(id: string): Promise<void> {
   if (API_BASE_URL) {
-    try {
-      await fetch(`${API_BASE_URL}/tasks/${id}`, {
-        method: "DELETE",
-        headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
-      });
-      return;
-    } catch {
-      // Fall through to mock
+    const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
+      method: "DELETE",
+      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message ?? "Failed to delete task");
     }
+    return;
   }
 
   const index = mockTasks.findIndex((t) => t.id === id);
