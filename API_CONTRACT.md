@@ -465,6 +465,15 @@ interface Task {
   percentComplete: number;   // 0-100
   assignee?: string;         // UUID from users table
   createdAt: string;
+  // Additional fields returned by backend (not yet surfaced in UI)
+  sequence?: number;         // Backend auto-assigns
+  plannedCost?: string;      // Decimal string e.g. "0.00"
+  actualCost?: string;       // Decimal string e.g. "0.00"
+  remarks?: string | null;
+  assignments?: unknown[];   // Future: resource assignments
+  dependencies?: unknown[];  // Future: task dependencies
+  comments?: unknown[];      // Future: task comments
+  progressHistory?: unknown[]; // Future: progress audit trail
 }
 ```
 
@@ -521,7 +530,7 @@ All will follow the same response format, error format, and naming conventions d
 | `/api/v1/tasks?projectCode={code}` | GET | `lib/services/tasks.ts` | ✅ Live | Wrapped in `{ data: [...] }` |
 | `/api/v1/tasks/{id}` | GET | `lib/services/tasks.ts` | ✅ Live | Wrapped in `{ data: {} }` |
 | `/api/v1/tasks` | POST | `lib/services/tasks.ts` | ✅ Live | Returns taskCode, full object |
-| `/api/v1/tasks/{id}` | PUT | `lib/services/tasks.ts` | ❌ Unauthorized | Backend policy blocks update — Mzo to fix |
+| `/api/v1/tasks/{id}` | PUT | `lib/services/tasks.ts` | ✅ Live | Requires `projectCode` + `wbsNodeId` in body |
 | `/api/v1/users` | GET | `lib/services/users.ts` | ✅ Live | Used for dropdowns |
 | `/api/v1/auth/azure-login` | POST | `lib/auth/auth-service.ts` | ✅ Live | Azure AD flow |
 
