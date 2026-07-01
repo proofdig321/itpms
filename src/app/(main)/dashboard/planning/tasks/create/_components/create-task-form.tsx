@@ -30,8 +30,8 @@ export function CreateTaskForm({ projects, wbsNodes, users }: CreateTaskFormProp
       await createTask(values.projectCode, values);
       toast.success("Task created successfully.");
       router.push("/dashboard/planning/tasks");
-    } catch {
-      toast.error("Failed to create task.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create task.");
     } finally {
       setIsSubmitting(false);
     }

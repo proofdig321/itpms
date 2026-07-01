@@ -58,7 +58,7 @@ export async function getTasksByProject(projectCode: string): Promise<Task[]> {
 
 export async function getTaskById(id: string): Promise<Task | undefined> {
   const data = await fetchApi<Record<string, unknown>>(`/tasks/${id}`);
-  if (data && data.id) return mapApiTask(data);
+  if (data?.id) return mapApiTask(data);
   return mockTasks.find((t) => t.id === id);
 }
 
@@ -74,12 +74,11 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
         },
         body: JSON.stringify(values),
       });
-      if (response.ok) {
-        const raw = await response.json();
-        return mapApiTask(raw.data ?? raw);
-      }
-    } catch {
-      // Fall through to mock
+      const raw = await response.json();
+      if (response.ok) return mapApiTask(raw.data ?? raw);
+      throw new Error(raw.message ?? "Failed to create task");
+    } catch (err) {
+      throw err;
     }
   }
 
