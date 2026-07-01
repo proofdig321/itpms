@@ -450,7 +450,7 @@ import "server-only";
 
 This prevents accidental imports into client components at build time.
 
-**Exception:** Services that expose mutation functions called from client components (e.g., `createProject`) cannot use `server-only` until mutations are converted to Server Actions in a future phase.
+**Exception:** Services that expose mutation functions called from client components (e.g., `createProject`) cannot use `server-only`.
 
 ---
 

@@ -181,7 +181,7 @@ Full contract details in `API_CONTRACT.md`.
 | Item | Reason | Impact |
 |------|--------|--------|
 | `src/data/users.ts` imported by template sidebar | Template infrastructure — not our code | None |
-| Projects/Tasks/WBS services lack `server-only` | Have client-called mutations | Will resolve when mutations become Server Actions |
+| Projects/Tasks/WBS services lack `server-only` | Have client-called mutations | By design — mutations are client-triggered |
 | Gantt is read-only (no drag/resize) | Requires backend scheduling integration | UX enhancement for later |
 | Report export buttons are disabled | Requires backend file generation endpoints | Activates when Laravel is ready |
 
