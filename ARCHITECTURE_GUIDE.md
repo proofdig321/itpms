@@ -28,7 +28,7 @@ data/{module}.ts  →  lib/services/{module}.ts  →  page.tsx  →  _components
 ```
 
 - **data/**: Raw mock data and type definitions. Never imported by UI directly.
-- **lib/services/**: Async functions with try/catch. Only point of contact for data. Swap internals for `fetch()` when Laravel is ready.
+- **lib/services/**: Async functions. Only point of contact for data. Calls live Laravel API via `fetch()` with mock fallback.
 - **page.tsx**: Server component. Calls service, passes data to client components.
 - **_components/**: Client components. Receive data via props. No data fetching.
 
