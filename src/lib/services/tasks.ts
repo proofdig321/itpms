@@ -58,7 +58,8 @@ export async function getTasksByProject(projectCode: string): Promise<Task[]> {
 
 export async function getTaskById(id: string): Promise<Task | undefined> {
   const data = await fetchApi<Record<string, unknown>>(`/tasks/${id}`);
-  if (data?.id) return mapApiTask(data);
+  const raw = (data?.data as Record<string, unknown>) ?? data;
+  if (raw?.id) return mapApiTask(raw);
   return mockTasks.find((t) => t.id === id);
 }
 
