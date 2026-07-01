@@ -1,5 +1,5 @@
 import { tasks as mockTasks, type Task } from "@/data/tasks";
-import type { TaskFormValues } from "@/lib/schemas/task";
+import { type TaskFormValues, taskPriorities, taskStatuses, taskTypes } from "@/lib/schemas/task";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
@@ -25,9 +25,9 @@ function mapApiTask(raw: Record<string, unknown>): Task {
     taskCode: (raw.taskCode as string) ?? "",
     name: raw.name as string,
     description: (raw.description as string) ?? "",
-    type: raw.type as Task["type"],
-    priority: raw.priority as Task["priority"],
-    status: raw.status as Task["status"],
+    type: (taskTypes.includes(raw.type as Task["type"]) ? raw.type : "planning") as Task["type"],
+    priority: (taskPriorities.includes(raw.priority as Task["priority"]) ? raw.priority : "medium") as Task["priority"],
+    status: (taskStatuses.includes(raw.status as Task["status"]) ? raw.status : "not-started") as Task["status"],
     duration: (raw.duration as number) ?? 0,
     milestone: (raw.milestone as boolean) ?? false,
     plannedStart: raw.plannedStart as string,
