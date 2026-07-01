@@ -10,6 +10,7 @@ import { getProjects } from "@/lib/services/projects";
 import { getTasksByProject } from "@/lib/services/tasks";
 
 import { ProjectSelector } from "../_components/project-selector";
+import { ProjectSync } from "../_components/project-sync";
 import { TasksTable } from "./_components/tasks-table";
 import { TasksTableSkeleton } from "./_components/tasks-table-skeleton";
 
@@ -20,7 +21,12 @@ interface TasksPageProps {
 export default async function TasksPage({ searchParams }: TasksPageProps) {
   const params = await searchParams;
   const projects = await getProjects();
-  const selectedCode = params.project ?? projects[0]?.projectCode ?? "";
+  const fallback = projects[0]?.projectCode ?? "";
+  const selectedCode = params.project ?? "";
+
+  if (!selectedCode) {
+    return <ProjectSync basePath="/dashboard/planning/tasks" fallbackCode={fallback} />;
+  }
 
   return (
     <div className="flex flex-col gap-6">

@@ -12,6 +12,7 @@ import { GanttTimeline } from "./_components/gantt-timeline";
 import { PlanningTable } from "./_components/planning-table";
 import { PlanningTableSkeleton } from "./_components/planning-table-skeleton";
 import { ProjectSelector } from "./_components/project-selector";
+import { ProjectSync } from "./_components/project-sync";
 import { WbsTree } from "./_components/wbs-tree";
 
 interface PlanningPageProps {
@@ -21,7 +22,12 @@ interface PlanningPageProps {
 export default async function PlanningPage({ searchParams }: PlanningPageProps) {
   const params = await searchParams;
   const projects = await getProjects();
-  const selectedCode = params.project ?? projects[0]?.projectCode ?? "";
+  const fallback = projects[0]?.projectCode ?? "";
+  const selectedCode = params.project ?? "";
+
+  if (!selectedCode) {
+    return <ProjectSync basePath="/dashboard/planning" fallbackCode={fallback} />;
+  }
 
   return (
     <div className="flex flex-col gap-6">

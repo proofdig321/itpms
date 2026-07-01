@@ -27,7 +27,11 @@ function mapApiTask(raw: Record<string, unknown>): Task {
     description: (raw.description as string) ?? "",
     type: (taskTypes.includes(raw.type as Task["type"]) ? raw.type : "planning") as Task["type"],
     priority: (taskPriorities.includes(raw.priority as Task["priority"]) ? raw.priority : "medium") as Task["priority"],
-    status: (taskStatuses.includes(raw.status as Task["status"]) ? raw.status : "not-started") as Task["status"],
+    status: (taskStatuses.includes(raw.status as Task["status"])
+      ? raw.status
+      : raw.status === "todo"
+        ? "in-progress"
+        : "not-started") as Task["status"],
     duration: (raw.duration as number) ?? 0,
     milestone: (raw.milestone as boolean) ?? false,
     plannedStart: raw.plannedStart as string,
@@ -65,22 +69,18 @@ export async function getTaskById(id: string): Promise<Task | undefined> {
 
 export async function createTask(projectCode: string, values: TaskFormValues): Promise<Task> {
   if (API_BASE_URL) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/tasks`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "ngrok-skip-browser-warning": "true",
-        },
-        body: JSON.stringify(values),
-      });
-      const raw = await response.json();
-      if (response.ok) return mapApiTask(raw.data ?? raw);
-      throw new Error(raw.message ?? "Failed to create task");
-    } catch (err) {
-      throw err;
-    }
+    const response = await fetch(`${API_BASE_URL}/tasks`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: JSON.stringify(values),
+    });
+    const raw = await response.json();
+    if (response.ok) return mapApiTask(raw.data ?? raw);
+    throw new Error(raw.message ?? "Failed to create task");
   }
 
   const task: Task = {
@@ -105,25 +105,21 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
 
 export async function updateTask(id: string, values: Partial<TaskFormValues>): Promise<Task | undefined> {
   if (API_BASE_URL) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "ngrok-skip-browser-warning": "true",
-        },
-        body: JSON.stringify(values),
-      });
-      if (response.ok) {
-        const raw = await response.json();
-        return mapApiTask(raw.data ?? raw);
-      }
-      const err = await response.json();
-      throw new Error(err.message ?? "Failed to update task");
-    } catch (err) {
-      throw err;
+    const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: JSON.stringify(values),
+    });
+    if (response.ok) {
+      const raw = await response.json();
+      return mapApiTask(raw.data ?? raw);
     }
+    const err = await response.json();
+    throw new Error(err.message ?? "Failed to update task");
   }
 
   const index = mockTasks.findIndex((t) => t.id === id);

@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { usePlanningStore } from "@/stores/planning/planning-store";
 import type { Project } from "@/types/project";
 
 interface ProjectSelectorProps {
@@ -24,8 +25,10 @@ export function ProjectSelector({ projects, selectedCode, basePath = "/dashboard
 function ProjectSelectorInner({ projects, selectedCode, basePath }: ProjectSelectorProps & { basePath: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const setSelectedProjectCode = usePlanningStore((s) => s.setSelectedProjectCode);
 
   const handleChange = (code: string) => {
+    setSelectedProjectCode(code);
     const params = new URLSearchParams(searchParams.toString());
     params.set("project", code);
     router.push(`${basePath}?${params.toString()}`);
