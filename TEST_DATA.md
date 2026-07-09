@@ -1,261 +1,10 @@
-# TEST_DATA.md
+# Manual End-to-End Testing Guide
 
-## Test Data for ITPMS Dashboard
-
-Use these commands to populate the dashboard with sample data.
-Run from terminal or use the frontend forms.
-
-> **Current API:** `https://7e0d-196-30-115-34.ngrok-free.app/api/v1`
+Test all CRUD operations via the dashboard UI.
 
 ---
 
-## ⚠️ Known Issue
-
-`POST` requests currently return 500 Server Error on the new server.
-Mzo needs to fix this before data can be created via API.
-Use the **frontend forms** as an alternative once the issue is resolved.
-
----
-
-## 1. Create Projects
-
-### Project 1: ICT Infrastructure Upgrade
-
-```bash
-curl -s -X POST -H "Accept: application/json" -H "Content-Type: application/json" -H "ngrok-skip-browser-warning: true" \
-  -d '{
-    "title": "ICT Infrastructure Upgrade",
-    "description": "Upgrade municipal ICT infrastructure including network switches, servers, and end-user workstations across all municipal buildings.",
-    "status": "on-track",
-    "progress": 25,
-    "managerId": "019f1d6a-e4cd-715c-a389-40f427747b78",
-    "startDate": "2026-07-01",
-    "endDate": "2026-12-31"
-  }' \
-  "https://7e0d-196-30-115-34.ngrok-free.app/api/v1/projects"
-```
-
-### Project 2: Municipal ERP System
-
-```bash
-curl -s -X POST -H "Accept: application/json" -H "Content-Type: application/json" -H "ngrok-skip-browser-warning: true" \
-  -d '{
-    "title": "Municipal ERP System Implementation",
-    "description": "Implement an integrated ERP system for finance, HR, supply chain, and asset management across the municipality.",
-    "status": "not-started",
-    "progress": 0,
-    "managerId": "019f3bf9-01fd-73b9-a4c0-378bd40826b1",
-    "startDate": "2026-08-01",
-    "endDate": "2027-06-30"
-  }' \
-  "https://7e0d-196-30-115-34.ngrok-free.app/api/v1/projects"
-```
-
-### Project 3: Cybersecurity Enhancement
-
-```bash
-curl -s -X POST -H "Accept: application/json" -H "Content-Type: application/json" -H "ngrok-skip-browser-warning: true" \
-  -d '{
-    "title": "Cybersecurity Enhancement Programme",
-    "description": "Strengthen the municipality cybersecurity posture through firewall upgrades, endpoint protection, and staff awareness training.",
-    "status": "at-risk",
-    "progress": 40,
-    "managerId": "019f1d6a-e4cd-715c-a389-40f427747b78",
-    "startDate": "2026-04-01",
-    "endDate": "2026-09-30"
-  }' \
-  "https://7e0d-196-30-115-34.ngrok-free.app/api/v1/projects"
-```
-
----
-
-## 2. Create WBS Nodes
-
-> Replace `{PROJECT_CODE}` with the actual project code returned from step 1 (e.g. `ITP-2026-0001`).
-
-### Phase 1: Planning
-
-```bash
-curl -s -X POST -H "Accept: application/json" -H "Content-Type: application/json" -H "ngrok-skip-browser-warning: true" \
-  -d '{
-    "projectCode": "{PROJECT_CODE}",
-    "parentId": null,
-    "name": "Planning Phase",
-    "description": "Initial planning and requirements gathering",
-    "level": "phase",
-    "status": "completed",
-    "progress": 100,
-    "startDate": "2026-07-01",
-    "endDate": "2026-07-31"
-  }' \
-  "https://7e0d-196-30-115-34.ngrok-free.app/api/v1/wbs"
-```
-
-### Phase 2: Procurement
-
-```bash
-curl -s -X POST -H "Accept: application/json" -H "Content-Type: application/json" -H "ngrok-skip-browser-warning: true" \
-  -d '{
-    "projectCode": "{PROJECT_CODE}",
-    "parentId": null,
-    "name": "Procurement Phase",
-    "description": "SCM processes and vendor selection",
-    "level": "phase",
-    "status": "in-progress",
-    "progress": 50,
-    "startDate": "2026-08-01",
-    "endDate": "2026-09-30"
-  }' \
-  "https://7e0d-196-30-115-34.ngrok-free.app/api/v1/wbs"
-```
-
-### Phase 3: Implementation
-
-```bash
-curl -s -X POST -H "Accept: application/json" -H "Content-Type: application/json" -H "ngrok-skip-browser-warning: true" \
-  -d '{
-    "projectCode": "{PROJECT_CODE}",
-    "parentId": null,
-    "name": "Implementation Phase",
-    "description": "Hardware installation and software deployment",
-    "level": "phase",
-    "status": "not-started",
-    "progress": 0,
-    "startDate": "2026-10-01",
-    "endDate": "2026-12-15"
-  }' \
-  "https://7e0d-196-30-115-34.ngrok-free.app/api/v1/wbs"
-```
-
-### Deliverable under Phase 2 (child node)
-
-> Replace `{PHASE2_ID}` with the ID returned from the Procurement Phase above.
-
-```bash
-curl -s -X POST -H "Accept: application/json" -H "Content-Type: application/json" -H "ngrok-skip-browser-warning: true" \
-  -d '{
-    "projectCode": "{PROJECT_CODE}",
-    "parentId": "{PHASE2_ID}",
-    "name": "Vendor Evaluation",
-    "description": "Evaluate and score vendor proposals",
-    "level": "deliverable",
-    "status": "in-progress",
-    "progress": 60,
-    "startDate": "2026-08-15",
-    "endDate": "2026-09-15"
-  }' \
-  "https://7e0d-196-30-115-34.ngrok-free.app/api/v1/wbs"
-```
-
----
-
-## 3. Create Tasks
-
-> Replace `{PROJECT_CODE}` and `{WBS_NODE_ID}` with actual values from steps 1 and 2.
-
-### Task 1: Requirements Document
-
-```bash
-curl -s -X POST -H "Accept: application/json" -H "Content-Type: application/json" -H "ngrok-skip-browser-warning: true" \
-  -d '{
-    "projectCode": "{PROJECT_CODE}",
-    "wbsNodeId": "{WBS_NODE_ID}",
-    "name": "Draft Requirements Document",
-    "description": "Compile functional and technical requirements from all departments.",
-    "type": "documentation",
-    "priority": "high",
-    "status": "completed",
-    "plannedStart": "2026-07-01",
-    "plannedFinish": "2026-07-15"
-  }' \
-  "https://7e0d-196-30-115-34.ngrok-free.app/api/v1/tasks"
-```
-
-### Task 2: Network Assessment
-
-```bash
-curl -s -X POST -H "Accept: application/json" -H "Content-Type: application/json" -H "ngrok-skip-browser-warning: true" \
-  -d '{
-    "projectCode": "{PROJECT_CODE}",
-    "wbsNodeId": "{WBS_NODE_ID}",
-    "name": "Network Infrastructure Assessment",
-    "description": "Audit current network topology, bandwidth utilisation, and identify upgrade requirements.",
-    "type": "planning",
-    "priority": "critical",
-    "status": "in-progress",
-    "plannedStart": "2026-07-10",
-    "plannedFinish": "2026-07-25"
-  }' \
-  "https://7e0d-196-30-115-34.ngrok-free.app/api/v1/tasks"
-```
-
-### Task 3: Vendor RFQ
-
-```bash
-curl -s -X POST -H "Accept: application/json" -H "Content-Type: application/json" -H "ngrok-skip-browser-warning: true" \
-  -d '{
-    "projectCode": "{PROJECT_CODE}",
-    "wbsNodeId": "{WBS_NODE_ID}",
-    "name": "Issue RFQ to Vendors",
-    "description": "Prepare and distribute Request for Quotation to shortlisted vendors.",
-    "type": "procurement",
-    "priority": "high",
-    "status": "not-started",
-    "plannedStart": "2026-08-01",
-    "plannedFinish": "2026-08-20"
-  }' \
-  "https://7e0d-196-30-115-34.ngrok-free.app/api/v1/tasks"
-```
-
-### Task 4: Server Room Preparation
-
-```bash
-curl -s -X POST -H "Accept: application/json" -H "Content-Type: application/json" -H "ngrok-skip-browser-warning: true" \
-  -d '{
-    "projectCode": "{PROJECT_CODE}",
-    "wbsNodeId": "{WBS_NODE_ID}",
-    "name": "Server Room Preparation",
-    "description": "Prepare server room with cooling, power, and rack infrastructure for new equipment.",
-    "type": "implementation",
-    "priority": "medium",
-    "status": "draft",
-    "plannedStart": "2026-09-15",
-    "plannedFinish": "2026-10-15"
-  }' \
-  "https://7e0d-196-30-115-34.ngrok-free.app/api/v1/tasks"
-```
-
-### Task 5: Staff Training
-
-```bash
-curl -s -X POST -H "Accept: application/json" -H "Content-Type: application/json" -H "ngrok-skip-browser-warning: true" \
-  -d '{
-    "projectCode": "{PROJECT_CODE}",
-    "wbsNodeId": "{WBS_NODE_ID}",
-    "name": "End-User Training Programme",
-    "description": "Conduct training sessions for municipal staff on new systems and equipment.",
-    "type": "training",
-    "priority": "medium",
-    "status": "not-started",
-    "plannedStart": "2026-11-01",
-    "plannedFinish": "2026-11-30"
-  }' \
-  "https://7e0d-196-30-115-34.ngrok-free.app/api/v1/tasks"
-```
-
----
-
-## 4. Using the Frontend Forms Instead
-
-If the API commands above return errors, use the frontend UI:
-
-1. **Create Project:** Dashboard → Projects → Create Project
-2. **Create WBS:** Dashboard → Planning → select project → Add Node (+ button)
-3. **Create Task:** Dashboard → Planning → Tasks → Create Task
-
----
-
-## Available Users (for managerId / assigneeId)
+## Available Users (for assignment fields)
 
 | Name | ID |
 |------|-----|
@@ -266,13 +15,144 @@ If the API commands above return errors, use the frontend UI:
 
 ---
 
-## RBAC (Pending)
+## 1. Projects CRUD
 
-RBAC implementation requires Mzo to:
-1. Return `role` and `permissions` array from `/api/v1/auth/me`
-2. Implement backend data filtering (team members only see assigned projects/tasks)
-3. Confirm role names: `ict-admin`, `ict-manager`, `project-manager`, `viewer`
+### CREATE — Go to Projects → Create Project
 
-Frontend `PermissionGate` component is ready — just needs real permission data from the backend.
+| Field | Project 1 | Project 2 | Project 3 |
+|-------|-----------|-----------|-----------|
+| Title | ICT Infrastructure Upgrade | Municipal ERP System | Cybersecurity Enhancement |
+| Description | Upgrade network switches, servers, and workstations across all municipal buildings | Integrated ERP for finance, HR, supply chain, and asset management | Firewall upgrades, endpoint protection, and staff awareness training |
+| Status | on-track | not-started | at-risk |
+| Progress | 25 | 0 | 40 |
+| Manager | ICT | Princess Mbhele | ICT |
+| Start Date | 2026-07-01 | 2026-08-01 | 2026-04-01 |
+| End Date | 2026-12-31 | 2027-06-30 | 2026-09-30 |
+
+### READ — Verify all 3 appear in project list with correct data
+
+### UPDATE — Edit Project 1
+
+| Field | Change to |
+|-------|-----------|
+| Title | ICT Infrastructure Upgrade Phase 2 |
+| Status | at-risk |
+| Progress | 35 |
+
+### DELETE — Delete Project 3 (Cybersecurity Enhancement)
+
+- Confirm it disappears from the list
+- Confirm Projects 1 and 2 remain
+
+---
+
+## 2. WBS CRUD
+
+### CREATE — Go to Planning → select Project 1 → Add Node (+)
+
+| Field | Node 1 | Node 2 | Node 3 |
+|-------|--------|--------|--------|
+| Name | Planning Phase | Procurement Phase | Implementation Phase |
+| Description | Requirements gathering and planning | SCM processes and vendor selection | Hardware install and software deployment |
+| Level | phase | phase | phase |
+| Status | completed | in-progress | not-started |
+| Progress | 100 | 50 | 0 |
+| Start Date | 2026-07-01 | 2026-08-01 | 2026-10-01 |
+| End Date | 2026-07-31 | 2026-09-30 | 2026-12-15 |
+
+### CREATE child node — Under Node 2 (Procurement Phase)
+
+| Field | Value |
+|-------|-------|
+| Name | Vendor Evaluation |
+| Description | Evaluate and score vendor proposals |
+| Level | deliverable |
+| Status | in-progress |
+| Progress | 60 |
+| Start Date | 2026-08-15 |
+| End Date | 2026-09-15 |
+
+### READ — Verify tree structure shows 3 phases, with Vendor Evaluation nested under Procurement
+
+### UPDATE — Edit Node 2
+
+| Field | Change to |
+|-------|-----------|
+| Name | Procurement & SCM Phase |
+| Progress | 70 |
+
+### DELETE — Delete Node 3 (Implementation Phase)
+
+- Confirm it disappears
+- Confirm Nodes 1, 2, and child remain
+
+---
+
+## 3. Tasks CRUD
+
+### CREATE — Go to Planning → Tasks → Create Task
+
+| Field | Task 1 | Task 2 | Task 3 |
+|-------|--------|--------|--------|
+| Name | Draft Requirements Document | Network Infrastructure Assessment | Issue RFQ to Vendors |
+| Description | Compile functional and technical requirements from all departments | Audit current network topology and identify upgrade needs | Prepare and distribute RFQ to shortlisted vendors |
+| Project | ICT Infrastructure Upgrade | ICT Infrastructure Upgrade | ICT Infrastructure Upgrade |
+| WBS Node | Planning Phase | Planning Phase | Procurement Phase |
+| Type | documentation | planning | procurement |
+| Priority | high | critical | high |
+| Status | completed | in-progress | not-started |
+| Planned Start | 2026-07-01 | 2026-07-10 | 2026-08-01 |
+| Planned Finish | 2026-07-15 | 2026-07-25 | 2026-08-20 |
+
+### CREATE 2 more tasks
+
+| Field | Task 4 | Task 5 |
+|-------|--------|--------|
+| Name | Server Room Preparation | End-User Training Programme |
+| Description | Prepare server room with cooling, power, and rack infrastructure | Conduct training sessions for staff on new systems |
+| Project | ICT Infrastructure Upgrade | ICT Infrastructure Upgrade |
+| WBS Node | Implementation Phase | Implementation Phase |
+| Type | implementation | training |
+| Priority | medium | medium |
+| Status | draft | not-started |
+| Planned Start | 2026-09-15 | 2026-11-01 |
+| Planned Finish | 2026-10-15 | 2026-11-30 |
+
+### READ — Verify all 5 tasks appear in task list with correct statuses and priorities
+
+### UPDATE — Edit Task 2
+
+| Field | Change to |
+|-------|-----------|
+| Status | completed |
+| Priority | high |
+| Name | Network Infrastructure Assessment (Complete) |
+
+### DELETE — Delete Task 4 (Server Room Preparation)
+
+- Confirm it disappears
+- Confirm other 4 tasks remain
+
+---
+
+## 4. Test Checklist
+
+| # | Test | Pass? |
+|---|------|-------|
+| 1 | Create 3 projects | ☐ |
+| 2 | View project list shows all 3 | ☐ |
+| 3 | Edit project 1 — changes persist | ☐ |
+| 4 | Delete project 3 — removed from list | ☐ |
+| 5 | Create 3 WBS phases under project 1 | ☐ |
+| 6 | Create child node under phase 2 | ☐ |
+| 7 | WBS tree renders correctly | ☐ |
+| 8 | Edit WBS node 2 — changes persist | ☐ |
+| 9 | Delete WBS node 3 — removed from tree | ☐ |
+| 10 | Create 5 tasks | ☐ |
+| 11 | Task list shows all 5 with correct data | ☐ |
+| 12 | Edit task 2 — changes persist | ☐ |
+| 13 | Delete task 4 — removed from list | ☐ |
+| 14 | Task detail view loads without crash | ☐ |
+| 15 | Draft status displays correctly | ☐ |
 
 ---

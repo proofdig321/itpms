@@ -1,13 +1,34 @@
 "use client";
 
+import { useState } from "react";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Pencil } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
+import { deleteTask } from "@/lib/services/tasks";
 import type { Task, TaskPriority, TaskStatus } from "@/types/task";
 
 const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
@@ -114,15 +135,67 @@ export const columns: ColumnDef<Task>[] = [
   {
     id: "actions",
     header: "",
-    cell: ({ row }) => {
-      const task = row.original;
-      return (
-        <Button asChild variant="ghost" size="icon-sm" aria-label={`Edit ${task.name}`}>
-          <Link href={`/dashboard/planning/tasks/${task.id}/edit`}>
-            <Pencil className="h-3.5 w-3.5" />
-          </Link>
-        </Button>
-      );
-    },
+    cell: ({ row }) => <ActionsCell task={row.original} />,
   },
 ];
+
+function ActionsCell({ task }: { task: Task }) {
+  const router = useRouter();
+  const [showDelete, setShowDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteTask(task.id);
+      toast.success("Task deleted successfully.");
+      router.refresh();
+    } catch {
+      toast.error("Failed to delete task.");
+    } finally {
+      setIsDeleting(false);
+      setShowDelete(false);
+    }
+  };
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon-sm" aria-label="Actions">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild>
+            <Link href={`/dashboard/planning/tasks/${task.id}/edit`}>
+              <Pencil className="mr-2 h-3.5 w-3.5" />
+              Edit
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="text-destructive" onSelect={() => setShowDelete(true)}>
+            <Trash2 className="mr-2 h-3.5 w-3.5" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Task</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{task.name}&quot;? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
