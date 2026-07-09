@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { Plus, Trash2 } from "lucide-react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -68,9 +69,14 @@ export function TaskForm({
       status: "draft",
       plannedStart: "",
       plannedFinish: "",
-      assigneeId: "",
+      assignments: [],
       ...defaultValues,
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "assignments",
   });
 
   const selectedProjectCode = form.watch("projectCode");
@@ -254,28 +260,83 @@ export function TaskForm({
           />
         </div>
 
-        <Controller
-          control={form.control}
-          name="assigneeId"
-          render={({ field, fieldState }) => (
-            <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="task-assignee">Assignee</FieldLabel>
-              <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                <SelectTrigger id="task-assignee" className="w-full">
-                  <SelectValue placeholder="Select assignee" />
-                </SelectTrigger>
-                <SelectContent>
-                  {users.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
+        {/* Assignments */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <FieldLabel>Assignments</FieldLabel>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => append({ userId: "", role: "", allocation: 100 })}
+            >
+              <Plus className="mr-1 h-3.5 w-3.5" />
+              Add
+            </Button>
+          </div>
+
+          {fields.length === 0 && (
+            <p className="text-muted-foreground text-sm">No assignments. Click "Add" to assign team members.</p>
           )}
-        />
+
+          {fields.map((item, index) => (
+            <div key={item.id} className="grid gap-3 rounded-md border p-3 sm:grid-cols-[1fr_1fr_80px_auto]">
+              <Controller
+                control={form.control}
+                name={`assignments.${index}.userId`}
+                render={({ field, fieldState }) => (
+                  <Field className="gap-1">
+                    <FieldLabel className="text-xs">User</FieldLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full" aria-invalid={fieldState.invalid}>
+                        <SelectValue placeholder="Select user" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {users.map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name={`assignments.${index}.role`}
+                render={({ field, fieldState }) => (
+                  <Field className="gap-1">
+                    <FieldLabel className="text-xs">Role</FieldLabel>
+                    <Input {...field} placeholder="e.g. Technician" aria-invalid={fieldState.invalid} />
+                  </Field>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name={`assignments.${index}.allocation`}
+                render={({ field, fieldState }) => (
+                  <Field className="gap-1">
+                    <FieldLabel className="text-xs">%</FieldLabel>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                      aria-invalid={fieldState.invalid}
+                    />
+                  </Field>
+                )}
+              />
+              <div className="flex items-end">
+                <Button type="button" variant="ghost" size="icon-sm" onClick={() => remove(index)} aria-label="Remove">
+                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
       </FieldGroup>
 
       <div className="flex justify-end">

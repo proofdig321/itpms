@@ -13,6 +13,12 @@ export const taskTypes = [
 export const taskPriorities = ["critical", "high", "medium", "low"] as const;
 export const taskStatuses = ["draft", "not-started", "in-progress", "completed", "on-hold"] as const;
 
+export const assignmentSchema = z.object({
+  userId: z.string().min(1, { message: "User is required." }),
+  role: z.string().min(1, { message: "Role is required." }),
+  allocation: z.number().min(0).max(100, { message: "Allocation must be 0-100." }),
+});
+
 export const taskFormSchema = z.object({
   projectCode: z.string().min(1, { message: "Project is required." }),
   wbsNodeId: z.string().min(1, { message: "WBS node is required." }),
@@ -23,7 +29,7 @@ export const taskFormSchema = z.object({
   status: z.enum(taskStatuses, { message: "Please select a status." }),
   plannedStart: z.string().min(1, { message: "Planned start is required." }),
   plannedFinish: z.string().min(1, { message: "Planned finish is required." }),
-  assigneeId: z.string().optional(),
+  assignments: z.array(assignmentSchema),
 });
 
 export type TaskFormValues = z.infer<typeof taskFormSchema>;

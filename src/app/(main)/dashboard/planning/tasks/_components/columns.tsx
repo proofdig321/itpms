@@ -121,8 +121,13 @@ export const columns: ColumnDef<Task>[] = [
     },
   },
   {
-    accessorKey: "assignee",
+    accessorKey: "assignments",
     header: "Assignee",
+    cell: ({ row }) => {
+      const assignments = row.original.assignments;
+      if (!assignments?.length) return "Unassigned";
+      return `${assignments.length} assigned`;
+    },
   },
   {
     accessorKey: "plannedFinish",

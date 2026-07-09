@@ -155,7 +155,9 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
             <CardTitle className="font-normal text-muted-foreground text-sm">Assignee</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-medium text-sm">{task.assignee ?? "Unassigned"}</p>
+            <p className="font-medium text-sm">
+              {task.assignments?.length ? task.assignments.map((a) => a.role).join(", ") : "Unassigned"}
+            </p>
           </CardContent>
         </Card>
       </div>

@@ -45,7 +45,7 @@ export default async function EditTaskPage({ params }: EditTaskPageProps) {
               status: task.status,
               plannedStart: task.plannedStart,
               plannedFinish: task.plannedFinish,
-              assigneeId: task.assignee ?? "",
+              assignments: task.assignments ?? [],
             }}
             projects={projects}
             wbsNodes={wbsNodes}

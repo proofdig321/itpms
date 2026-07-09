@@ -1,5 +1,6 @@
-import { tasks as mockTasks, type Task } from "@/data/tasks";
+import { tasks as mockTasks } from "@/data/tasks";
 import { type TaskFormValues, taskPriorities, taskStatuses, taskTypes } from "@/lib/schemas/task";
+import type { Task, TaskAssignment } from "@/types/task";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
@@ -39,7 +40,13 @@ function mapApiTask(raw: Record<string, unknown>): Task {
     actualStart: (raw.actualStart as string) ?? undefined,
     actualFinish: (raw.actualFinish as string) ?? undefined,
     percentComplete: (raw.percentComplete as number) ?? 0,
-    assignee: (raw.assignee as string) ?? undefined,
+    assignments: Array.isArray(raw.assignments)
+      ? (raw.assignments as Record<string, unknown>[]).map((a) => ({
+          userId: a.userId as string,
+          role: (a.role as string) ?? "",
+          allocation: (a.allocation as number) ?? 100,
+        }))
+      : [],
     createdAt: (raw.createdAt as string) ?? "",
   };
 }
@@ -97,6 +104,7 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
     plannedStart: values.plannedStart,
     plannedFinish: values.plannedFinish,
     percentComplete: 0,
+    assignments: values.assignments ?? [],
     createdAt: new Date().toISOString(),
   };
   mockTasks.push(task);

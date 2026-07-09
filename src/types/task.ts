@@ -12,6 +12,12 @@ export type TaskPriority = "critical" | "high" | "medium" | "low";
 
 export type TaskStatus = "draft" | "not-started" | "in-progress" | "completed" | "on-hold";
 
+export interface TaskAssignment {
+  userId: string;
+  role: string;
+  allocation: number;
+}
+
 export interface Task {
   id: string;
   projectCode: string;
@@ -29,6 +35,6 @@ export interface Task {
   actualStart?: string;
   actualFinish?: string;
   percentComplete: number;
-  assignee?: string;
+  assignments: TaskAssignment[];
   createdAt: string;
 }

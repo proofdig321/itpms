@@ -20,7 +20,7 @@ export const tasks: Task[] = [
     actualStart: "2025-03-02",
     actualFinish: "2025-03-06",
     percentComplete: 100,
-    assignee: "mock-3",
+    assignments: [{ userId: "mock-3", role: "Evaluator", allocation: 100 }],
     createdAt: "2025-02-28",
   },
   {
@@ -39,7 +39,7 @@ export const tasks: Task[] = [
     plannedFinish: "2025-03-20",
     actualStart: "2025-03-10",
     percentComplete: 40,
-    assignee: "mock-3",
+    assignments: [{ userId: "mock-3", role: "Evaluator", allocation: 100 }],
     createdAt: "2025-03-01",
   },
   {
@@ -57,7 +57,7 @@ export const tasks: Task[] = [
     plannedStart: "2025-03-21",
     plannedFinish: "2025-03-24",
     percentComplete: 0,
-    assignee: "mock-2",
+    assignments: [{ userId: "mock-2", role: "Compliance Officer", allocation: 100 }],
     createdAt: "2025-03-01",
   },
   {
@@ -75,7 +75,7 @@ export const tasks: Task[] = [
     plannedStart: "2025-05-01",
     plannedFinish: "2025-05-06",
     percentComplete: 0,
-    assignee: "mock-1",
+    assignments: [{ userId: "mock-1", role: "Project Coordinator", allocation: 100 }],
     createdAt: "2025-04-01",
   },
   {
@@ -93,7 +93,7 @@ export const tasks: Task[] = [
     plannedFinish: "2025-02-20",
     actualStart: "2025-02-03",
     percentComplete: 60,
-    assignee: "mock-2",
+    assignments: [{ userId: "mock-2", role: "Database Analyst", allocation: 100 }],
     createdAt: "2025-01-25",
   },
 ];
