@@ -4,7 +4,7 @@ Test all CRUD operations via the dashboard UI.
 
 ---
 
-## Available Users (for assignment fields)
+## Available Users
 
 | Name | ID |
 |------|-----|
@@ -15,123 +15,103 @@ Test all CRUD operations via the dashboard UI.
 
 ---
 
-## 1. Projects CRUD
+## 1. Projects (Dashboard → Projects → Create Project)
 
-### CREATE — Go to Projects → Create Project
+### CREATE — 5 Projects
 
-| Field | Project 1 | Project 2 | Project 3 |
-|-------|-----------|-----------|-----------|
-| Title | ICT Infrastructure Upgrade | Municipal ERP System | Cybersecurity Enhancement |
-| Description | Upgrade network switches, servers, and workstations across all municipal buildings | Integrated ERP for finance, HR, supply chain, and asset management | Firewall upgrades, endpoint protection, and staff awareness training |
-| Status | on-track | not-started | at-risk |
-| Progress | 25 | 0 | 40 |
-| Manager | ICT | Princess Mbhele | ICT |
-| Start Date | 2026-07-01 | 2026-08-01 | 2026-04-01 |
-| End Date | 2026-12-31 | 2027-06-30 | 2026-09-30 |
+| # | Title | Description | Status | Progress | Manager | Start | End |
+|---|-------|-------------|--------|----------|---------|-------|-----|
+| 1 | ICT Infrastructure Upgrade | Upgrade network switches, servers, and workstations across all municipal buildings | on-track | 25 | ICT | 2026-07-01 | 2026-12-31 |
+| 2 | Municipal ERP System | Integrated ERP for finance, HR, supply chain, and asset management | not-started | 0 | Princess Mbhele | 2026-08-01 | 2027-06-30 |
+| 3 | Cybersecurity Enhancement | Firewall upgrades, endpoint protection, and staff awareness training | at-risk | 40 | Mzomuhle Nkosi | 2026-04-01 | 2026-09-30 |
+| 4 | Fibre Network Expansion | Deploy fibre optic backbone to all municipal offices and community centres | on-track | 15 | Developer | 2026-09-01 | 2027-03-31 |
+| 5 | Smart Meter Rollout | IoT smart meter deployment for water and electricity monitoring | not-started | 0 | Princess Mbhele | 2026-10-01 | 2027-08-31 |
 
-### READ — Verify all 3 appear in project list with correct data
+### READ — Verify all 5 appear in project list
 
-### UPDATE — Edit Project 1
+### UPDATE — Edit Project 3
 
 | Field | Change to |
 |-------|-----------|
-| Title | ICT Infrastructure Upgrade Phase 2 |
-| Status | at-risk |
-| Progress | 35 |
+| Status | on-track |
+| Progress | 55 |
 
-### DELETE — Delete Project 3 (Cybersecurity Enhancement)
+### DELETE — Delete Project 5
 
-- Confirm it disappears from the list
-- Confirm Projects 1 and 2 remain
+- Confirm removed from list
+- Confirm Projects 1–4 remain
 
 ---
 
-## 2. WBS CRUD
+## 2. WBS Nodes (Dashboard → Planning → select project → + button)
 
-### CREATE — Go to Planning → select Project 1 → Add Node (+)
+### CREATE — 5 WBS Nodes (under Project 1: ICT Infrastructure Upgrade)
 
-| Field | Node 1 | Node 2 | Node 3 |
-|-------|--------|--------|--------|
-| Name | Planning Phase | Procurement Phase | Implementation Phase |
-| Description | Requirements gathering and planning | SCM processes and vendor selection | Hardware install and software deployment |
-| Level | phase | phase | phase |
-| Status | completed | in-progress | not-started |
-| Progress | 100 | 50 | 0 |
-| Start Date | 2026-07-01 | 2026-08-01 | 2026-10-01 |
-| End Date | 2026-07-31 | 2026-09-30 | 2026-12-15 |
+| # | Name | Description | Level | Status | Progress | Start | End |
+|---|------|-------------|-------|--------|----------|-------|-----|
+| 1 | ICT Infrastructure Upgrade | Root project node | project | in-progress | 25 | 2026-07-01 | 2026-12-31 |
+| 2 | Planning & Assessment | Requirements gathering and site assessments | phase | completed | 100 | 2026-07-01 | 2026-07-31 |
+| 3 | Procurement | SCM processes, RFQs, and vendor selection | phase | in-progress | 50 | 2026-08-01 | 2026-09-30 |
+| 4 | Implementation | Hardware installation and software deployment | phase | not-started | 0 | 2026-10-01 | 2026-12-15 |
+| 5 | Vendor Evaluation | Evaluate and score vendor proposals (child of Procurement) | deliverable | in-progress | 60 | 2026-08-15 | 2026-09-15 |
 
-### CREATE child node — Under Node 2 (Procurement Phase)
+> Node 1 is root (parentId = null, level = project)
+> Nodes 2–4 are children of Node 1 (level = phase)
+> Node 5 is child of Node 3 (level = deliverable)
 
-| Field | Value |
-|-------|-------|
-| Name | Vendor Evaluation |
-| Description | Evaluate and score vendor proposals |
-| Level | deliverable |
-| Status | in-progress |
-| Progress | 60 |
-| Start Date | 2026-08-15 |
-| End Date | 2026-09-15 |
+### READ — Verify tree structure: root → 3 phases, with Vendor Evaluation nested under Procurement
 
-### READ — Verify tree structure shows 3 phases, with Vendor Evaluation nested under Procurement
-
-### UPDATE — Edit Node 2
+### UPDATE — Edit Node 3
 
 | Field | Change to |
 |-------|-----------|
-| Name | Procurement & SCM Phase |
+| Name | Procurement & SCM |
 | Progress | 70 |
 
-### DELETE — Delete Node 3 (Implementation Phase)
+### DELETE — Delete Node 4 (Implementation)
 
-- Confirm it disappears
-- Confirm Nodes 1, 2, and child remain
+- Confirm removed from tree
+- Confirm Nodes 1, 2, 3, and 5 remain
 
 ---
 
-## 3. Tasks CRUD
+## 3. Tasks (Dashboard → Planning → Tasks → Create Task)
 
-### CREATE — Go to Planning → Tasks → Create Task
+### CREATE — 5 Tasks (under Project 1)
 
-| Field | Task 1 | Task 2 | Task 3 |
-|-------|--------|--------|--------|
-| Name | Draft Requirements Document | Network Infrastructure Assessment | Issue RFQ to Vendors |
-| Description | Compile functional and technical requirements from all departments | Audit current network topology and identify upgrade needs | Prepare and distribute RFQ to shortlisted vendors |
-| Project | ICT Infrastructure Upgrade | ICT Infrastructure Upgrade | ICT Infrastructure Upgrade |
-| WBS Node | Planning Phase | Planning Phase | Procurement Phase |
-| Type | documentation | planning | procurement |
-| Priority | high | critical | high |
-| Status | completed | in-progress | not-started |
-| Planned Start | 2026-07-01 | 2026-07-10 | 2026-08-01 |
-| Planned Finish | 2026-07-15 | 2026-07-25 | 2026-08-20 |
+| # | Name | Description | WBS Node | Type | Priority | Status | Start | End |
+|---|------|-------------|----------|------|----------|--------|-------|-----|
+| 1 | Draft Requirements Document | Compile functional and technical requirements from all departments | Planning & Assessment | documentation | high | completed | 2026-07-01 | 2026-07-15 |
+| 2 | Network Infrastructure Audit | Audit current network topology, bandwidth, and identify upgrade needs | Planning & Assessment | planning | critical | in-progress | 2026-07-10 | 2026-07-25 |
+| 3 | Issue RFQ to Vendors | Prepare and distribute Request for Quotation to shortlisted vendors | Procurement & SCM | procurement | high | not-started | 2026-08-01 | 2026-08-20 |
+| 4 | Server Room Preparation | Prepare server room with cooling, power, and rack infrastructure | Implementation | implementation | medium | draft | 2026-10-01 | 2026-10-31 |
+| 5 | End-User Training Programme | Conduct training sessions for municipal staff on new systems | Implementation | training | medium | not-started | 2026-11-01 | 2026-11-30 |
 
-### CREATE 2 more tasks
+### Assignments (add when creating each task)
 
-| Field | Task 4 | Task 5 |
-|-------|--------|--------|
-| Name | Server Room Preparation | End-User Training Programme |
-| Description | Prepare server room with cooling, power, and rack infrastructure | Conduct training sessions for staff on new systems |
-| Project | ICT Infrastructure Upgrade | ICT Infrastructure Upgrade |
-| WBS Node | Implementation Phase | Implementation Phase |
-| Type | implementation | training |
-| Priority | medium | medium |
-| Status | draft | not-started |
-| Planned Start | 2026-09-15 | 2026-11-01 |
-| Planned Finish | 2026-10-15 | 2026-11-30 |
+| Task | User | Role | Allocation |
+|------|------|------|------------|
+| 1 | Developer | Business Analyst | 100 |
+| 2 | Mzomuhle Nkosi | Network Engineer | 100 |
+| 2 | Developer | Technical Support | 25 |
+| 3 | Princess Mbhele | SCM Officer | 100 |
+| 4 | Mzomuhle Nkosi | Infrastructure Lead | 100 |
+| 5 | Princess Mbhele | Training Coordinator | 50 |
+| 5 | Developer | Technical Trainer | 50 |
 
-### READ — Verify all 5 tasks appear in task list with correct statuses and priorities
+### READ — Verify all 5 tasks appear with correct statuses, priorities, and assignments
 
 ### UPDATE — Edit Task 2
 
 | Field | Change to |
 |-------|-----------|
 | Status | completed |
-| Priority | high |
-| Name | Network Infrastructure Assessment (Complete) |
+| Name | Network Infrastructure Audit (Complete) |
 
 ### DELETE — Delete Task 4 (Server Room Preparation)
 
-- Confirm it disappears
-- Confirm other 4 tasks remain
+- Confirm removed from list
+- Confirm Tasks 1, 2, 3, 5 remain
 
 ---
 
@@ -139,20 +119,23 @@ Test all CRUD operations via the dashboard UI.
 
 | # | Test | Pass? |
 |---|------|-------|
-| 1 | Create 3 projects | ☐ |
-| 2 | View project list shows all 3 | ☐ |
-| 3 | Edit project 1 — changes persist | ☐ |
-| 4 | Delete project 3 — removed from list | ☐ |
-| 5 | Create 3 WBS phases under project 1 | ☐ |
-| 6 | Create child node under phase 2 | ☐ |
-| 7 | WBS tree renders correctly | ☐ |
-| 8 | Edit WBS node 2 — changes persist | ☐ |
-| 9 | Delete WBS node 3 — removed from tree | ☐ |
-| 10 | Create 5 tasks | ☐ |
-| 11 | Task list shows all 5 with correct data | ☐ |
-| 12 | Edit task 2 — changes persist | ☐ |
-| 13 | Delete task 4 — removed from list | ☐ |
-| 14 | Task detail view loads without crash | ☐ |
-| 15 | Draft status displays correctly | ☐ |
+| 1 | Create 5 projects | ☐ |
+| 2 | Project list shows all 5 | ☐ |
+| 3 | Edit project 3 — changes persist | ☐ |
+| 4 | Delete project 5 — removed | ☐ |
+| 5 | Create root WBS node (level: project) | ☐ |
+| 6 | Create 3 phase nodes under root | ☐ |
+| 7 | Create deliverable node under Procurement | ☐ |
+| 8 | WBS tree renders correctly | ☐ |
+| 9 | Edit WBS node 3 — changes persist | ☐ |
+| 10 | Delete WBS node 4 — removed | ☐ |
+| 11 | Create 5 tasks with assignments | ☐ |
+| 12 | Task list shows all 5 | ☐ |
+| 13 | Task detail shows assignments | ☐ |
+| 14 | Edit task 2 — changes persist | ☐ |
+| 15 | Delete task 4 — removed | ☐ |
+| 16 | Draft status displays correctly | ☐ |
+| 17 | Dropdown menu (edit/delete) works on project rows | ☐ |
+| 18 | Dropdown menu (edit/delete) works on task rows | ☐ |
 
 ---
