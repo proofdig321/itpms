@@ -68,7 +68,7 @@ export function WbsTree({ nodes, projectCode, users = [] }: WbsTreeProps) {
         <p className="font-medium text-sm">No WBS structure defined</p>
         <p className="mt-1 text-muted-foreground text-sm">Work breakdown structure will appear here.</p>
         <div className="mt-4">
-          <PermissionGate permission="wbs.edit">
+          <PermissionGate permission="wbs.create">
             <AddWbsNodeDialog projectCode={projectCode} parentId={null} users={users} />
           </PermissionGate>
         </div>
@@ -129,9 +129,13 @@ function WbsTreeNode({ node, depth, projectCode, users }: WbsTreeNodeProps) {
           <Progress value={node.progress} className="hidden h-1.5 w-16 sm:block" />
           <span className="w-8 text-right text-muted-foreground text-xs tabular-nums">{node.progress}%</span>
           <Badge className={`${statusConfig[node.status].className} text-xs`}>{statusConfig[node.status].label}</Badge>
-          <PermissionGate permission="wbs.edit">
+          <PermissionGate permission="wbs.create">
             <AddWbsNodeDialog projectCode={projectCode} parentId={node.id} parentName={node.name} users={users} />
+          </PermissionGate>
+          <PermissionGate permission="wbs.update">
             <EditWbsNodeDialog node={node} users={users} />
+          </PermissionGate>
+          <PermissionGate permission="wbs.delete">
             <DeleteWbsNodeDialog node={node} />
           </PermissionGate>
         </div>

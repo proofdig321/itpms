@@ -37,7 +37,7 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
         </div>
         <div className="flex items-center gap-2">
           <ProjectSelector projects={projects} selectedCode={selectedCode} basePath="/dashboard/planning/tasks" />
-          <PermissionGate permission="planning.edit">
+          <PermissionGate permission="tasks.create">
             <Button asChild>
               <Link href="/dashboard/planning/tasks/create">
                 <Plus className="h-4 w-4" />

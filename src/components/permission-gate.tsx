@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 
 import { getUserPermissionsContext } from "@/lib/auth/auth-service";
-import { can } from "@/lib/auth/permissions";
+import { can, hasRole } from "@/lib/auth/permissions";
 
 interface PermissionGateProps {
   permission: string;
@@ -14,8 +14,11 @@ interface PermissionGateProps {
 export function PermissionGate({ permission, children, fallback = null }: PermissionGateProps) {
   const ctx = getUserPermissionsContext();
 
-  // If no session (user not authenticated via Azure yet), allow all — prevents lockout during dev
+  // No session — allow all (dev mode / not yet authenticated)
   if (!ctx) return children;
+
+  // ict-admin bypasses all permission checks
+  if (hasRole("ict-admin", ctx)) return children;
 
   if (can(permission, ctx)) return children;
 

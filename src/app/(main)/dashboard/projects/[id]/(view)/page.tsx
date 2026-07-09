@@ -63,7 +63,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           <p className="text-muted-foreground text-sm">{project.projectCode}</p>
         </div>
         <div className="flex gap-2">
-          <PermissionGate permission="projects.edit">
+          <PermissionGate permission="projects.update">
             <Button asChild variant="outline">
               <Link href={`/dashboard/projects/${project.id}/edit`}>
                 <Pencil className="h-4 w-4" />

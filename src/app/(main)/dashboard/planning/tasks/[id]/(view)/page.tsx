@@ -77,7 +77,7 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
           <p className="text-muted-foreground text-sm">{task.projectCode}</p>
         </div>
         <div className="flex gap-2">
-          <PermissionGate permission="planning.edit">
+          <PermissionGate permission="tasks.update">
             <Button asChild variant="outline">
               <Link href={`/dashboard/planning/tasks/${task.id}/edit`}>
                 <Pencil className="h-4 w-4" />
@@ -85,7 +85,7 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
               </Link>
             </Button>
           </PermissionGate>
-          <PermissionGate permission="planning.edit">
+          <PermissionGate permission="tasks.delete">
             <DeleteTaskDialog taskId={task.id} taskName={task.name} />
           </PermissionGate>
         </div>
