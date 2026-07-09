@@ -1,21 +1,29 @@
-export type Role = "ict-admin" | "ict-manager" | "project-manager" | "viewer";
+export type Role = "ict-admin" | "ict-manager" | "project-manager" | "team-member";
 
 export type Permission =
   | "projects.create"
-  | "projects.edit"
+  | "projects.view"
+  | "projects.update"
   | "projects.delete"
-  | "planning.view"
-  | "planning.edit"
-  | "monitoring.view"
+  | "tasks.create"
+  | "tasks.view"
+  | "tasks.update"
+  | "tasks.delete"
+  | "wbs.create"
   | "wbs.view"
-  | "wbs.edit";
+  | "wbs.update"
+  | "wbs.delete"
+  | "users.create"
+  | "users.view"
+  | "users.update"
+  | "users.delete";
 
 export interface UserPermissionsContext {
   roles: string[];
-  permissions: Permission[];
+  permissions: string[];
 }
 
-export function can(permission: Permission, user: UserPermissionsContext): boolean {
+export function can(permission: string, user: UserPermissionsContext): boolean {
   return user.permissions.includes(permission);
 }
 
@@ -26,20 +34,46 @@ export function hasRole(role: string, user: UserPermissionsContext): boolean {
 export const roleDefaults: Record<Role, Permission[]> = {
   "ict-admin": [
     "projects.create",
-    "projects.edit",
+    "projects.view",
+    "projects.update",
     "projects.delete",
-    "planning.view",
-    "planning.edit",
-    "monitoring.view",
+    "tasks.create",
+    "tasks.view",
+    "tasks.update",
+    "tasks.delete",
+    "wbs.create",
     "wbs.view",
-    "wbs.edit",
+    "wbs.update",
+    "wbs.delete",
+    "users.create",
+    "users.view",
+    "users.update",
+    "users.delete",
   ],
-  "ict-manager": ["projects.create", "projects.edit", "planning.view", "monitoring.view", "wbs.view"],
-  "project-manager": ["projects.create", "planning.view", "monitoring.view", "wbs.view"],
-  viewer: ["monitoring.view", "wbs.view"],
-};
-
-export const mockUserContext: UserPermissionsContext = {
-  roles: ["ict-admin"],
-  permissions: roleDefaults["ict-admin"],
+  "ict-manager": [
+    "projects.create",
+    "projects.view",
+    "projects.update",
+    "tasks.create",
+    "tasks.view",
+    "tasks.update",
+    "wbs.create",
+    "wbs.view",
+    "wbs.update",
+    "users.view",
+  ],
+  "project-manager": [
+    "projects.create",
+    "projects.view",
+    "projects.update",
+    "tasks.create",
+    "tasks.view",
+    "tasks.update",
+    "tasks.delete",
+    "wbs.create",
+    "wbs.view",
+    "wbs.update",
+    "wbs.delete",
+  ],
+  "team-member": ["projects.view", "tasks.view", "tasks.update", "wbs.view"],
 };
