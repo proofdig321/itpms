@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -16,10 +16,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { WbsNodeFormValues } from "@/lib/schemas/wbs";
 import { createWbsNode, deleteWbsNode, updateWbsNode } from "@/lib/services/wbs-mutations";
 import type { User } from "@/types/user";
@@ -77,22 +82,24 @@ export function AddWbsNodeDialog({ projectCode, parentId, parentName, users = []
   );
 }
 
-interface EditWbsNodeDialogProps {
+interface WbsNodeActionsProps {
   node: WbsNode;
   users?: User[];
 }
 
-export function EditWbsNodeDialog({ node, users = [] }: EditWbsNodeDialogProps) {
+export function WbsNodeActions({ node, users = [] }: WbsNodeActionsProps) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleSubmit = async (values: WbsNodeFormValues) => {
+  const handleUpdate = async (values: WbsNodeFormValues) => {
     setIsSubmitting(true);
     try {
       await updateWbsNode(node.id, values);
       toast.success("WBS node updated.");
-      setOpen(false);
+      setShowEdit(false);
       router.refresh();
     } catch {
       toast.error("Failed to update WBS node.");
@@ -100,47 +107,6 @@ export function EditWbsNodeDialog({ node, users = [] }: EditWbsNodeDialogProps) 
       setIsSubmitting(false);
     }
   };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="icon-sm" aria-label={`Edit ${node.name}`}>
-          <Pencil className="h-3.5 w-3.5" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit "{node.name}"</DialogTitle>
-        </DialogHeader>
-        <WbsNodeForm
-          onSubmit={handleSubmit}
-          submitLabel="Update"
-          isSubmitting={isSubmitting}
-          defaultValues={{
-            name: node.name,
-            description: node.description ?? "",
-            level: node.level,
-            status: node.status,
-            progress: node.progress,
-            ownerId: node.ownerId,
-            startDate: node.startDate ?? "",
-            endDate: node.endDate ?? "",
-            parentId: node.parentId,
-          }}
-          users={users}
-        />
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-interface DeleteWbsNodeDialogProps {
-  node: WbsNode;
-}
-
-export function DeleteWbsNodeDialog({ node }: DeleteWbsNodeDialogProps) {
-  const router = useRouter();
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -152,30 +118,75 @@ export function DeleteWbsNodeDialog({ node }: DeleteWbsNodeDialogProps) {
       toast.error("Failed to delete WBS node.");
     } finally {
       setIsDeleting(false);
+      setShowDelete(false);
     }
   };
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon-sm" aria-label={`Delete ${node.name}`}>
-          <Trash2 className="h-3.5 w-3.5 text-destructive" />
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete WBS Node</AlertDialogTitle>
-          <AlertDialogDescription>
-            Delete &quot;{node.name}&quot; and all its children? This cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-            {isDeleting ? "Deleting..." : "Delete"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon-sm" aria-label="Actions">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onSelect={() => setShowEdit(true)}>
+            <Pencil className="mr-2 h-3.5 w-3.5" />
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem className="text-destructive" onSelect={() => setShowDelete(true)}>
+            <Trash2 className="mr-2 h-3.5 w-3.5" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Dialog open={showEdit} onOpenChange={setShowEdit}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit &quot;{node.name}&quot;</DialogTitle>
+          </DialogHeader>
+          <WbsNodeForm
+            onSubmit={handleUpdate}
+            submitLabel="Update"
+            isSubmitting={isSubmitting}
+            defaultValues={{
+              name: node.name,
+              description: node.description ?? "",
+              level: node.level,
+              status: node.status,
+              progress: node.progress,
+              ownerId: node.ownerId,
+              startDate: node.startDate ?? "",
+              endDate: node.endDate ?? "",
+              parentId: node.parentId,
+            }}
+            users={users}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete WBS Node</AlertDialogTitle>
+            <AlertDialogDescription>
+              Delete &quot;{node.name}&quot; and all its children? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
+
+// Keep legacy exports for backward compatibility
+export const EditWbsNodeDialog = WbsNodeActions;
+export const DeleteWbsNodeDialog = ({ node }: { node: WbsNode }) => null;

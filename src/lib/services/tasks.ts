@@ -76,6 +76,8 @@ export async function getTaskById(id: string): Promise<Task | undefined> {
 
 export async function createTask(projectCode: string, values: TaskFormValues): Promise<Task> {
   if (API_BASE_URL) {
+    // Strip assignments — backend crashes when field is present (not yet implemented)
+    const { assignments, ...payload } = values;
     const response = await fetch(`${API_BASE_URL}/tasks`, {
       method: "POST",
       headers: {
@@ -83,7 +85,7 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
         Accept: "application/json",
         "ngrok-skip-browser-warning": "true",
       },
-      body: JSON.stringify(values),
+      body: JSON.stringify(payload),
     });
     const raw = await response.json();
     if (response.ok) return mapApiTask(raw.data ?? raw);
@@ -113,6 +115,8 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
 
 export async function updateTask(id: string, values: Partial<TaskFormValues>): Promise<Task | undefined> {
   if (API_BASE_URL) {
+    // Strip assignments — backend crashes when field is present (not yet implemented)
+    const { assignments, ...payload } = values;
     const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
       method: "PUT",
       headers: {
@@ -120,7 +124,7 @@ export async function updateTask(id: string, values: Partial<TaskFormValues>): P
         Accept: "application/json",
         "ngrok-skip-browser-warning": "true",
       },
-      body: JSON.stringify(values),
+      body: JSON.stringify(payload),
     });
     if (response.ok) {
       const raw = await response.json();

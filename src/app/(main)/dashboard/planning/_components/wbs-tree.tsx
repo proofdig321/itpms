@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import type { User } from "@/types/user";
 import type { WbsNode, WbsStatus } from "@/types/wbs";
 
-import { AddWbsNodeDialog, DeleteWbsNodeDialog, EditWbsNodeDialog } from "./wbs-actions";
+import { AddWbsNodeDialog, WbsNodeActions } from "./wbs-actions";
 
 const statusConfig: Record<WbsStatus, { label: string; className: string }> = {
   "not-started": {
@@ -133,10 +133,7 @@ function WbsTreeNode({ node, depth, projectCode, users }: WbsTreeNodeProps) {
             <AddWbsNodeDialog projectCode={projectCode} parentId={node.id} parentName={node.name} users={users} />
           </PermissionGate>
           <PermissionGate permission="wbs.update">
-            <EditWbsNodeDialog node={node} users={users} />
-          </PermissionGate>
-          <PermissionGate permission="wbs.delete">
-            <DeleteWbsNodeDialog node={node} />
+            <WbsNodeActions node={node} users={users} />
           </PermissionGate>
         </div>
       </div>
