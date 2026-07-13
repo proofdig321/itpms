@@ -113,7 +113,6 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
 
 export async function updateTask(id: string, values: Partial<TaskFormValues>): Promise<Task | undefined> {
   if (API_BASE_URL) {
-    const { assignments, ...payload } = values;
     const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
       method: "PUT",
       headers: {
@@ -121,7 +120,7 @@ export async function updateTask(id: string, values: Partial<TaskFormValues>): P
         Accept: "application/json",
         "ngrok-skip-browser-warning": "true",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(values),
     });
     if (response.ok) {
       const raw = await response.json();
