@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Activity, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -21,14 +21,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { deleteTask } from "@/lib/services/tasks";
+import { Textarea } from "@/components/ui/textarea";
+import { deleteTask, updateTaskProgress } from "@/lib/services/tasks";
 import type { Task, TaskPriority, TaskStatus } from "@/types/task";
 
 const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
@@ -147,7 +151,11 @@ export const columns: ColumnDef<Task>[] = [
 function ActionsCell({ task }: { task: Task }) {
   const router = useRouter();
   const [showDelete, setShowDelete] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [percentComplete, setPercentComplete] = useState(task.percentComplete ?? 0);
+  const [remarks, setRemarks] = useState("");
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -160,6 +168,21 @@ function ActionsCell({ task }: { task: Task }) {
     } finally {
       setIsDeleting(false);
       setShowDelete(false);
+    }
+  };
+
+  const handleProgressUpdate = async () => {
+    setIsUpdating(true);
+    try {
+      await updateTaskProgress(task.id, { percentComplete, remarks });
+      toast.success("Progress updated successfully.");
+      setShowProgress(false);
+      setRemarks("");
+      router.refresh();
+    } catch {
+      toast.error("Failed to update progress.");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -178,12 +201,54 @@ function ActionsCell({ task }: { task: Task }) {
               Edit
             </Link>
           </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setShowProgress(true)}>
+            <Activity className="mr-2 h-3.5 w-3.5" />
+            Update Progress
+          </DropdownMenuItem>
           <DropdownMenuItem className="text-destructive" onSelect={() => setShowDelete(true)}>
             <Trash2 className="mr-2 h-3.5 w-3.5" />
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <Dialog open={showProgress} onOpenChange={setShowProgress}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Update Progress — {task.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="percentComplete">Percent Complete</Label>
+              <Input
+                id="percentComplete"
+                type="number"
+                min={0}
+                max={100}
+                value={percentComplete}
+                onChange={(e) => setPercentComplete(Number(e.target.value))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="remarks">Remarks</Label>
+              <Textarea
+                id="remarks"
+                placeholder="e.g. Equipment delivered and installation started."
+                value={remarks}
+                onChange={(e) => setRemarks(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowProgress(false)} disabled={isUpdating}>
+              Cancel
+            </Button>
+            <Button onClick={handleProgressUpdate} disabled={isUpdating}>
+              {isUpdating ? "Updating..." : "Update"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
         <AlertDialogContent>

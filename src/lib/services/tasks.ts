@@ -153,3 +153,28 @@ export async function deleteTask(id: string): Promise<void> {
   if (index === -1) return;
   mockTasks.splice(index, 1);
 }
+
+export async function updateTaskProgress(
+  id: string,
+  data: { percentComplete: number; remarks: string },
+): Promise<void> {
+  if (API_BASE_URL) {
+    const response = await fetch(`${API_BASE_URL}/tasks/${id}/progress`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message ?? "Failed to update progress");
+    }
+    return;
+  }
+
+  const task = mockTasks.find((t) => t.id === id);
+  if (task) task.percentComplete = data.percentComplete;
+}
