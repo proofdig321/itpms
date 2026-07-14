@@ -32,6 +32,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
+import { getSessionUser } from "@/lib/auth/auth-service";
 import { cancelTask, deleteTask, holdTask, resumeTask, updateTaskProgress } from "@/lib/services/tasks";
 import type { Task, TaskPriority, TaskStatus } from "@/types/task";
 
@@ -174,7 +175,7 @@ function ActionsCell({ task }: { task: Task }) {
   const handleProgressUpdate = async () => {
     setIsUpdating(true);
     try {
-      await updateTaskProgress(task.id, { percentComplete, remarks });
+      await updateTaskProgress(task.id, { percentComplete, remarks, userId: getSessionUser()?.id ?? "" });
       toast.success("Progress updated successfully.");
       setShowProgress(false);
       setRemarks("");

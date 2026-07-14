@@ -156,7 +156,7 @@ export async function deleteTask(id: string): Promise<void> {
 
 export async function updateTaskProgress(
   id: string,
-  data: { percentComplete: number; remarks: string },
+  data: { percentComplete: number; remarks: string; userId: string },
 ): Promise<void> {
   if (API_BASE_URL) {
     const response = await fetch(`${API_BASE_URL}/tasks/${id}/progress`, {
