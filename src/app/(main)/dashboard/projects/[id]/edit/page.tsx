@@ -36,11 +36,9 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
             defaultValues={{
               title: project.title,
               description: project.description,
-              status: project.status,
-              progress: project.progress,
               managerId: project.managerId ?? "",
-              startDate: project.startDate,
-              endDate: project.endDate,
+              plannedStart: project.plannedStart,
+              plannedFinish: project.plannedFinish,
             }}
             users={users}
           />

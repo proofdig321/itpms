@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Archive, CheckCircle, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
-import { deleteProject } from "@/lib/services/projects";
+import { archiveProject, closeProject, deleteProject } from "@/lib/services/projects";
 import type { Project } from "@/types/project";
 
 const statusConfig: Record<Project["status"], { label: string; className: string }> = {
@@ -104,10 +104,10 @@ export const columns: ColumnDef<Project>[] = [
     },
   },
   {
-    accessorKey: "endDate",
+    accessorKey: "plannedFinish",
     header: "Due Date",
     cell: ({ row }) => {
-      const date = row.getValue("endDate") as string;
+      const date = row.getValue("plannedFinish") as string;
       return new Date(date).toLocaleDateString("en-ZA", {
         year: "numeric",
         month: "short",
@@ -141,6 +141,26 @@ function ActionsCell({ project }: { project: Project }) {
     }
   };
 
+  const handleArchive = async () => {
+    try {
+      await archiveProject(project.id);
+      toast.success("Project archived.");
+      router.refresh();
+    } catch {
+      toast.error("Failed to archive project.");
+    }
+  };
+
+  const handleClose = async () => {
+    try {
+      await closeProject(project.id);
+      toast.success("Project closed.");
+      router.refresh();
+    } catch {
+      toast.error("Failed to close project.");
+    }
+  };
+
   return (
     <>
       <DropdownMenu>
@@ -155,6 +175,14 @@ function ActionsCell({ project }: { project: Project }) {
               <Pencil className="mr-2 h-3.5 w-3.5" />
               Edit
             </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={handleArchive}>
+            <Archive className="mr-2 h-3.5 w-3.5" />
+            Archive
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={handleClose}>
+            <CheckCircle className="mr-2 h-3.5 w-3.5" />
+            Close
           </DropdownMenuItem>
           <DropdownMenuItem className="text-destructive" onSelect={() => setShowDelete(true)}>
             <Trash2 className="mr-2 h-3.5 w-3.5" />

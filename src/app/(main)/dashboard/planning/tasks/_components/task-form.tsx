@@ -9,7 +9,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { type TaskFormValues, taskFormSchema, taskPriorities, taskStatuses, taskTypes } from "@/lib/schemas/task";
+import { type TaskFormValues, taskFormSchema, taskPriorities, taskTypes } from "@/lib/schemas/task";
 import type { Project } from "@/types/project";
 import type { User } from "@/types/user";
 import type { WbsNode } from "@/types/wbs";
@@ -29,13 +29,6 @@ const priorityLabels: Record<(typeof taskPriorities)[number], string> = {
   high: "High",
   medium: "Medium",
   low: "Low",
-};
-const statusLabels: Record<(typeof taskStatuses)[number], string> = {
-  draft: "Draft",
-  "not-started": "Not Started",
-  "in-progress": "In Progress",
-  completed: "Completed",
-  "on-hold": "On Hold",
 };
 
 interface TaskFormProps {
@@ -66,7 +59,6 @@ export function TaskForm({
       description: "",
       type: "implementation",
       priority: "medium",
-      status: "draft",
       plannedStart: "",
       plannedFinish: "",
       assignments: [],
@@ -163,7 +155,7 @@ export function TaskForm({
           )}
         />
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           <Controller
             control={form.control}
             name="type"
@@ -201,29 +193,6 @@ export function TaskForm({
                     {taskPriorities.map((p) => (
                       <SelectItem key={p} value={p}>
                         {priorityLabels[p]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="status"
-            render={({ field, fieldState }) => (
-              <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="task-status">Status</FieldLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger id="task-status" className="w-full">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {taskStatuses.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {statusLabels[s]}
                       </SelectItem>
                     ))}
                   </SelectContent>

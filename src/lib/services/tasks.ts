@@ -1,6 +1,6 @@
 import { tasks as mockTasks } from "@/data/tasks";
 import { type TaskFormValues, taskPriorities, taskStatuses, taskTypes } from "@/lib/schemas/task";
-import type { Task, TaskAssignment } from "@/types/task";
+import type { Task } from "@/types/task";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
@@ -98,7 +98,7 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
     description: values.description,
     type: values.type,
     priority: values.priority,
-    status: values.status,
+    status: "not-started",
     duration: 0,
     milestone: false,
     plannedStart: values.plannedStart,
@@ -177,4 +177,43 @@ export async function updateTaskProgress(
 
   const task = mockTasks.find((t) => t.id === id);
   if (task) task.percentComplete = data.percentComplete;
+}
+
+export async function holdTask(id: string): Promise<void> {
+  if (API_BASE_URL) {
+    const response = await fetch(`${API_BASE_URL}/tasks/${id}/hold`, {
+      method: "POST",
+      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message ?? "Failed to hold task");
+    }
+  }
+}
+
+export async function resumeTask(id: string): Promise<void> {
+  if (API_BASE_URL) {
+    const response = await fetch(`${API_BASE_URL}/tasks/${id}/resume`, {
+      method: "POST",
+      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message ?? "Failed to resume task");
+    }
+  }
+}
+
+export async function cancelTask(id: string): Promise<void> {
+  if (API_BASE_URL) {
+    const response = await fetch(`${API_BASE_URL}/tasks/${id}/cancel`, {
+      method: "POST",
+      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message ?? "Failed to cancel task");
+    }
+  }
 }

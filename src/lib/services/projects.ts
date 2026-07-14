@@ -24,10 +24,10 @@ function mapApiProject(raw: Record<string, unknown>): Project {
     title: raw.title as string,
     description: (raw.description as string) ?? "",
     status: raw.status as Project["status"],
-    progress: raw.progress as number,
+    progress: (raw.progress as number) ?? 0,
     managerId: (raw.managerId as string) ?? null,
-    startDate: raw.startDate as string,
-    endDate: raw.endDate as string,
+    plannedStart: (raw.plannedStart as string) ?? (raw.startDate as string) ?? "",
+    plannedFinish: (raw.plannedFinish as string) ?? (raw.endDate as string) ?? "",
     createdAt: (raw.created_at as string) ?? (raw.createdAt as string) ?? "",
   };
 }
@@ -49,29 +49,30 @@ export async function getProjectById(id: string): Promise<Project | undefined> {
 
 export async function createProject(values: ProjectFormValues): Promise<Project> {
   if (API_BASE_URL) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/projects`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "ngrok-skip-browser-warning": "true",
-        },
-        body: JSON.stringify(values),
-      });
-      if (response.ok) {
-        const raw = await response.json();
-        return mapApiProject(raw.data ?? raw.project ?? raw);
-      }
-    } catch {
-      // Fall through to mock
-    }
+    const response = await fetch(`${API_BASE_URL}/projects`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: JSON.stringify(values),
+    });
+    const raw = await response.json();
+    if (response.ok) return mapApiProject(raw.data ?? raw.project ?? raw);
+    throw new Error(raw.message ?? "Failed to create project");
   }
 
   const project: Project = {
     id: crypto.randomUUID(),
     projectCode: `ITP-${new Date().getFullYear()}-${String(mockProjects.length + 1).padStart(4, "0")}`,
-    ...values,
+    title: values.title,
+    description: values.description,
+    status: "not-started",
+    progress: 0,
+    managerId: values.managerId,
+    plannedStart: values.plannedStart,
+    plannedFinish: values.plannedFinish,
     createdAt: new Date().toISOString(),
   };
   mockProjects.push(project);
@@ -80,22 +81,18 @@ export async function createProject(values: ProjectFormValues): Promise<Project>
 
 export async function updateProject(id: string, values: Partial<ProjectFormValues>): Promise<Project | undefined> {
   if (API_BASE_URL) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "ngrok-skip-browser-warning": "true",
-        },
-        body: JSON.stringify(values),
-      });
-      const raw = await response.json();
-      if (response.ok) return mapApiProject(raw.data ?? raw.project ?? raw);
-      throw new Error(raw.message ?? "Failed to update project");
-    } catch (err) {
-      throw err;
-    }
+    const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: JSON.stringify(values),
+    });
+    const raw = await response.json();
+    if (response.ok) return mapApiProject(raw.data ?? raw.project ?? raw);
+    throw new Error(raw.message ?? "Failed to update project");
   }
 
   const index = mockProjects.findIndex((p) => p.id === id);
@@ -106,18 +103,44 @@ export async function updateProject(id: string, values: Partial<ProjectFormValue
 
 export async function deleteProject(id: string): Promise<void> {
   if (API_BASE_URL) {
-    try {
-      await fetch(`${API_BASE_URL}/projects/${id}`, {
-        method: "DELETE",
-        headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
-      });
-      return;
-    } catch {
-      // Fall through to mock
+    const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+      method: "DELETE",
+      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message ?? "Failed to delete project");
     }
+    return;
   }
 
   const index = mockProjects.findIndex((p) => p.id === id);
   if (index === -1) return;
   mockProjects.splice(index, 1);
+}
+
+export async function archiveProject(id: string): Promise<void> {
+  if (API_BASE_URL) {
+    const response = await fetch(`${API_BASE_URL}/projects/${id}/archive`, {
+      method: "POST",
+      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message ?? "Failed to archive project");
+    }
+  }
+}
+
+export async function closeProject(id: string): Promise<void> {
+  if (API_BASE_URL) {
+    const response = await fetch(`${API_BASE_URL}/projects/${id}/close`, {
+      method: "POST",
+      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message ?? "Failed to close project");
+    }
+  }
 }

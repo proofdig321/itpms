@@ -5,23 +5,17 @@ export const projectStatuses = ["on-track", "at-risk", "delayed", "completed", "
 const baseProjectFormSchema = z.object({
   title: z.string().min(1, { message: "Title is required." }),
   description: z.string().min(1, { message: "Description is required." }),
-  status: z.enum(projectStatuses, { message: "Please select a valid status." }),
-  progress: z
-    .number()
-    .int({ message: "Progress must be a whole number." })
-    .min(0, { message: "Progress cannot be less than 0." })
-    .max(100, { message: "Progress cannot exceed 100." }),
   managerId: z.string().min(1, { message: "Manager is required." }),
-  startDate: z.string().min(1, { message: "Start date is required." }),
-  endDate: z.string().min(1, { message: "End date is required." }),
+  plannedStart: z.string().min(1, { message: "Planned start date is required." }),
+  plannedFinish: z.string().min(1, { message: "Planned finish date is required." }),
 });
 
 export const projectFormSchema = baseProjectFormSchema.superRefine((data, ctx) => {
-  if (data.startDate && data.endDate && data.endDate < data.startDate) {
+  if (data.plannedStart && data.plannedFinish && data.plannedFinish < data.plannedStart) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "End date cannot be before start date.",
-      path: ["endDate"],
+      message: "Planned finish cannot be before planned start.",
+      path: ["plannedFinish"],
     });
   }
 });

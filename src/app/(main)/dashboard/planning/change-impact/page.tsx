@@ -68,7 +68,7 @@ export default async function ChangeImpactPage() {
                     </TableCell>
                     <TableCell>
                       {project
-                        ? new Date(project.startDate).toLocaleDateString("en-ZA", {
+                        ? new Date(project.plannedStart).toLocaleDateString("en-ZA", {
                             month: "short",
                             day: "numeric",
                             year: "numeric",

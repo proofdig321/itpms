@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Activity, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Activity, Ban, MoreHorizontal, Pause, Pencil, Play, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -32,7 +32,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
-import { deleteTask, updateTaskProgress } from "@/lib/services/tasks";
+import { cancelTask, deleteTask, holdTask, resumeTask, updateTaskProgress } from "@/lib/services/tasks";
 import type { Task, TaskPriority, TaskStatus } from "@/types/task";
 
 const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
@@ -186,6 +186,36 @@ function ActionsCell({ task }: { task: Task }) {
     }
   };
 
+  const handleHold = async () => {
+    try {
+      await holdTask(task.id);
+      toast.success("Task put on hold.");
+      router.refresh();
+    } catch {
+      toast.error("Failed to hold task.");
+    }
+  };
+
+  const handleResume = async () => {
+    try {
+      await resumeTask(task.id);
+      toast.success("Task resumed.");
+      router.refresh();
+    } catch {
+      toast.error("Failed to resume task.");
+    }
+  };
+
+  const handleCancel = async () => {
+    try {
+      await cancelTask(task.id);
+      toast.success("Task cancelled.");
+      router.refresh();
+    } catch {
+      toast.error("Failed to cancel task.");
+    }
+  };
+
   return (
     <>
       <DropdownMenu>
@@ -204,6 +234,18 @@ function ActionsCell({ task }: { task: Task }) {
           <DropdownMenuItem onSelect={() => setShowProgress(true)}>
             <Activity className="mr-2 h-3.5 w-3.5" />
             Update Progress
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={handleHold}>
+            <Pause className="mr-2 h-3.5 w-3.5" />
+            Hold
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={handleResume}>
+            <Play className="mr-2 h-3.5 w-3.5" />
+            Resume
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={handleCancel}>
+            <Ban className="mr-2 h-3.5 w-3.5" />
+            Cancel
           </DropdownMenuItem>
           <DropdownMenuItem className="text-destructive" onSelect={() => setShowDelete(true)}>
             <Trash2 className="mr-2 h-3.5 w-3.5" />

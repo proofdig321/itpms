@@ -112,13 +112,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           </CardHeader>
           <CardContent>
             <p className="text-sm">
-              {new Date(project.startDate).toLocaleDateString("en-ZA", {
+              {new Date(project.plannedStart).toLocaleDateString("en-ZA", {
                 year: "numeric",
                 month: "short",
                 day: "numeric",
               })}
               {" — "}
-              {new Date(project.endDate).toLocaleDateString("en-ZA", {
+              {new Date(project.plannedFinish).toLocaleDateString("en-ZA", {
                 year: "numeric",
                 month: "short",
                 day: "numeric",
