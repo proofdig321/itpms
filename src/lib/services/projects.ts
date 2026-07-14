@@ -49,6 +49,16 @@ export async function getProjectById(id: string): Promise<Project | undefined> {
 
 export async function createProject(values: ProjectFormValues): Promise<Project> {
   if (API_BASE_URL) {
+    // Map frontend fields to current backend field names (backend rename pending)
+    const payload = {
+      title: values.title,
+      description: values.description,
+      managerId: values.managerId,
+      startDate: values.plannedStart,
+      endDate: values.plannedFinish,
+      status: "not-started",
+      progress: 0,
+    };
     const response = await fetch(`${API_BASE_URL}/projects`, {
       method: "POST",
       headers: {
@@ -56,7 +66,7 @@ export async function createProject(values: ProjectFormValues): Promise<Project>
         Accept: "application/json",
         "ngrok-skip-browser-warning": "true",
       },
-      body: JSON.stringify(values),
+      body: JSON.stringify(payload),
     });
     const raw = await response.json();
     if (response.ok) return mapApiProject(raw.data ?? raw.project ?? raw);
@@ -81,6 +91,14 @@ export async function createProject(values: ProjectFormValues): Promise<Project>
 
 export async function updateProject(id: string, values: Partial<ProjectFormValues>): Promise<Project | undefined> {
   if (API_BASE_URL) {
+    // Map frontend fields to current backend field names (backend rename pending)
+    const payload: Record<string, unknown> = {
+      title: values.title,
+      description: values.description,
+      managerId: values.managerId,
+      startDate: values.plannedStart,
+      endDate: values.plannedFinish,
+    };
     const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
       method: "PUT",
       headers: {
@@ -88,7 +106,7 @@ export async function updateProject(id: string, values: Partial<ProjectFormValue
         Accept: "application/json",
         "ngrok-skip-browser-warning": "true",
       },
-      body: JSON.stringify(values),
+      body: JSON.stringify(payload),
     });
     const raw = await response.json();
     if (response.ok) return mapApiProject(raw.data ?? raw.project ?? raw);
