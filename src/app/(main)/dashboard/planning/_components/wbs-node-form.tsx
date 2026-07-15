@@ -42,8 +42,8 @@ export function WbsNodeForm({
       description: "",
       level: "task",
       ownerId: null,
-      startDate: "",
-      endDate: "",
+      plannedStart: "",
+      plannedFinish: "",
       parentId: null,
       ...defaultValues,
     },
@@ -133,7 +133,7 @@ export function WbsNodeForm({
         <div className="grid gap-3 sm:grid-cols-2">
           <Controller
             control={form.control}
-            name="startDate"
+            name="plannedStart"
             render={({ field, fieldState }) => (
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="wbs-start">Planned Start</FieldLabel>
@@ -145,10 +145,10 @@ export function WbsNodeForm({
 
           <Controller
             control={form.control}
-            name="endDate"
+            name="plannedFinish"
             render={({ field, fieldState }) => (
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="wbs-end">Planned End</FieldLabel>
+                <FieldLabel htmlFor="wbs-end">Planned Finish</FieldLabel>
                 <Input {...field} id="wbs-end" type="date" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>

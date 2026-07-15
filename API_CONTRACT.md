@@ -349,7 +349,16 @@ The Azure App Registration must have:
 - `openid`, `profile`, `email` scopes enabled
 - Single-page application (SPA) platform configured
 
-Frontend stores the app token in cookies and injects it as `Authorization: Bearer {token}` on all API requests.
+Frontend stores the app token in cookies (`auth_token`) and injects it as `Authorization: Bearer {token}` on all API requests.
+
+### Authorization Header Injection
+
+All service files automatically attach the Bearer token:
+
+- **Client-side mutations** (POST/PUT/DELETE): Read token from `document.cookie` via `getAuthHeaders()` in `lib/services/api-helpers.ts`
+- **Server-side reads** (GET): Read token from Next.js `cookies()` via `getServerAuthHeaders()` in `lib/services/server-api-helpers.ts`
+
+If no token is present (user not logged in), requests proceed without the `Authorization` header — the backend will return 401.
 
 ---
 
@@ -382,8 +391,8 @@ interface WbsNode {
   description?: string;
   level: WbsLevel;
   status: WbsStatus;         // Server-computed based on task progress
-  startDate?: string;
-  endDate?: string;
+  plannedStart?: string;     // ISO 8601 date
+  plannedFinish?: string;    // ISO 8601 date
   progress: number;          // 0-100, server-computed from tasks
   assignee?: string;
 }
@@ -399,6 +408,7 @@ interface WbsNode {
 - Supports unlimited depth (per FR-PLN-002)
 - Scheduling calculations (critical path, EVM) are backend responsibility
 - Frontend only visualizes structure and progress
+- Frontend sends `plannedStart` / `plannedFinish` (not `startDate` / `endDate`)
 
 ---
 
@@ -584,7 +594,8 @@ When Mr Nkosi builds an endpoint, we swap that service using this pattern. Zero 
 | `sequence` | `sequence` | Backend auto-assigns |
 | `depth` | `depth` | Backend computes |
 | `code` | `code` | Backend computes from depth/sequence |
-| `startDate` (datetime) | `startDate` (date only) | Stripped to YYYY-MM-DD |
+| `plannedStart` (datetime) | `plannedStart` (date only) | Stripped to YYYY-MM-DD |
+| `plannedFinish` (datetime) | `plannedFinish` (date only) | Stripped to YYYY-MM-DD |
 
 ---
 

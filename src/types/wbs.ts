@@ -15,6 +15,6 @@ export interface WbsNode {
   level: WbsLevel;
   status: WbsStatus;
   progress: number;
-  startDate?: string;
-  endDate?: string;
+  plannedStart?: string;
+  plannedFinish?: string;
 }

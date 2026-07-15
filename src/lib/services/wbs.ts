@@ -1,14 +1,15 @@
-import "server-only";
-
 import { wbsNodes as mockWbsNodes, type WbsNode } from "@/data/wbs";
+
+import { getServerAuthHeaders } from "./server-api-helpers";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 async function fetchApi<T>(endpoint: string): Promise<T | null> {
   if (!API_BASE_URL) return null;
   try {
+    const headers = await getServerAuthHeaders();
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+      headers,
       next: { revalidate: 30 },
     });
     if (!response.ok) return null;
@@ -32,15 +33,14 @@ function mapApiWbsNode(raw: Record<string, unknown>): WbsNode {
     level: raw.level as WbsNode["level"],
     status: raw.status as WbsNode["status"],
     progress: (raw.progress as number) ?? 0,
-    startDate: raw.startDate ? (raw.startDate as string).split("T")[0] : undefined,
-    endDate: raw.endDate ? (raw.endDate as string).split("T")[0] : undefined,
+    plannedStart: raw.plannedStart ? (raw.plannedStart as string).split("T")[0] : undefined,
+    plannedFinish: raw.plannedFinish ? (raw.plannedFinish as string).split("T")[0] : undefined,
   };
 }
 
 export async function getWbsByProject(projectCode: string): Promise<WbsNode[]> {
   const data = await fetchApi<Record<string, unknown>>(`/wbs?projectCode=${projectCode}`);
 
-  // Handle Laravel paginated response { data: [...] } or flat array
   if (data) {
     const items = Array.isArray(data) ? data : (data.data as Record<string, unknown>[] | undefined);
     if (items && Array.isArray(items)) {

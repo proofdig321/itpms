@@ -1,8 +1,9 @@
 import type { User } from "@/types/user";
 
+import { getServerAuthHeaders } from "./server-api-helpers";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
 
-// Mock fallback when API is unavailable
 const mockUsers: User[] = [
   { id: "mock-1", name: "Thabo Mokoena", email: "thabo@municipality.gov.za" },
   { id: "mock-2", name: "Naledi Dlamini", email: "naledi@municipality.gov.za" },
@@ -11,8 +12,9 @@ const mockUsers: User[] = [
 
 export async function getUsers(): Promise<User[]> {
   try {
+    const headers = await getServerAuthHeaders();
     const response = await fetch(`${API_BASE_URL}/users`, {
-      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+      headers,
       next: { revalidate: 60 },
     });
 

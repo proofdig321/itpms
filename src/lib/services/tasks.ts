@@ -2,13 +2,17 @@ import { tasks as mockTasks } from "@/data/tasks";
 import { type TaskFormValues, taskPriorities, taskStatuses, taskTypes } from "@/lib/schemas/task";
 import type { Task } from "@/types/task";
 
+import { getAuthHeaders } from "./api-helpers";
+import { getServerAuthHeaders } from "./server-api-helpers";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 async function fetchApi<T>(endpoint: string): Promise<T | null> {
   if (!API_BASE_URL) return null;
   try {
+    const headers = await getServerAuthHeaders();
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+      headers,
       next: { revalidate: 30 },
     });
     if (!response.ok) return null;
@@ -78,11 +82,7 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
   if (API_BASE_URL) {
     const response = await fetch(`${API_BASE_URL}/tasks`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "ngrok-skip-browser-warning": "true",
-      },
+      headers: getAuthHeaders("json"),
       body: JSON.stringify(values),
     });
     const raw = await response.json();
@@ -115,11 +115,7 @@ export async function updateTask(id: string, values: Partial<TaskFormValues>): P
   if (API_BASE_URL) {
     const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "ngrok-skip-browser-warning": "true",
-      },
+      headers: getAuthHeaders("json"),
       body: JSON.stringify(values),
     });
     if (response.ok) {
@@ -140,7 +136,7 @@ export async function deleteTask(id: string): Promise<void> {
   if (API_BASE_URL) {
     const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
       method: "DELETE",
-      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+      headers: getAuthHeaders(),
     });
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
@@ -161,11 +157,7 @@ export async function updateTaskProgress(
   if (API_BASE_URL) {
     const response = await fetch(`${API_BASE_URL}/tasks/${id}/progress`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "ngrok-skip-browser-warning": "true",
-      },
+      headers: getAuthHeaders("json"),
       body: JSON.stringify(data),
     });
     if (!response.ok) {
@@ -183,7 +175,7 @@ export async function holdTask(id: string): Promise<void> {
   if (API_BASE_URL) {
     const response = await fetch(`${API_BASE_URL}/tasks/${id}/hold`, {
       method: "POST",
-      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+      headers: getAuthHeaders(),
     });
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
@@ -196,7 +188,7 @@ export async function resumeTask(id: string): Promise<void> {
   if (API_BASE_URL) {
     const response = await fetch(`${API_BASE_URL}/tasks/${id}/resume`, {
       method: "POST",
-      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+      headers: getAuthHeaders(),
     });
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
@@ -209,7 +201,7 @@ export async function cancelTask(id: string): Promise<void> {
   if (API_BASE_URL) {
     const response = await fetch(`${API_BASE_URL}/tasks/${id}/cancel`, {
       method: "POST",
-      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+      headers: getAuthHeaders(),
     });
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));

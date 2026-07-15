@@ -8,8 +8,8 @@ export const wbsNodeFormSchema = z.object({
   description: z.string().optional(),
   level: z.enum(wbsLevels, { message: "Please select a level." }),
   ownerId: z.string().nullable(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
+  plannedStart: z.string().optional(),
+  plannedFinish: z.string().optional(),
   parentId: z.string().nullable(),
 });
 

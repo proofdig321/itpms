@@ -1,13 +1,17 @@
 import { projects as mockProjects, type Project } from "@/data/projects";
 import type { ProjectFormValues } from "@/lib/schemas/project";
 
+import { getAuthHeaders } from "./api-helpers";
+import { getServerAuthHeaders } from "./server-api-helpers";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 async function fetchApi<T>(endpoint: string): Promise<T | null> {
   if (!API_BASE_URL) return null;
   try {
+    const headers = await getServerAuthHeaders();
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+      headers,
       next: { revalidate: 30 },
     });
     if (!response.ok) return null;
@@ -49,22 +53,16 @@ export async function getProjectById(id: string): Promise<Project | undefined> {
 
 export async function createProject(values: ProjectFormValues): Promise<Project> {
   if (API_BASE_URL) {
-    // Map frontend fields to backend field names (backend accepts startDate/endDate on POST)
-    const payload = {
-      title: values.title,
-      description: values.description,
-      managerId: values.managerId,
-      startDate: values.plannedStart,
-      endDate: values.plannedFinish,
-    };
     const response = await fetch(`${API_BASE_URL}/projects`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "ngrok-skip-browser-warning": "true",
-      },
-      body: JSON.stringify(payload),
+      headers: getAuthHeaders("json"),
+      body: JSON.stringify({
+        title: values.title,
+        description: values.description,
+        managerId: values.managerId,
+        plannedStart: values.plannedStart,
+        plannedFinish: values.plannedFinish,
+      }),
     });
     const raw = await response.json();
     if (response.ok) return mapApiProject(raw.data ?? raw.project ?? raw);
@@ -89,22 +87,16 @@ export async function createProject(values: ProjectFormValues): Promise<Project>
 
 export async function updateProject(id: string, values: Partial<ProjectFormValues>): Promise<Project | undefined> {
   if (API_BASE_URL) {
-    // Map frontend fields to backend field names (backend accepts startDate/endDate on PUT)
-    const payload: Record<string, unknown> = {
-      title: values.title,
-      description: values.description,
-      managerId: values.managerId,
-      startDate: values.plannedStart,
-      endDate: values.plannedFinish,
-    };
     const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "ngrok-skip-browser-warning": "true",
-      },
-      body: JSON.stringify(payload),
+      headers: getAuthHeaders("json"),
+      body: JSON.stringify({
+        title: values.title,
+        description: values.description,
+        managerId: values.managerId,
+        plannedStart: values.plannedStart,
+        plannedFinish: values.plannedFinish,
+      }),
     });
     const raw = await response.json();
     if (response.ok) return mapApiProject(raw.data ?? raw.project ?? raw);
@@ -121,7 +113,7 @@ export async function deleteProject(id: string): Promise<void> {
   if (API_BASE_URL) {
     const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
       method: "DELETE",
-      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+      headers: getAuthHeaders(),
     });
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
@@ -139,7 +131,7 @@ export async function archiveProject(id: string): Promise<void> {
   if (API_BASE_URL) {
     const response = await fetch(`${API_BASE_URL}/projects/${id}/archive`, {
       method: "POST",
-      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+      headers: getAuthHeaders(),
     });
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
@@ -152,7 +144,7 @@ export async function closeProject(id: string): Promise<void> {
   if (API_BASE_URL) {
     const response = await fetch(`${API_BASE_URL}/projects/${id}/close`, {
       method: "POST",
-      headers: { Accept: "application/json", "ngrok-skip-browser-warning": "true" },
+      headers: getAuthHeaders(),
     });
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));

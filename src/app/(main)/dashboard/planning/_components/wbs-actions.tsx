@@ -156,8 +156,8 @@ export function WbsNodeActions({ node, users = [] }: WbsNodeActionsProps) {
               description: node.description ?? "",
               level: node.level,
               ownerId: node.ownerId,
-              startDate: node.startDate ?? "",
-              endDate: node.endDate ?? "",
+              plannedStart: node.plannedStart ?? "",
+              plannedFinish: node.plannedFinish ?? "",
               parentId: node.parentId,
             }}
             users={users}
