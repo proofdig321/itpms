@@ -15,7 +15,7 @@ function formatCurrency(amount: number) {
 }
 
 export default async function PlanningDashboardsPage() {
-  const [evm, forecast, criticalTasks, costs, risks, resources, procurement] = await Promise.all([
+  const [evm, _forecast, criticalTasks, costs, risks, resources, procurement] = await Promise.all([
     getEvmByProject("ITPMS-001"),
     getForecast("ITPMS-001"),
     getCriticalPath("ITPMS-001"),
@@ -63,7 +63,7 @@ export default async function PlanningDashboardsPage() {
                 <CardTitle className="font-normal text-muted-foreground text-sm">Budget Status</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="font-semibold tabular-nums text-lg">{formatCurrency(totalSpent)}</p>
+                <p className="font-semibold text-lg tabular-nums">{formatCurrency(totalSpent)}</p>
                 <p className="text-muted-foreground text-xs">of {formatCurrency(totalBudget)}</p>
               </CardContent>
             </Card>
@@ -111,11 +111,11 @@ export default async function PlanningDashboardsPage() {
               </CardHeader>
               <CardContent>
                 {evm && evm.costVariance < 0 ? (
-                  <p className="font-semibold tabular-nums text-lg text-red-600">
+                  <p className="font-semibold text-lg text-red-600 tabular-nums">
                     {formatCurrency(Math.abs(evm.costVariance))}
                   </p>
                 ) : (
-                  <p className="font-semibold text-lg text-green-600">None</p>
+                  <p className="font-semibold text-green-600 text-lg">None</p>
                 )}
               </CardContent>
             </Card>

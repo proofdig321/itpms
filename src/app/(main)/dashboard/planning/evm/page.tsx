@@ -39,7 +39,7 @@ export default async function EvmPage() {
             <CardTitle className="font-normal text-muted-foreground text-sm">Planned Value (PV)</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-semibold tabular-nums text-2xl">{formatCurrency(evm.plannedValue)}</p>
+            <p className="font-semibold text-2xl tabular-nums">{formatCurrency(evm.plannedValue)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -47,7 +47,7 @@ export default async function EvmPage() {
             <CardTitle className="font-normal text-muted-foreground text-sm">Earned Value (EV)</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-semibold tabular-nums text-2xl">{formatCurrency(evm.earnedValue)}</p>
+            <p className="font-semibold text-2xl tabular-nums">{formatCurrency(evm.earnedValue)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -55,7 +55,7 @@ export default async function EvmPage() {
             <CardTitle className="font-normal text-muted-foreground text-sm">Actual Cost (AC)</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-semibold tabular-nums text-2xl">{formatCurrency(evm.actualCost)}</p>
+            <p className="font-semibold text-2xl tabular-nums">{formatCurrency(evm.actualCost)}</p>
           </CardContent>
         </Card>
       </div>
@@ -68,7 +68,7 @@ export default async function EvmPage() {
           </CardHeader>
           <CardContent>
             <p
-              className={`font-semibold tabular-nums text-lg ${evm.scheduleVariance < 0 ? "text-red-600" : "text-green-600"}`}
+              className={`font-semibold text-lg tabular-nums ${evm.scheduleVariance < 0 ? "text-red-600" : "text-green-600"}`}
             >
               {formatCurrency(evm.scheduleVariance)}
             </p>
@@ -80,7 +80,7 @@ export default async function EvmPage() {
           </CardHeader>
           <CardContent>
             <p
-              className={`font-semibold tabular-nums text-lg ${evm.costVariance < 0 ? "text-red-600" : "text-green-600"}`}
+              className={`font-semibold text-lg tabular-nums ${evm.costVariance < 0 ? "text-red-600" : "text-green-600"}`}
             >
               {formatCurrency(evm.costVariance)}
             </p>
@@ -91,7 +91,7 @@ export default async function EvmPage() {
             <CardTitle className="font-normal text-muted-foreground text-sm">SPI</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className={`font-semibold tabular-nums text-lg ${evm.spiIndex < 1 ? "text-red-600" : "text-green-600"}`}>
+            <p className={`font-semibold text-lg tabular-nums ${evm.spiIndex < 1 ? "text-red-600" : "text-green-600"}`}>
               {formatIndex(evm.spiIndex)}
             </p>
           </CardContent>
@@ -101,7 +101,7 @@ export default async function EvmPage() {
             <CardTitle className="font-normal text-muted-foreground text-sm">CPI</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className={`font-semibold tabular-nums text-lg ${evm.cpiIndex < 1 ? "text-red-600" : "text-green-600"}`}>
+            <p className={`font-semibold text-lg tabular-nums ${evm.cpiIndex < 1 ? "text-red-600" : "text-green-600"}`}>
               {formatIndex(evm.cpiIndex)}
             </p>
           </CardContent>
@@ -116,7 +116,7 @@ export default async function EvmPage() {
               <CardTitle className="font-normal text-muted-foreground text-sm">Estimate at Completion (EAC)</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="font-semibold tabular-nums text-lg">{formatCurrency(forecast.estimateAtCompletion)}</p>
+              <p className="font-semibold text-lg tabular-nums">{formatCurrency(forecast.estimateAtCompletion)}</p>
             </CardContent>
           </Card>
           <Card>
@@ -124,7 +124,7 @@ export default async function EvmPage() {
               <CardTitle className="font-normal text-muted-foreground text-sm">Estimate to Complete (ETC)</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="font-semibold tabular-nums text-lg">{formatCurrency(forecast.estimateToComplete)}</p>
+              <p className="font-semibold text-lg tabular-nums">{formatCurrency(forecast.estimateToComplete)}</p>
             </CardContent>
           </Card>
           <Card>
@@ -133,7 +133,7 @@ export default async function EvmPage() {
             </CardHeader>
             <CardContent>
               <p
-                className={`font-semibold tabular-nums text-lg ${forecast.varianceAtCompletion < 0 ? "text-red-600" : "text-green-600"}`}
+                className={`font-semibold text-lg tabular-nums ${forecast.varianceAtCompletion < 0 ? "text-red-600" : "text-green-600"}`}
               >
                 {formatCurrency(forecast.varianceAtCompletion)}
               </p>

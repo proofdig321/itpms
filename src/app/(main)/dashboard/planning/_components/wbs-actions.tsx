@@ -187,4 +187,4 @@ export function WbsNodeActions({ node, users = [] }: WbsNodeActionsProps) {
 
 // Keep legacy exports for backward compatibility
 export const EditWbsNodeDialog = WbsNodeActions;
-export const DeleteWbsNodeDialog = ({ node }: { node: WbsNode }) => null;
+export const DeleteWbsNodeDialog = (_props: { node: WbsNode }) => null;

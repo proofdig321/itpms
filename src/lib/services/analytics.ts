@@ -32,7 +32,7 @@ export async function getEvmByProject(projectCode: string): Promise<EarnedValueM
   }
 }
 
-export async function getCriticalPath(projectCode: string): Promise<CriticalPathTask[]> {
+export async function getCriticalPath(_projectCode: string): Promise<CriticalPathTask[]> {
   try {
     return mockCriticalPath;
   } catch {

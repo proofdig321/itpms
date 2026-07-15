@@ -57,7 +57,7 @@ export async function getWbsByProject(projectCode: string): Promise<WbsNode[]> {
 
 export async function getWbsNodeById(id: string): Promise<WbsNode | undefined> {
   const data = await fetchApi<Record<string, unknown>>(`/wbs/${id}`);
-  if (data && data.id) {
+  if (data?.id) {
     return mapApiWbsNode(data);
   }
 

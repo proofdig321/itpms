@@ -155,7 +155,7 @@ function ActionsCell({ task }: { task: Task }) {
   const [showProgress, setShowProgress] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [percentComplete, setPercentComplete] = useState(task.percentComplete ?? 0);
+  const [percentComplete, setPercentComplete] = useState(task.percentComplete);
   const [remarks, setRemarks] = useState("");
 
   const handleDelete = async () => {
@@ -175,7 +175,8 @@ function ActionsCell({ task }: { task: Task }) {
   const handleProgressUpdate = async () => {
     setIsUpdating(true);
     try {
-      await updateTaskProgress(task.id, { percentComplete, remarks, userId: getSessionUser()?.id ?? "" });
+      const userId = getSessionUser()?.id || "";
+      await updateTaskProgress(task.id, { percentComplete, remarks, userId });
       toast.success("Progress updated successfully.");
       setShowProgress(false);
       setRemarks("");

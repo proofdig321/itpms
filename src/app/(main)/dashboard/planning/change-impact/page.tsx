@@ -53,7 +53,7 @@ export default async function ChangeImpactPage() {
                     <TableCell className="font-medium">Budget</TableCell>
                     <TableCell className="tabular-nums">{formatCurrency(approvedBaseline.totalCost)}</TableCell>
                     <TableCell className="tabular-nums">{formatCurrency(2950000)}</TableCell>
-                    <TableCell className="tabular-nums text-red-600">
+                    <TableCell className="text-red-600 tabular-nums">
                       {formatCurrency(2950000 - approvedBaseline.totalCost)}
                     </TableCell>
                   </TableRow>
