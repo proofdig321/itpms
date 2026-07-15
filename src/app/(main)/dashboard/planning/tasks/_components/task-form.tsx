@@ -59,6 +59,7 @@ export function TaskForm({
       description: "",
       type: "implementation",
       priority: "medium",
+      duration: 1,
       plannedStart: "",
       plannedFinish: "",
       assignments: [],
@@ -228,6 +229,25 @@ export function TaskForm({
             )}
           />
         </div>
+
+        <Controller
+          control={form.control}
+          name="duration"
+          render={({ field, fieldState }) => (
+            <Field className="gap-1.5 sm:max-w-[200px]" data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="task-duration">Duration (working days)</FieldLabel>
+              <Input
+                id="task-duration"
+                type="number"
+                min={1}
+                value={field.value}
+                onChange={(e) => field.onChange(e.target.valueAsNumber || 1)}
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
 
         {/* Assignments */}
         <div className="flex flex-col gap-3">

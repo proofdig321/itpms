@@ -42,6 +42,7 @@ export default async function EditTaskPage({ params }: EditTaskPageProps) {
               description: task.description,
               type: task.type,
               priority: task.priority,
+              duration: task.duration ?? 1,
               plannedStart: task.plannedStart,
               plannedFinish: task.plannedFinish,
               assignments: task.assignments ?? [],

@@ -26,6 +26,7 @@ export const taskFormSchema = z.object({
   description: z.string().min(1, { message: "Description is required." }),
   type: z.enum(taskTypes, { message: "Please select a task type." }),
   priority: z.enum(taskPriorities, { message: "Please select a priority." }),
+  duration: z.number().min(1, { message: "Duration must be at least 1 working day." }),
   plannedStart: z.string().min(1, { message: "Planned start is required." }),
   plannedFinish: z.string().min(1, { message: "Planned finish is required." }),
   assignments: z.array(assignmentSchema),
