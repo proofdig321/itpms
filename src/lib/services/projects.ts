@@ -1,7 +1,7 @@
 import { projects as mockProjects, type Project } from "@/data/projects";
 import type { ProjectFormValues } from "@/lib/schemas/project";
 
-import { getAuthHeaders } from "./api-helpers";
+import { getAuthHeaders, handleUnauthorized } from "./api-helpers";
 import { getServerAuthHeaders } from "./server-api-helpers";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
@@ -64,6 +64,7 @@ export async function createProject(values: ProjectFormValues): Promise<Project>
         plannedFinish: values.plannedFinish,
       }),
     });
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     const raw = await response.json();
     if (response.ok) return mapApiProject(raw.data ?? raw.project ?? raw);
     throw new Error(raw.message ?? "Failed to create project");
@@ -98,6 +99,7 @@ export async function updateProject(id: string, values: Partial<ProjectFormValue
         plannedFinish: values.plannedFinish,
       }),
     });
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     const raw = await response.json();
     if (response.ok) return mapApiProject(raw.data ?? raw.project ?? raw);
     throw new Error(raw.message ?? "Failed to update project");
@@ -115,6 +117,7 @@ export async function deleteProject(id: string): Promise<void> {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.message ?? "Failed to delete project");
@@ -133,6 +136,7 @@ export async function archiveProject(id: string): Promise<void> {
       method: "POST",
       headers: getAuthHeaders(),
     });
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.message ?? "Failed to archive project");
@@ -146,6 +150,7 @@ export async function closeProject(id: string): Promise<void> {
       method: "POST",
       headers: getAuthHeaders(),
     });
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.message ?? "Failed to close project");

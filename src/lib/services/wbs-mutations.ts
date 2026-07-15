@@ -2,7 +2,7 @@ import { wbsNodes as mockWbsNodes } from "@/data/wbs";
 import type { WbsNodeFormValues } from "@/lib/schemas/wbs";
 import type { WbsNode } from "@/types/wbs";
 
-import { getAuthHeaders } from "./api-helpers";
+import { getAuthHeaders, handleUnauthorized } from "./api-helpers";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
@@ -42,6 +42,7 @@ export async function createWbsNode(projectCode: string, values: WbsNodeFormValu
       }),
     });
 
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
       throw new Error(errorData?.message || `Failed to create WBS node (${response.status})`);
@@ -88,6 +89,7 @@ export async function updateWbsNode(id: string, values: Partial<WbsNodeFormValue
       body: JSON.stringify(payload),
     });
 
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
       throw new Error(errorData?.message || `Failed to update WBS node (${response.status})`);
@@ -110,6 +112,7 @@ export async function deleteWbsNode(id: string): Promise<void> {
       headers: getAuthHeaders(),
     });
 
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
       throw new Error(errorData?.message || `Failed to delete WBS node (${response.status})`);

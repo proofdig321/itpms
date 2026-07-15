@@ -2,7 +2,7 @@ import { tasks as mockTasks } from "@/data/tasks";
 import { type TaskFormValues, taskPriorities, taskStatuses, taskTypes } from "@/lib/schemas/task";
 import type { Task } from "@/types/task";
 
-import { getAuthHeaders } from "./api-helpers";
+import { getAuthHeaders, handleUnauthorized } from "./api-helpers";
 import { getServerAuthHeaders } from "./server-api-helpers";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
@@ -85,6 +85,7 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
       headers: getAuthHeaders("json"),
       body: JSON.stringify(values),
     });
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     const raw = await response.json();
     if (response.ok) return mapApiTask(raw.data ?? raw);
     throw new Error(raw.message ?? "Failed to create task");
@@ -118,6 +119,7 @@ export async function updateTask(id: string, values: Partial<TaskFormValues>): P
       headers: getAuthHeaders("json"),
       body: JSON.stringify(values),
     });
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     if (response.ok) {
       const raw = await response.json();
       return mapApiTask(raw.data ?? raw);
@@ -138,6 +140,7 @@ export async function deleteTask(id: string): Promise<void> {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.message ?? "Failed to delete task");
@@ -160,6 +163,7 @@ export async function updateTaskProgress(
       headers: getAuthHeaders("json"),
       body: JSON.stringify(data),
     });
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.message ?? "Failed to update progress");
@@ -177,6 +181,7 @@ export async function holdTask(id: string): Promise<void> {
       method: "POST",
       headers: getAuthHeaders(),
     });
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.message ?? "Failed to hold task");
@@ -190,6 +195,7 @@ export async function resumeTask(id: string): Promise<void> {
       method: "POST",
       headers: getAuthHeaders(),
     });
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.message ?? "Failed to resume task");
@@ -203,6 +209,7 @@ export async function cancelTask(id: string): Promise<void> {
       method: "POST",
       headers: getAuthHeaders(),
     });
+    if (handleUnauthorized(response)) throw new Error("Session expired");
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.message ?? "Failed to cancel task");

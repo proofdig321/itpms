@@ -1,4 +1,4 @@
-import { getSessionToken } from "@/lib/auth/auth-service";
+import { clearSession, getSessionToken } from "@/lib/auth/auth-service";
 
 /**
  * Returns standard headers for API requests.
@@ -21,4 +21,20 @@ export function getAuthHeaders(contentType?: "json"): Record<string, string> {
   }
 
   return headers;
+}
+
+/**
+ * Checks response for 401 Unauthorized.
+ * If detected, clears session and redirects to login.
+ * Returns true if the response is a 401 (caller should abort).
+ */
+export function handleUnauthorized(response: Response): boolean {
+  if (response.status === 401) {
+    clearSession();
+    if (typeof window !== "undefined") {
+      window.location.href = "/auth/v2/login";
+    }
+    return true;
+  }
+  return false;
 }
