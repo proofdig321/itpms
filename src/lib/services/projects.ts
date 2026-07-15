@@ -49,15 +49,13 @@ export async function getProjectById(id: string): Promise<Project | undefined> {
 
 export async function createProject(values: ProjectFormValues): Promise<Project> {
   if (API_BASE_URL) {
-    // Map frontend fields to current backend field names (backend rename pending)
+    // Map frontend fields to backend field names (backend accepts startDate/endDate on POST)
     const payload = {
       title: values.title,
       description: values.description,
       managerId: values.managerId,
       startDate: values.plannedStart,
       endDate: values.plannedFinish,
-      status: "not-started",
-      progress: 0,
     };
     const response = await fetch(`${API_BASE_URL}/projects`, {
       method: "POST",
@@ -91,7 +89,7 @@ export async function createProject(values: ProjectFormValues): Promise<Project>
 
 export async function updateProject(id: string, values: Partial<ProjectFormValues>): Promise<Project | undefined> {
   if (API_BASE_URL) {
-    // Map frontend fields to current backend field names (backend rename pending)
+    // Map frontend fields to backend field names (backend accepts startDate/endDate on PUT)
     const payload: Record<string, unknown> = {
       title: values.title,
       description: values.description,

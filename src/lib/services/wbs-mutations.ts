@@ -30,8 +30,6 @@ export async function createWbsNode(projectCode: string, values: WbsNodeFormValu
       name: values.name,
       description: values.description || null,
       level: values.level,
-      status: "not-started",
-      progress: 0,
       ownerId: values.ownerId || null,
       parentId: values.parentId || null,
       startDate: values.startDate || null,
