@@ -108,7 +108,10 @@ export const columns: ColumnDef<Project>[] = [
     header: "Due Date",
     cell: ({ row }) => {
       const date = row.getValue("plannedFinish") as string;
-      return new Date(date).toLocaleDateString("en-ZA", {
+      if (!date) return "—";
+      const parsed = new Date(date);
+      if (Number.isNaN(parsed.getTime())) return "—";
+      return parsed.toLocaleDateString("en-ZA", {
         year: "numeric",
         month: "short",
         day: "numeric",

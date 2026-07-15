@@ -37,8 +37,8 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
               title: project.title,
               description: project.description,
               managerId: project.managerId ?? "",
-              plannedStart: project.plannedStart,
-              plannedFinish: project.plannedFinish,
+              plannedStart: project.plannedStart ?? "",
+              plannedFinish: project.plannedFinish ?? "",
             }}
             users={users}
           />

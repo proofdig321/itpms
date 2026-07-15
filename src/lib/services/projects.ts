@@ -88,16 +88,18 @@ export async function createProject(values: ProjectFormValues): Promise<Project>
 
 export async function updateProject(id: string, values: Partial<ProjectFormValues>): Promise<Project | undefined> {
   if (API_BASE_URL) {
+    const payload: Record<string, unknown> = {
+      title: values.title,
+      description: values.description,
+      managerId: values.managerId,
+    };
+    if (values.plannedStart) payload.plannedStart = values.plannedStart;
+    if (values.plannedFinish) payload.plannedFinish = values.plannedFinish;
+
     const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
       method: "PUT",
       headers: getAuthHeaders("json"),
-      body: JSON.stringify({
-        title: values.title,
-        description: values.description,
-        managerId: values.managerId,
-        plannedStart: values.plannedStart,
-        plannedFinish: values.plannedFinish,
-      }),
+      body: JSON.stringify(payload),
     });
     if (handleUnauthorized(response)) throw new Error("Session expired");
     const raw = await response.json();
