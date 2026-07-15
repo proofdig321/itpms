@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getProjects } from "@/lib/services/projects";
+import { getProjects } from "@/lib/services/projects-queries";
 import { getUsers } from "@/lib/services/users";
 import { getWbsByProject } from "@/lib/services/wbs";
 

@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 
 import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
-import { getProjects } from "@/lib/services/projects";
+import { getProjects } from "@/lib/services/projects-queries";
 import { getUsers } from "@/lib/services/users";
 
 import { ProjectsTable } from "./_components/projects-table";

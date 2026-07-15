@@ -3,8 +3,8 @@ import { Suspense } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDependenciesByProject } from "@/lib/services/dependencies";
 import { getMilestones } from "@/lib/services/planning";
-import { getProjects } from "@/lib/services/projects";
-import { getTasksByProject } from "@/lib/services/tasks";
+import { getProjects } from "@/lib/services/projects-queries";
+import { getTasksByProject } from "@/lib/services/tasks-queries";
 import { getUsers } from "@/lib/services/users";
 import { getWbsByProject } from "@/lib/services/wbs";
 

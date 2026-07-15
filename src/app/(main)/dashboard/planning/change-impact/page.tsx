@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getBaselinesByProject } from "@/lib/services/analytics";
-import { getProjectById } from "@/lib/services/projects";
+import { getProjectById } from "@/lib/services/projects-queries";
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR", maximumFractionDigits: 0 }).format(

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getProjectById } from "@/lib/services/projects";
+import { getProjectById } from "@/lib/services/projects-queries";
 import { getUsers } from "@/lib/services/users";
 
 import { EditProjectForm } from "./_components/edit-project-form";

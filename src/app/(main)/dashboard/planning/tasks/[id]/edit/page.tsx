@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getProjects } from "@/lib/services/projects";
-import { getTaskById } from "@/lib/services/tasks";
+import { getProjects } from "@/lib/services/projects-queries";
+import { getTaskById } from "@/lib/services/tasks-queries";
 import { getUsers } from "@/lib/services/users";
 import { getWbsByProject } from "@/lib/services/wbs";
 

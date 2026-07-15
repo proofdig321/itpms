@@ -3,24 +3,8 @@ import { type TaskFormValues, taskPriorities, taskStatuses, taskTypes } from "@/
 import type { Task } from "@/types/task";
 
 import { getAuthHeaders, handleUnauthorized } from "./api-helpers";
-import { getServerAuthHeaders } from "./server-api-helpers";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
-
-async function fetchApi<T>(endpoint: string): Promise<T | null> {
-  if (!API_BASE_URL) return null;
-  try {
-    const headers = await getServerAuthHeaders();
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers,
-      next: { revalidate: 30 },
-    });
-    if (!response.ok) return null;
-    return await response.json();
-  } catch {
-    return null;
-  }
-}
 
 function mapApiTask(raw: Record<string, unknown>): Task {
   return {
@@ -53,29 +37,6 @@ function mapApiTask(raw: Record<string, unknown>): Task {
       : [],
     createdAt: (raw.createdAt as string) ?? "",
   };
-}
-
-export async function getTasks(projectCode?: string): Promise<Task[]> {
-  if (projectCode) {
-    return getTasksByProject(projectCode);
-  }
-  return mockTasks;
-}
-
-export async function getTasksByProject(projectCode: string): Promise<Task[]> {
-  const data = await fetchApi<Record<string, unknown>>(`/tasks?projectCode=${projectCode}`);
-  if (data) {
-    const items = Array.isArray(data) ? data : (data.data as Record<string, unknown>[] | undefined);
-    if (items && Array.isArray(items)) return items.map(mapApiTask);
-  }
-  return mockTasks.filter((t) => t.projectCode === projectCode);
-}
-
-export async function getTaskById(id: string): Promise<Task | undefined> {
-  const data = await fetchApi<Record<string, unknown>>(`/tasks/${id}`);
-  const raw = (data?.data as Record<string, unknown>) ?? data;
-  if (raw?.id) return mapApiTask(raw);
-  return mockTasks.find((t) => t.id === id);
 }
 
 export async function createTask(projectCode: string, values: TaskFormValues): Promise<Task> {

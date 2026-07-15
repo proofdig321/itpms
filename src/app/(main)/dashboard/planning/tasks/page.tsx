@@ -6,8 +6,8 @@ import { Plus } from "lucide-react";
 
 import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
-import { getProjects } from "@/lib/services/projects";
-import { getTasksByProject } from "@/lib/services/tasks";
+import { getProjects } from "@/lib/services/projects-queries";
+import { getTasksByProject } from "@/lib/services/tasks-queries";
 
 import { ProjectSelector } from "../_components/project-selector";
 import { ProjectSync } from "../_components/project-sync";
