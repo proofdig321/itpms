@@ -24,43 +24,59 @@ src/
 ## Data Flow
 
 ```
-data/{module}.ts  →  lib/services/{module}.ts  →  page.tsx  →  _components/
+data/{module}.ts  →  lib/services/{module}-queries.ts  →  page.tsx  →  _components/
+                     lib/services/{module}.ts          →  _components/ (mutations)
 ```
 
 - **data/**: Raw mock data and type definitions. Never imported by UI directly.
-- **lib/services/**: Async functions. Only point of contact for data. Calls live Laravel API via `fetch()` with mock fallback.
-- **page.tsx**: Server component. Calls service, passes data to client components.
-- **_components/**: Client components. Receive data via props. No data fetching.
+- **lib/services/*-queries.ts**: Server-only GET functions. Uses `getServerAuthHeaders()` from `server-api-helpers.ts`. Has `import "server-only"`.
+- **lib/services/*.ts** (mutations): Client-only POST/PUT/DELETE functions. Uses `getAuthHeaders()` from `api-helpers.ts`. Handles 401 via `handleUnauthorized()`.
+- **page.tsx**: Server component. Calls query service, passes data to client components.
+- **_components/**: Client components. Receive data via props. Call mutation services for create/update/delete.
 
 ---
 
 ## Service Layer Contract
 
+Services are split by boundary:
+
+### Server-only queries (`*-queries.ts`)
+
 ```typescript
-// All functions are async
-// Live API is called first, mock data is the fallback
-// UI only imports from lib/services/, never from data/
+import "server-only";
+import { getServerAuthHeaders } from "@/lib/services/server-api-helpers";
 
 export async function getItems(): Promise<Item[]> {
-  const data = await fetchApi("/items");
-  if (data) return data.map(mapApiItem);
-  return mockItems; // fallback
+  const headers = await getServerAuthHeaders();
+  const response = await fetch(`${API_BASE_URL}/items`, { headers });
+  if (!response.ok) return [];
+  const data = await response.json();
+  return Array.isArray(data) ? data : data.data ?? [];
 }
+```
+
+### Client-only mutations (`*.ts`)
+
+```typescript
+import { getAuthHeaders, handleUnauthorized } from "@/lib/services/api-helpers";
 
 export async function createItem(values: ItemFormValues): Promise<Item> {
-  // No try/catch — errors propagate to the calling component
   const response = await fetch(`${API_BASE_URL}/items`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    headers: getAuthHeaders(),
     body: JSON.stringify(values),
   });
+  if (response.status === 401) { handleUnauthorized(response); throw new Error("Unauthorized"); }
   const raw = await response.json();
-  if (response.ok) return mapApiItem(raw.data ?? raw);
+  if (response.ok) return raw.data ?? raw;
   throw new Error(raw.message ?? "Request failed");
 }
 ```
 
-> Note: Services call `fetch()` directly. `src/lib/api/client.ts` exists but is not yet used — migration planned when auth token injection is needed.
+### Auth helpers
+
+- **`lib/services/api-helpers.ts`** (client): Reads token from `document.cookie`, provides `getAuthHeaders()` and `handleUnauthorized()`
+- **`lib/services/server-api-helpers.ts`** (server): Reads token from Next.js `cookies()`, provides `getServerAuthHeaders()`
 
 ---
 
@@ -440,17 +456,40 @@ Version changes should be isolated within `lib/api/client.ts` and the service la
 
 ---
 
-## Server-Only Enforcement
+## Server-Only Enforcement & Service Splitting
 
-Files under `src/data/` and `src/lib/services/` that are read-only (no client-side mutations) must include:
+Next.js App Router enforces strict server/client boundaries. `next/headers` (cookies) **cannot** be imported in any file that's also imported by a client component — even transitively.
 
-```typescript
-import "server-only";
+### The Pattern (CRITICAL)
+
+Every module with both reads and writes MUST be split:
+
+```
+lib/services/
+├── {module}-queries.ts    # Server-only (GET). Has `import "server-only"`. Uses getServerAuthHeaders().
+├── {module}.ts            # Client-only (POST/PUT/DELETE). Uses getAuthHeaders() from api-helpers.ts.
+├── api-helpers.ts         # Client-side auth helper (reads document.cookie)
+└── server-api-helpers.ts  # Server-side auth helper (reads next/headers cookies)
 ```
 
-This prevents accidental imports into client components at build time.
+### Rules
 
-**Exception:** Services that expose mutation functions called from client components (e.g., `createProject`) cannot use `server-only`.
+- Server components import from `*-queries.ts` only
+- Client components import from `*.ts` (mutations) only
+- NEVER import `server-api-helpers.ts` in a file that's also imported by client components
+- Violation causes build failure: "next/headers cannot be used in client bundles"
+
+### Current service files
+
+| File | Boundary | Purpose |
+|------|----------|--------|
+| `projects-queries.ts` | Server | GET projects |
+| `projects.ts` | Client | Create/Update/Delete projects |
+| `tasks-queries.ts` | Server | GET tasks |
+| `tasks.ts` | Client | Create/Update/Delete tasks |
+| `wbs.ts` | Server | GET WBS nodes |
+| `wbs-mutations.ts` | Client | Create/Update/Delete WBS nodes |
+| `users.ts` | Server | GET users |
 
 ---
 
@@ -487,6 +526,12 @@ Rules:
 
 ---
 
-## API Client
+## API Client & Authentication
 
-Services currently call `fetch()` directly. `src/lib/api/client.ts` exists for future use when bearer token injection is needed (Azure AD integration). Migration to the API client will happen at that point — it is a single-layer change inside `lib/services/` with no UI impact.
+Bearer token injection is **live**. All API requests include `Authorization: Bearer {token}`.
+
+- **Client-side**: `api-helpers.ts` reads token from `document.cookie` via `getSessionToken()`
+- **Server-side**: `server-api-helpers.ts` reads token from Next.js `cookies()` via `getServerAuthHeaders()`
+- **401 Interceptor**: `handleUnauthorized()` clears session cookies and redirects to `/auth/v2/login`
+
+The legacy `src/lib/api/client.ts` is no longer needed — auth injection is handled directly in the helper files.

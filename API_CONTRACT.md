@@ -531,26 +531,32 @@ All will follow the same response format, error format, and naming conventions d
 
 ## 13. FRONTEND INTEGRATION STATUS
 
-### Connected to Laravel (live with mock fallback)
+### End-to-End Tested & Passing ✅
 
 | Endpoint | Method | Frontend Service | Status | Notes |
 |----------|--------|-----------------|--------|-------|
-| `/api/v1/projects` | GET | `lib/services/projects.ts` | ✅ Live | |
-| `/api/v1/projects/{id}` | GET | `lib/services/projects.ts` | ✅ Live | |
-| `/api/v1/projects` | POST | `lib/services/projects.ts` | ✅ Live | |
-| `/api/v1/projects/{id}` | PUT | `lib/services/projects.ts` | ✅ Live | Backend uses PUT not PATCH |
-| `/api/v1/projects/{id}` | DELETE | `lib/services/projects.ts` | ✅ Live | |
-| `/api/v1/wbs?projectCode={code}` | GET | `lib/services/wbs.ts` | ✅ Live | Paginated response |
-| `/api/v1/wbs` | POST | `lib/services/wbs-mutations.ts` | ✅ Live | Returns computed code/depth/sequence |
-| `/api/v1/wbs/{id}` | PUT | `lib/services/wbs-mutations.ts` | ✅ Live | |
-| `/api/v1/wbs/{id}` | DELETE | `lib/services/wbs-mutations.ts` | ✅ Live | |
-| `/api/v1/tasks?projectCode={code}` | GET | `lib/services/tasks.ts` | ✅ Live | Wrapped in `{ data: [...] }` |
-| `/api/v1/tasks/{id}` | GET | `lib/services/tasks.ts` | ✅ Live | Wrapped in `{ data: {} }` |
-| `/api/v1/tasks` | POST | `lib/services/tasks.ts` | ✅ Live | Returns taskCode, full object |
-| `/api/v1/tasks/{id}` | PUT | `lib/services/tasks.ts` | ✅ Live | Requires `projectCode` + `wbsNodeId` in body |
-| `/api/v1/tasks/{id}` | DELETE | `lib/services/tasks.ts` | ✅ Live | Soft delete |
-| `/api/v1/users` | GET | `lib/services/users.ts` | ✅ Live | Used for dropdowns |
-| `/api/v1/auth/azure-login` | POST | `lib/auth/auth-service.ts` | ✅ Live | Azure AD flow |
+| `/api/v1/projects` | GET | `lib/services/projects-queries.ts` | ✅ E2E Tested | Flat array response |
+| `/api/v1/projects/{id}` | GET | `lib/services/projects-queries.ts` | ✅ E2E Tested | Flat object response |
+| `/api/v1/projects` | POST | `lib/services/projects.ts` | ✅ E2E Tested | Sends `plannedStart`/`plannedFinish` |
+| `/api/v1/projects/{id}` | PUT | `lib/services/projects.ts` | ✅ E2E Tested | Only sends dates if non-empty |
+| `/api/v1/projects/{id}` | DELETE | `lib/services/projects.ts` | ✅ E2E Tested | Soft delete |
+| `/api/v1/projects/{id}/archive` | POST | `lib/services/projects.ts` | ⏳ Pending Backend | Frontend wired, returns server error |
+| `/api/v1/projects/{id}/close` | POST | `lib/services/projects.ts` | ⏳ Pending Backend | Frontend wired, returns server error |
+| `/api/v1/wbs?projectCode={code}` | GET | `lib/services/wbs.ts` | ✅ E2E Tested | Paginated response |
+| `/api/v1/wbs` | POST | `lib/services/wbs-mutations.ts` | ✅ E2E Tested | Returns computed code/depth/sequence |
+| `/api/v1/wbs/{id}` | PUT | `lib/services/wbs-mutations.ts` | ✅ E2E Tested | Sends `plannedStart`/`plannedFinish` |
+| `/api/v1/wbs/{id}` | DELETE | `lib/services/wbs-mutations.ts` | ✅ E2E Tested | Soft delete |
+| `/api/v1/tasks?projectCode={code}` | GET | `lib/services/tasks-queries.ts` | ✅ E2E Tested | Wrapped in `{ data: [...] }` |
+| `/api/v1/tasks/{id}` | GET | `lib/services/tasks-queries.ts` | ✅ E2E Tested | Wrapped in `{ data: {} }` |
+| `/api/v1/tasks` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | Returns taskCode, full object |
+| `/api/v1/tasks/{id}` | PUT | `lib/services/tasks.ts` | ✅ E2E Tested | Requires `projectCode` + `wbsNodeId` in body |
+| `/api/v1/tasks/{id}` | DELETE | `lib/services/tasks.ts` | ✅ E2E Tested | Soft delete |
+| `/api/v1/tasks/{id}/progress` | POST | `lib/services/tasks.ts` | ⏳ Pending Backend | Frontend wired, returns server error |
+| `/api/v1/tasks/{id}/hold` | POST | `lib/services/tasks.ts` | ⏳ Pending Backend | Frontend wired, returns server error |
+| `/api/v1/tasks/{id}/resume` | POST | `lib/services/tasks.ts` | ⏳ Pending Backend | Frontend wired, returns server error |
+| `/api/v1/tasks/{id}/cancel` | POST | `lib/services/tasks.ts` | ⏳ Pending Backend | Frontend wired, returns server error |
+| `/api/v1/users` | GET | `lib/services/users.ts` | ✅ E2E Tested | Used for dropdowns |
+| `/api/v1/auth/azure-login` | POST | `lib/auth/auth-service.ts` | ✅ E2E Tested | Azure AD flow |
 
 ### Awaiting Backend Implementation (using mock data)
 
@@ -569,20 +575,36 @@ All will follow the same response format, error format, and naming conventions d
 
 ### Integration Pattern
 
-All services follow the same pattern:
+Services are split by server/client boundary:
 
 ```typescript
-async function getItems(): Promise<Item[]> {
-  // 1. Try live API
-  const data = await fetchApi("/endpoint");
-  if (data) return data.map(mapApiItem);
+// Server-only query (lib/services/{module}-queries.ts)
+import "server-only";
+import { getServerAuthHeaders } from "@/lib/services/server-api-helpers";
 
-  // 2. Fall back to mock
-  return mockItems;
+export async function getItems(): Promise<Item[]> {
+  const headers = await getServerAuthHeaders();
+  const response = await fetch(`${API_BASE_URL}/items`, { headers });
+  if (!response.ok) return [];
+  return await response.json();
+}
+
+// Client-only mutation (lib/services/{module}.ts)
+import { getAuthHeaders, handleUnauthorized } from "@/lib/services/api-helpers";
+
+export async function createItem(values: FormValues): Promise<Item> {
+  const response = await fetch(`${API_BASE_URL}/items`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(values),
+  });
+  if (response.status === 401) { handleUnauthorized(response); throw new Error("Unauthorized"); }
+  if (!response.ok) throw new Error((await response.json()).message);
+  return await response.json();
 }
 ```
 
-When Mr Nkosi builds an endpoint, we swap that service using this pattern. Zero UI changes required.
+All requests include `Authorization: Bearer {token}`. When Sanctum middleware is fully enforced, no frontend changes are needed.
 
 ### Field Mapping (Laravel → Frontend)
 

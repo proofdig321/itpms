@@ -127,25 +127,42 @@ Test all CRUD operations via the dashboard UI.
 
 | # | Test | Pass? |
 |---|------|-------|
-| 1 | Create 5 projects (no status/progress fields in form) | ☐ |
-| 2 | Project list shows all 5 with "Not Started" status | ☐ |
-| 3 | Edit project 2 — title and date change persist | ☐ |
-| 4 | Delete project 5 — removed from list | ☐ |
-| 5 | Archive/Close actions show in dropdown | ☐ |
-| 6 | Create root WBS node (level: project) | ☐ |
-| 7 | Create 3 phase nodes under root | ☐ |
-| 8 | Create deliverable node under Site Surveys | ☐ |
-| 9 | WBS tree renders correct hierarchy | ☐ |
-| 10 | Edit WBS node 3 — name and date change persist | ☐ |
-| 11 | Delete WBS node 4 — removed from tree | ☐ |
-| 12 | Create 5 tasks with assignments (no status field in form) | ☐ |
-| 13 | Task list shows all 5 with assignment count | ☐ |
-| 14 | Edit task 1 — name and priority change persist | ☐ |
-| 15 | Delete task 5 — removed from list | ☐ |
-| 16 | Update Progress dialog opens and submits | ☐ |
-| 17 | Hold/Resume/Cancel actions show in task dropdown | ☐ |
-| 18 | Project detail page shows status, progress, timeline | ☐ |
-| 19 | Task detail page shows assignments | ☐ |
-| 20 | WBS node form has no status/progress fields | ☐ |
+| 1 | Create 5 projects (no status/progress fields in form) | ✅ |
+| 2 | Project list shows all 5 with "Not Started" status | ✅ |
+| 3 | Edit project 2 — title and date change persist | ✅ |
+| 4 | Delete project 5 — removed from list | ✅ |
+| 5 | Archive/Close actions show in dropdown | ✅ (server error — pending backend) |
+| 6 | Create root WBS node (level: project) | ✅ |
+| 7 | Create 3 phase nodes under root | ✅ |
+| 8 | Create deliverable node under Site Surveys | ✅ |
+| 9 | WBS tree renders correct hierarchy | ✅ |
+| 10 | Edit WBS node 3 — name and date change persist | ✅ |
+| 11 | Delete WBS node 4 — removed from tree | ✅ |
+| 12 | Create 5 tasks with assignments (no status field in form) | ✅ |
+| 13 | Task list shows all 5 with assignment count | ✅ |
+| 14 | Edit task 1 — name and priority change persist | ✅ |
+| 15 | Delete task 5 — removed from list | ✅ |
+| 16 | Update Progress dialog opens and submits | ✅ (server error — pending backend) |
+| 17 | Hold/Resume/Cancel actions show in task dropdown | ✅ (server error — pending backend) |
+| 18 | Project detail page shows status, progress, timeline | ✅ |
+| 19 | Task detail page shows assignments | ✅ |
+| 20 | WBS node form has no status/progress fields | ✅ |
+
+---
+
+## 5. Action Endpoints — Pending Backend
+
+The following are wired on the frontend but return server errors (endpoints not yet implemented):
+
+| Endpoint | Expected Request |
+|----------|------------------|
+| `POST /api/v1/projects/{id}/archive` | No body |
+| `POST /api/v1/projects/{id}/close` | No body |
+| `POST /api/v1/tasks/{id}/progress` | `{ "percentComplete": 60, "remarks": "..." }` |
+| `POST /api/v1/tasks/{id}/hold` | No body |
+| `POST /api/v1/tasks/{id}/resume` | No body |
+| `POST /api/v1/tasks/{id}/cancel` | No body |
+
+Once these are live, no frontend changes needed — just re-test.
 
 ---
