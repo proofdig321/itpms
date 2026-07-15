@@ -17,101 +17,109 @@ Test all CRUD operations via the dashboard UI.
 
 ## 1. Projects (Dashboard → Projects → Create Project)
 
+> Forms no longer have Status or Progress fields. Server computes these.
+
 ### CREATE — 5 Projects
 
-| # | Title | Description | Status | Progress | Manager | Start | End |
-|---|-------|-------------|--------|----------|---------|-------|-----|
-| 1 | ICT Infrastructure Upgrade | Upgrade network switches, servers, and workstations across all municipal buildings | on-track | 25 | ICT | 2026-07-01 | 2026-12-31 |
-| 2 | Municipal ERP System | Integrated ERP for finance, HR, supply chain, and asset management | not-started | 0 | Princess Mbhele | 2026-08-01 | 2027-06-30 |
-| 3 | Cybersecurity Enhancement | Firewall upgrades, endpoint protection, and staff awareness training | at-risk | 40 | Mzomuhle Nkosi | 2026-04-01 | 2026-09-30 |
-| 4 | Fibre Network Expansion | Deploy fibre optic backbone to all municipal offices and community centres | on-track | 15 | Developer | 2026-09-01 | 2027-03-31 |
-| 5 | Smart Meter Rollout | IoT smart meter deployment for water and electricity monitoring | not-started | 0 | Princess Mbhele | 2026-10-01 | 2027-08-31 |
+| # | Title | Description | Manager | Planned Start | Planned Finish |
+|---|-------|-------------|---------|---------------|----------------|
+| 1 | Municipal CCTV Network | Deploy IP cameras across municipal buildings and public spaces | Mzomuhle Nkosi | 2026-08-01 | 2027-02-28 |
+| 2 | Office 365 Migration | Migrate all staff mailboxes and collaboration tools to Microsoft 365 | Developer | 2026-08-15 | 2026-11-30 |
+| 3 | GIS Mapping Platform | Implement geographic information system for infrastructure asset tracking | Princess Mbhele | 2026-09-01 | 2027-04-30 |
+| 4 | Disaster Recovery Setup | Establish offsite backup and DR facility for critical municipal systems | Mzomuhle Nkosi | 2026-10-01 | 2027-01-31 |
+| 5 | Public WiFi Phase 2 | Extend free WiFi coverage to community halls and taxi ranks | Developer | 2026-11-01 | 2027-05-31 |
 
-### READ — Verify all 5 appear in project list
+### READ — Verify all 5 appear in project list with status "Not Started" (server default)
 
-### UPDATE — Edit Project 3
+### UPDATE — Edit Project 2
 
 | Field | Change to |
 |-------|-----------|
-| Status | on-track |
-| Progress | 55 |
+| Title | Office 365 Migration (Phase 1) |
+| Planned Finish | 2026-12-15 |
 
 ### DELETE — Delete Project 5
 
-- Confirm removed from list
-- Confirm Projects 1–4 remain
+### ACTIONS — Test dropdown menu
+
+- Archive Project 4 (toast may show error — endpoint not yet live)
+- Close Project 2 (toast may show error — endpoint not yet live)
 
 ---
 
 ## 2. WBS Nodes (Dashboard → Planning → select project → + button)
 
-### CREATE — 5 WBS Nodes (under Project 1: ICT Infrastructure Upgrade)
+> Forms no longer have Status or Progress fields. Server computes these.
 
-| # | Name | Description | Level | Status | Progress | Start | End |
-|---|------|-------------|-------|--------|----------|-------|-----|
-| 1 | ICT Infrastructure Upgrade | Root project node | project | in-progress | 25 | 2026-07-01 | 2026-12-31 |
-| 2 | Planning & Assessment | Requirements gathering and site assessments | phase | completed | 100 | 2026-07-01 | 2026-07-31 |
-| 3 | Procurement | SCM processes, RFQs, and vendor selection | phase | in-progress | 50 | 2026-08-01 | 2026-09-30 |
-| 4 | Implementation | Hardware installation and software deployment | phase | not-started | 0 | 2026-10-01 | 2026-12-15 |
-| 5 | Vendor Evaluation | Evaluate and score vendor proposals (child of Procurement) | deliverable | in-progress | 60 | 2026-08-15 | 2026-09-15 |
+### CREATE — 5 WBS Nodes (under Project 1: Municipal CCTV Network)
 
-> Node 1 is root (parentId = null, level = project)
+| # | Name | Description | Level | Parent | Owner | Start | End |
+|---|------|-------------|-------|--------|-------|-------|-----|
+| 1 | Municipal CCTV Network | Root project node | project | (none — root) | Mzomuhle Nkosi | 2026-08-01 | 2027-02-28 |
+| 2 | Site Surveys | Assess all locations for camera placement and connectivity | phase | Node 1 | Developer | 2026-08-01 | 2026-09-15 |
+| 3 | Procurement | Source cameras, NVRs, cabling, and installation contractors | phase | Node 1 | Princess Mbhele | 2026-09-01 | 2026-10-31 |
+| 4 | Installation | Physical installation and network configuration | phase | Node 1 | Mzomuhle Nkosi | 2026-11-01 | 2027-01-31 |
+| 5 | Camera Specifications | Define resolution, storage, and night-vision requirements | deliverable | Node 2 | Developer | 2026-08-15 | 2026-09-01 |
+
+> Node 1 is root (no parent, level = project)
 > Nodes 2–4 are children of Node 1 (level = phase)
-> Node 5 is child of Node 3 (level = deliverable)
+> Node 5 is child of Node 2 (level = deliverable)
 
-### READ — Verify tree structure: root → 3 phases, with Vendor Evaluation nested under Procurement
+### READ — Verify tree: root → 3 phases, with Camera Specifications nested under Site Surveys
 
 ### UPDATE — Edit Node 3
 
 | Field | Change to |
 |-------|-----------|
-| Name | Procurement & SCM |
-| Progress | 70 |
+| Name | Procurement & Vendor Management |
+| End | 2026-11-15 |
 
-### DELETE — Delete Node 4 (Implementation)
-
-- Confirm removed from tree
-- Confirm Nodes 1, 2, 3, and 5 remain
+### DELETE — Delete Node 4 (Installation)
 
 ---
 
 ## 3. Tasks (Dashboard → Planning → Tasks → Create Task)
 
-### CREATE — 5 Tasks (under Project 1)
+> Forms no longer have Status field. Server computes it.
 
-| # | Name | Description | WBS Node | Type | Priority | Status | Start | End |
-|---|------|-------------|----------|------|----------|--------|-------|-----|
-| 1 | Draft Requirements Document | Compile functional and technical requirements from all departments | Planning & Assessment | documentation | high | completed | 2026-07-01 | 2026-07-15 |
-| 2 | Network Infrastructure Audit | Audit current network topology, bandwidth, and identify upgrade needs | Planning & Assessment | planning | critical | in-progress | 2026-07-10 | 2026-07-25 |
-| 3 | Issue RFQ to Vendors | Prepare and distribute Request for Quotation to shortlisted vendors | Procurement & SCM | procurement | high | not-started | 2026-08-01 | 2026-08-20 |
-| 4 | Server Room Preparation | Prepare server room with cooling, power, and rack infrastructure | Implementation | implementation | medium | draft | 2026-10-01 | 2026-10-31 |
-| 5 | End-User Training Programme | Conduct training sessions for municipal staff on new systems | Implementation | training | medium | not-started | 2026-11-01 | 2026-11-30 |
+### CREATE — 5 Tasks (under Project 1: Municipal CCTV Network)
+
+| # | Name | Description | WBS Node | Type | Priority | Planned Start | Planned Finish |
+|---|------|-------------|----------|------|----------|---------------|----------------|
+| 1 | Conduct Site Assessments | Visit all 12 municipal buildings to assess camera mounting points | Site Surveys | planning | high | 2026-08-01 | 2026-08-31 |
+| 2 | Draft Camera Spec Document | Document resolution, FPS, storage, and integration requirements | Camera Specifications | documentation | medium | 2026-08-15 | 2026-09-01 |
+| 3 | Issue RFQ for CCTV Equipment | Prepare and distribute RFQ to approved vendors | Procurement & Vendor Management | procurement | high | 2026-09-01 | 2026-09-20 |
+| 4 | Evaluate Vendor Proposals | Score and rank vendor submissions against requirements | Procurement & Vendor Management | planning | critical | 2026-09-21 | 2026-10-10 |
+| 5 | Configure NVR Storage | Set up network video recorders and configure retention policies | Installation | implementation | medium | 2026-11-01 | 2026-11-30 |
 
 ### Assignments (add when creating each task)
 
 | Task | User | Role | Allocation |
 |------|------|------|------------|
-| 1 | Developer | Business Analyst | 100 |
-| 2 | Mzomuhle Nkosi | Network Engineer | 100 |
-| 2 | Developer | Technical Support | 25 |
+| 1 | Developer | Site Assessor | 100 |
+| 1 | Mzomuhle Nkosi | Project Lead | 25 |
+| 2 | Developer | Technical Writer | 100 |
 | 3 | Princess Mbhele | SCM Officer | 100 |
-| 4 | Mzomuhle Nkosi | Infrastructure Lead | 100 |
-| 5 | Princess Mbhele | Training Coordinator | 50 |
-| 5 | Developer | Technical Trainer | 50 |
+| 4 | Mzomuhle Nkosi | Evaluation Chair | 80 |
+| 4 | Princess Mbhele | SCM Representative | 50 |
+| 5 | Developer | Network Engineer | 100 |
 
-### READ — Verify all 5 tasks appear with correct statuses, priorities, and assignments
+### READ — Verify all 5 tasks appear with assignments count
 
-### UPDATE — Edit Task 2
+### UPDATE — Edit Task 1
 
 | Field | Change to |
 |-------|-----------|
-| Status | completed |
-| Name | Network Infrastructure Audit (Complete) |
+| Name | Conduct Site Assessments (12 Buildings) |
+| Priority | critical |
 
-### DELETE — Delete Task 4 (Server Room Preparation)
+### DELETE — Delete Task 5
 
-- Confirm removed from list
-- Confirm Tasks 1, 2, 3, 5 remain
+### ACTIONS — Test dropdown menu
+
+- Update Progress on Task 1: percentComplete = 60, remarks = "8 of 12 buildings assessed"
+- Hold Task 4 (toast may show error — endpoint not yet live)
+- Resume Task 4 (toast may show error — endpoint not yet live)
 
 ---
 
@@ -119,23 +127,25 @@ Test all CRUD operations via the dashboard UI.
 
 | # | Test | Pass? |
 |---|------|-------|
-| 1 | Create 5 projects | ☐ |
-| 2 | Project list shows all 5 | ☐ |
-| 3 | Edit project 3 — changes persist | ☐ |
-| 4 | Delete project 5 — removed | ☐ |
-| 5 | Create root WBS node (level: project) | ☐ |
-| 6 | Create 3 phase nodes under root | ☐ |
-| 7 | Create deliverable node under Procurement | ☐ |
-| 8 | WBS tree renders correctly | ☐ |
-| 9 | Edit WBS node 3 — changes persist | ☐ |
-| 10 | Delete WBS node 4 — removed | ☐ |
-| 11 | Create 5 tasks with assignments | ☐ |
-| 12 | Task list shows all 5 | ☐ |
-| 13 | Task detail shows assignments | ☐ |
-| 14 | Edit task 2 — changes persist | ☐ |
-| 15 | Delete task 4 — removed | ☐ |
-| 16 | Draft status displays correctly | ☐ |
-| 17 | Dropdown menu (edit/delete) works on project rows | ☐ |
-| 18 | Dropdown menu (edit/delete) works on task rows | ☐ |
+| 1 | Create 5 projects (no status/progress fields in form) | ☐ |
+| 2 | Project list shows all 5 with "Not Started" status | ☐ |
+| 3 | Edit project 2 — title and date change persist | ☐ |
+| 4 | Delete project 5 — removed from list | ☐ |
+| 5 | Archive/Close actions show in dropdown | ☐ |
+| 6 | Create root WBS node (level: project) | ☐ |
+| 7 | Create 3 phase nodes under root | ☐ |
+| 8 | Create deliverable node under Site Surveys | ☐ |
+| 9 | WBS tree renders correct hierarchy | ☐ |
+| 10 | Edit WBS node 3 — name and date change persist | ☐ |
+| 11 | Delete WBS node 4 — removed from tree | ☐ |
+| 12 | Create 5 tasks with assignments (no status field in form) | ☐ |
+| 13 | Task list shows all 5 with assignment count | ☐ |
+| 14 | Edit task 1 — name and priority change persist | ☐ |
+| 15 | Delete task 5 — removed from list | ☐ |
+| 16 | Update Progress dialog opens and submits | ☐ |
+| 17 | Hold/Resume/Cancel actions show in task dropdown | ☐ |
+| 18 | Project detail page shows status, progress, timeline | ☐ |
+| 19 | Task detail page shows assignments | ☐ |
+| 20 | WBS node form has no status/progress fields | ☐ |
 
 ---
