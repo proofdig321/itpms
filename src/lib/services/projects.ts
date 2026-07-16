@@ -69,15 +69,22 @@ export async function updateProject(id: string, values: Partial<ProjectFormValue
       }),
     });
     if (handleUnauthorized(response)) throw new Error("Session expired");
-    const raw = await response.json().catch(() => null);
+    const text = await response.text();
+    // biome-ignore lint: any needed for dynamic error shape
+    let raw: any = null;
+    try {
+      raw = JSON.parse(text);
+    } catch {
+      /* not JSON */
+    }
     if (response.ok && raw) return mapApiProject(raw.data ?? raw.project ?? raw);
     const errMsg =
       raw?.message ??
       raw?.error?.message ??
       (raw?.errors ? JSON.stringify(raw.errors) : null) ??
       (raw?.exception ? `${raw.exception}: ${raw.trace?.[0]?.file ?? ""}` : null) ??
-      `Server error ${response.status}`;
-    console.error("[updateProject] PUT failed:", { status: response.status, body: raw });
+      (text.slice(0, 200) || `Server error ${response.status}`);
+    console.error("[updateProject] PUT /projects failed:", response.status, text.slice(0, 500));
     throw new Error(errMsg);
   }
 
