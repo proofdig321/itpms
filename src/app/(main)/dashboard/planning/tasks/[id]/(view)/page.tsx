@@ -97,7 +97,9 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
             <CardTitle className="font-normal text-muted-foreground text-sm">Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <Badge className={statusConfig[task.status].className}>{statusConfig[task.status].label}</Badge>
+            <Badge className={(statusConfig[task.status] ?? statusConfig["not-started"]).className}>
+              {(statusConfig[task.status] ?? statusConfig["not-started"]).label}
+            </Badge>
           </CardContent>
         </Card>
         <Card>
@@ -105,7 +107,9 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
             <CardTitle className="font-normal text-muted-foreground text-sm">Priority</CardTitle>
           </CardHeader>
           <CardContent>
-            <Badge className={priorityConfig[task.priority].className}>{priorityConfig[task.priority].label}</Badge>
+            <Badge className={(priorityConfig[task.priority] ?? priorityConfig["medium"]).className}>
+              {(priorityConfig[task.priority] ?? priorityConfig["medium"]).label}
+            </Badge>
           </CardContent>
         </Card>
         <Card>

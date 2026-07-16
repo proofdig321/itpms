@@ -45,7 +45,7 @@ export const columns: ColumnDef<Milestone>[] = [
     header: "Status",
     cell: ({ row }) => {
       const status = row.getValue("status") as Milestone["status"];
-      const config = statusConfig[status];
+      const config = statusConfig[status] ?? statusConfig["not-started"];
       return <Badge className={config.className}>{config.label}</Badge>;
     },
   },

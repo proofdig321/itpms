@@ -99,7 +99,7 @@ export const columns: ColumnDef<Task>[] = [
     header: "Priority",
     cell: ({ row }) => {
       const priority = row.getValue("priority") as TaskPriority;
-      const config = priorityConfig[priority];
+      const config = priorityConfig[priority] ?? priorityConfig["medium"];
       return <Badge className={config.className}>{config.label}</Badge>;
     },
   },
@@ -108,7 +108,7 @@ export const columns: ColumnDef<Task>[] = [
     header: "Status",
     cell: ({ row }) => {
       const status = row.getValue("status") as TaskStatus;
-      const config = statusConfig[status];
+      const config = statusConfig[status] ?? statusConfig["not-started"];
       return <Badge className={config.className}>{config.label}</Badge>;
     },
   },

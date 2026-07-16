@@ -128,7 +128,9 @@ function WbsTreeNode({ node, depth, projectCode, users }: WbsTreeNodeProps) {
         <div className="flex shrink-0 items-center gap-1">
           <Progress value={node.progress} className="hidden h-1.5 w-16 sm:block" />
           <span className="w-8 text-right text-muted-foreground text-xs tabular-nums">{node.progress}%</span>
-          <Badge className={`${statusConfig[node.status].className} text-xs`}>{statusConfig[node.status].label}</Badge>
+          <Badge className={`${(statusConfig[node.status] ?? statusConfig["not-started"]).className} text-xs`}>
+            {(statusConfig[node.status] ?? statusConfig["not-started"]).label}
+          </Badge>
           <PermissionGate permission="wbs.create">
             <AddWbsNodeDialog projectCode={projectCode} parentId={node.id} parentName={node.name} users={users} />
           </PermissionGate>

@@ -50,7 +50,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     notFound();
   }
 
-  const status = statusConfig[project.status];
+  const status = statusConfig[project.status] ?? statusConfig["not-started"];
   const managerName = project.managerId
     ? (users.find((u) => u.id === project.managerId)?.name ?? project.managerId)
     : "Unassigned";
