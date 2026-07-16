@@ -55,13 +55,17 @@ export async function createProject(values: ProjectFormValues): Promise<Project>
   return project;
 }
 
-export async function updateProject(id: string, values: Partial<ProjectFormValues>): Promise<Project | undefined> {
+export async function updateProject(
+  id: string,
+  values: Partial<ProjectFormValues> & { projectCode?: string },
+): Promise<Project | undefined> {
   if (API_BASE_URL) {
     const payload: Record<string, unknown> = {
       title: values.title,
       description: values.description,
       managerId: values.managerId,
     };
+    if (values.projectCode) payload.projectCode = values.projectCode;
     if (values.plannedStart) payload.plannedStart = values.plannedStart;
     if (values.plannedFinish) payload.plannedFinish = values.plannedFinish;
 

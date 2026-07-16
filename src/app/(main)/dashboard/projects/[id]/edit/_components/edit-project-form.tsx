@@ -14,18 +14,19 @@ import { ProjectForm } from "../../../_components/project-form";
 
 interface EditProjectFormProps {
   projectId: string;
+  projectCode: string;
   defaultValues: ProjectFormValues;
   users: User[];
 }
 
-export function EditProjectForm({ projectId, defaultValues, users }: EditProjectFormProps) {
+export function EditProjectForm({ projectId, projectCode, defaultValues, users }: EditProjectFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (values: ProjectFormValues) => {
     setIsSubmitting(true);
     try {
-      await updateProject(projectId, values);
+      await updateProject(projectId, { ...values, projectCode });
       toast.success("Project updated successfully.");
       router.push("/dashboard/projects");
     } catch (err) {
