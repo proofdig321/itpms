@@ -33,7 +33,6 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
         <CardContent>
           <EditProjectForm
             projectId={project.id}
-            projectCode={project.projectCode}
             defaultValues={{
               title: project.title,
               description: project.description,
