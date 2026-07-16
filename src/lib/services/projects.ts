@@ -69,9 +69,16 @@ export async function updateProject(id: string, values: Partial<ProjectFormValue
       }),
     });
     if (handleUnauthorized(response)) throw new Error("Session expired");
-    const raw = await response.json();
-    if (response.ok) return mapApiProject(raw.data ?? raw.project ?? raw);
-    throw new Error(raw.message ?? "Failed to update project");
+    const raw = await response.json().catch(() => null);
+    if (response.ok && raw) return mapApiProject(raw.data ?? raw.project ?? raw);
+    const errMsg =
+      raw?.message ??
+      raw?.error?.message ??
+      (raw?.errors ? JSON.stringify(raw.errors) : null) ??
+      (raw?.exception ? `${raw.exception}: ${raw.trace?.[0]?.file ?? ""}` : null) ??
+      `Server error ${response.status}`;
+    console.error("[updateProject] PUT failed:", { status: response.status, body: raw });
+    throw new Error(errMsg);
   }
 
   const index = mockProjects.findIndex((p) => p.id === id);
