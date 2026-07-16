@@ -78,7 +78,7 @@ export const columns: ColumnDef<Project>[] = [
     header: "Status",
     cell: ({ row }) => {
       const status = row.getValue("status") as Project["status"];
-      const config = statusConfig[status];
+      const config = statusConfig[status] ?? statusConfig["not-started"];
       return <Badge className={config.className}>{config.label}</Badge>;
     },
   },

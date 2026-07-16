@@ -21,13 +21,16 @@ async function fetchApi<T>(endpoint: string): Promise<T | null> {
   }
 }
 
+const validStatuses: Project["status"][] = ["on-track", "at-risk", "delayed", "completed", "not-started"];
+
 function mapApiProject(raw: Record<string, unknown>): Project {
+  const rawStatus = raw.status as string;
   return {
     id: raw.id as string,
     projectCode: raw.projectCode as string,
     title: raw.title as string,
     description: (raw.description as string) ?? "",
-    status: raw.status as Project["status"],
+    status: validStatuses.includes(rawStatus as Project["status"]) ? (rawStatus as Project["status"]) : "not-started",
     progress: (raw.progress as number) ?? 0,
     managerId: (raw.managerId as string) ?? null,
     plannedStart: (raw.plannedStart as string) ?? (raw.startDate as string) ?? "",
