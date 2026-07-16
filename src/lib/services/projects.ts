@@ -57,17 +57,22 @@ export async function createProject(values: ProjectFormValues): Promise<Project>
 
 export async function updateProject(id: string, values: Partial<ProjectFormValues>): Promise<Project | undefined> {
   if (API_BASE_URL) {
-    const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
-      method: "PUT",
-      headers: getAuthHeaders("json"),
-      body: JSON.stringify({
-        title: values.title,
-        description: values.description,
-        managerId: values.managerId,
-        plannedStart: values.plannedStart,
-        plannedFinish: values.plannedFinish,
-      }),
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+        method: "PUT",
+        headers: getAuthHeaders("json"),
+        body: JSON.stringify({
+          title: values.title,
+          description: values.description,
+          managerId: values.managerId,
+          plannedStart: values.plannedStart,
+          plannedFinish: values.plannedFinish,
+        }),
+      });
+    } catch (e) {
+      throw new Error(`Network error: Unable to reach API server. ${e instanceof Error ? e.message : ""}`);
+    }
     if (handleUnauthorized(response)) throw new Error("Session expired");
     const text = await response.text();
     // biome-ignore lint: any needed for dynamic error shape
