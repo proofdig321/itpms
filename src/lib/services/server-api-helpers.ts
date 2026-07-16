@@ -12,10 +12,14 @@ export async function getServerAuthHeaders(): Promise<Record<string, string>> {
     "ngrok-skip-browser-warning": "true",
   };
 
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+  } catch {
+    // cookies() may throw in certain edge runtime contexts
   }
 
   return headers;
