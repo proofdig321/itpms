@@ -59,8 +59,20 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
         body: JSON.stringify({ dependencies }),
       });
       if (!depResponse.ok) {
-        const depErr = await depResponse.json().catch(() => ({}));
-        throw new Error(depErr.message ?? "Task created but failed to save dependencies");
+        const depText = await depResponse.text();
+        // biome-ignore lint: any needed for dynamic error shape
+        let depRaw: any = null;
+        try {
+          depRaw = JSON.parse(depText);
+        } catch {
+          /* not JSON */
+        }
+        console.error("[createTask] POST /dependencies failed:", depResponse.status, depText.slice(0, 500));
+        const errMsg =
+          depRaw?.message ??
+          (depRaw?.errors ? JSON.stringify(depRaw.errors) : null) ??
+          (depText.slice(0, 200) || `Dependencies error ${depResponse.status}`);
+        throw new Error(errMsg);
       }
     }
 
