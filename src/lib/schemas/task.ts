@@ -20,7 +20,7 @@ export const assignmentSchema = z.object({
 });
 
 export const dependencySchema = z.object({
-  taskId: z.string().min(1, { message: "Task is required." }),
+  predecessorTaskId: z.string().min(1, { message: "Predecessor task is required." }),
   type: z.enum(["finish-to-start", "start-to-start", "finish-to-finish", "start-to-finish"]),
   lag: z.number().int().min(0),
 });

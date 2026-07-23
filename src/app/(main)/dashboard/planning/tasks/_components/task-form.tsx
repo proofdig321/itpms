@@ -270,7 +270,7 @@ export function TaskForm({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => appendDep({ taskId: "", type: "finish-to-start", lag: 0 })}
+              onClick={() => appendDep({ predecessorTaskId: "", type: "finish-to-start", lag: 0 })}
             >
               <Plus className="mr-1 h-3.5 w-3.5" />
               Add
@@ -285,7 +285,7 @@ export function TaskForm({
             <div key={item.id} className="grid gap-3 rounded-md border p-3 sm:grid-cols-[1fr_1fr_60px_auto]">
               <Controller
                 control={form.control}
-                name={`dependencies.${index}.taskId`}
+                name={`dependencies.${index}.predecessorTaskId`}
                 render={({ field, fieldState }) => (
                   <Field className="gap-1">
                     <FieldLabel className="text-xs">Predecessor Task</FieldLabel>
