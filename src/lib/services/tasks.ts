@@ -41,19 +41,30 @@ function mapApiTask(raw: Record<string, unknown>): Task {
 
 export async function createTask(projectCode: string, values: TaskFormValues): Promise<Task> {
   if (API_BASE_URL) {
-    const payload = {
-      ...values,
-      dependencies: values.dependencies?.length ? values.dependencies : undefined,
-    };
+    const { dependencies, ...taskPayload } = values;
     const response = await fetch(`${API_BASE_URL}/tasks`, {
       method: "POST",
       headers: getAuthHeaders("json"),
-      body: JSON.stringify(payload),
+      body: JSON.stringify(taskPayload),
     });
     if (handleUnauthorized(response)) throw new Error("Session expired");
     const raw = await response.json();
-    if (response.ok) return mapApiTask(raw.data ?? raw);
-    throw new Error(raw.message ?? "Failed to create task");
+    if (!response.ok) throw new Error(raw.message ?? "Failed to create task");
+    const task = mapApiTask(raw.data ?? raw);
+
+    if (dependencies?.length && task.id) {
+      const depResponse = await fetch(`${API_BASE_URL}/tasks/${task.id}/dependencies`, {
+        method: "POST",
+        headers: getAuthHeaders("json"),
+        body: JSON.stringify({ dependencies }),
+      });
+      if (!depResponse.ok) {
+        const depErr = await depResponse.json().catch(() => ({}));
+        throw new Error(depErr.message ?? "Task created but failed to save dependencies");
+      }
+    }
+
+    return task;
   }
 
   const task: Task = {

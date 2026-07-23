@@ -330,8 +330,10 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                       <CardTitle className="font-normal text-muted-foreground text-sm">Overall Progress</CardTitle>
                     </CardHeader>
                     <CardContent className="flex items-center gap-3">
-                      <Progress value={scheduleProgress.overallProgress} className="h-2 flex-1" />
-                      <span className="font-medium text-sm tabular-nums">{scheduleProgress.overallProgress}%</span>
+                      <Progress value={scheduleProgress.overallProgress ?? 0} className="h-2 flex-1" />
+                      <span className="font-medium text-sm tabular-nums">
+                        {scheduleProgress.overallProgress ?? "—"}%
+                      </span>
                     </CardContent>
                   </Card>
                   <Card>
@@ -339,8 +341,10 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                       <CardTitle className="font-normal text-muted-foreground text-sm">Planned Progress</CardTitle>
                     </CardHeader>
                     <CardContent className="flex items-center gap-3">
-                      <Progress value={scheduleProgress.plannedProgress} className="h-2 flex-1" />
-                      <span className="font-medium text-sm tabular-nums">{scheduleProgress.plannedProgress}%</span>
+                      <Progress value={scheduleProgress.plannedProgress ?? 0} className="h-2 flex-1" />
+                      <span className="font-medium text-sm tabular-nums">
+                        {scheduleProgress.plannedProgress ?? "—"}%
+                      </span>
                     </CardContent>
                   </Card>
                   <Card>
@@ -349,10 +353,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                     </CardHeader>
                     <CardContent>
                       <p
-                        className={`font-semibold text-lg tabular-nums ${scheduleProgress.scheduleVariance < 0 ? "text-red-600" : "text-green-600"}`}
+                        className={`font-semibold text-lg tabular-nums ${
+                          (scheduleProgress.scheduleVariance ?? 0) < 0 ? "text-red-600" : "text-green-600"
+                        }`}
                       >
-                        {scheduleProgress.scheduleVariance > 0 ? "+" : ""}
-                        {scheduleProgress.scheduleVariance}%
+                        {scheduleProgress.scheduleVariance == null
+                          ? "—"
+                          : `${scheduleProgress.scheduleVariance > 0 ? "+" : ""}${scheduleProgress.scheduleVariance}%`}
                       </p>
                     </CardContent>
                   </Card>
@@ -368,15 +375,21 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                     <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
                       <div>
                         <p className="text-muted-foreground text-xs">Total Duration</p>
-                        <p className="font-medium">{schedule.totalDuration} days</p>
+                        <p className="font-medium">
+                          {schedule.totalDuration ?? "—"} {schedule.totalDuration != null ? "days" : ""}
+                        </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground text-xs">Elapsed</p>
-                        <p className="font-medium">{schedule.elapsedDays} days</p>
+                        <p className="font-medium">
+                          {schedule.elapsedDays ?? "—"} {schedule.elapsedDays != null ? "days" : ""}
+                        </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground text-xs">Remaining</p>
-                        <p className="font-medium">{schedule.remainingDays} days</p>
+                        <p className="font-medium">
+                          {schedule.remainingDays ?? "—"} {schedule.remainingDays != null ? "days" : ""}
+                        </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground text-xs">Actual Start</p>
