@@ -270,7 +270,7 @@ export function TaskForm({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => appendDep({ predecessorTaskId: "", dependencyType: "finish-to-start", lag: 0 })}
+              onClick={() => appendDep({ predecessorTaskId: "", dependencyType: "FS", lag: 0, mandatory: true })}
             >
               <Plus className="mr-1 h-3.5 w-3.5" />
               Add
@@ -315,10 +315,10 @@ export function TaskForm({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="finish-to-start">Finish to Start</SelectItem>
-                        <SelectItem value="start-to-start">Start to Start</SelectItem>
-                        <SelectItem value="finish-to-finish">Finish to Finish</SelectItem>
-                        <SelectItem value="start-to-finish">Start to Finish</SelectItem>
+                        <SelectItem value="FS">Finish to Start (FS)</SelectItem>
+                        <SelectItem value="SS">Start to Start (SS)</SelectItem>
+                        <SelectItem value="FF">Finish to Finish (FF)</SelectItem>
+                        <SelectItem value="SF">Start to Finish (SF)</SelectItem>
                       </SelectContent>
                     </Select>
                   </Field>

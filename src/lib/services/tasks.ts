@@ -41,49 +41,18 @@ function mapApiTask(raw: Record<string, unknown>): Task {
 
 export async function createTask(projectCode: string, values: TaskFormValues): Promise<Task> {
   if (API_BASE_URL) {
-    const { dependencies, ...taskPayload } = values;
     const response = await fetch(`${API_BASE_URL}/tasks`, {
       method: "POST",
       headers: getAuthHeaders("json"),
-      body: JSON.stringify(taskPayload),
+      body: JSON.stringify({
+        ...values,
+        dependencies: values.dependencies?.length ? values.dependencies : undefined,
+      }),
     });
     if (handleUnauthorized(response)) throw new Error("Session expired");
     const raw = await response.json();
     if (!response.ok) throw new Error(raw.message ?? "Failed to create task");
-    const task = mapApiTask(raw.data ?? raw);
-
-    if (dependencies?.length && task.id) {
-      for (const dep of dependencies) {
-        const depResponse = await fetch(`${API_BASE_URL}/tasks/${task.id}/dependencies`, {
-          method: "POST",
-          headers: getAuthHeaders("json"),
-          body: JSON.stringify({
-            predecessorTaskId: dep.predecessorTaskId,
-            successorTaskId: task.id,
-            dependencyType: dep.dependencyType,
-            lag: dep.lag,
-          }),
-        });
-        if (!depResponse.ok) {
-          const depText = await depResponse.text();
-          // biome-ignore lint: any needed for dynamic error shape
-          let depRaw: any = null;
-          try {
-            depRaw = JSON.parse(depText);
-          } catch {
-            /* not JSON */
-          }
-          console.error("[createTask] POST /dependencies failed:", depResponse.status, depText.slice(0, 500));
-          const errMsg =
-            (depRaw?.errors ? JSON.stringify(depRaw.errors) : null) ??
-            depRaw?.message ??
-            (depText.slice(0, 200) || `Dependencies error ${depResponse.status}`);
-          throw new Error(errMsg);
-        }
-      }
-    }
-
-    return task;
+    return mapApiTask(raw.data ?? raw);
   }
 
   const task: Task = {
