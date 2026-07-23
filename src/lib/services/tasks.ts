@@ -69,8 +69,8 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
         }
         console.error("[createTask] POST /dependencies failed:", depResponse.status, depText.slice(0, 500));
         const errMsg =
-          depRaw?.message ??
           (depRaw?.errors ? JSON.stringify(depRaw.errors) : null) ??
+          depRaw?.message ??
           (depText.slice(0, 200) || `Dependencies error ${depResponse.status}`);
         throw new Error(errMsg);
       }
