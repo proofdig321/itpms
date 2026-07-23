@@ -270,7 +270,7 @@ export function TaskForm({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => appendDep({ predecessorTaskId: "", type: "finish-to-start", lag: 0 })}
+              onClick={() => appendDep({ predecessorTaskId: "", dependencyType: "finish-to-start", lag: 0 })}
             >
               <Plus className="mr-1 h-3.5 w-3.5" />
               Add
@@ -306,7 +306,7 @@ export function TaskForm({
               />
               <Controller
                 control={form.control}
-                name={`dependencies.${index}.type`}
+                name={`dependencies.${index}.dependencyType`}
                 render={({ field }) => (
                   <Field className="gap-1">
                     <FieldLabel className="text-xs">Type</FieldLabel>

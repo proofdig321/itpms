@@ -53,26 +53,33 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
     const task = mapApiTask(raw.data ?? raw);
 
     if (dependencies?.length && task.id) {
-      const depResponse = await fetch(`${API_BASE_URL}/tasks/${task.id}/dependencies`, {
-        method: "POST",
-        headers: getAuthHeaders("json"),
-        body: JSON.stringify({ dependencies }),
-      });
-      if (!depResponse.ok) {
-        const depText = await depResponse.text();
-        // biome-ignore lint: any needed for dynamic error shape
-        let depRaw: any = null;
-        try {
-          depRaw = JSON.parse(depText);
-        } catch {
-          /* not JSON */
+      for (const dep of dependencies) {
+        const depResponse = await fetch(`${API_BASE_URL}/tasks/${task.id}/dependencies`, {
+          method: "POST",
+          headers: getAuthHeaders("json"),
+          body: JSON.stringify({
+            predecessorTaskId: dep.predecessorTaskId,
+            successorTaskId: task.id,
+            dependencyType: dep.dependencyType,
+            lag: dep.lag,
+          }),
+        });
+        if (!depResponse.ok) {
+          const depText = await depResponse.text();
+          // biome-ignore lint: any needed for dynamic error shape
+          let depRaw: any = null;
+          try {
+            depRaw = JSON.parse(depText);
+          } catch {
+            /* not JSON */
+          }
+          console.error("[createTask] POST /dependencies failed:", depResponse.status, depText.slice(0, 500));
+          const errMsg =
+            (depRaw?.errors ? JSON.stringify(depRaw.errors) : null) ??
+            depRaw?.message ??
+            (depText.slice(0, 200) || `Dependencies error ${depResponse.status}`);
+          throw new Error(errMsg);
         }
-        console.error("[createTask] POST /dependencies failed:", depResponse.status, depText.slice(0, 500));
-        const errMsg =
-          (depRaw?.errors ? JSON.stringify(depRaw.errors) : null) ??
-          depRaw?.message ??
-          (depText.slice(0, 200) || `Dependencies error ${depResponse.status}`);
-        throw new Error(errMsg);
       }
     }
 
