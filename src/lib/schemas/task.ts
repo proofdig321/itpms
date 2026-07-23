@@ -19,6 +19,12 @@ export const assignmentSchema = z.object({
   allocation: z.number().min(0).max(100, { message: "Allocation must be 0-100." }),
 });
 
+export const dependencySchema = z.object({
+  taskId: z.string().min(1, { message: "Task is required." }),
+  type: z.enum(["finish-to-start", "start-to-start", "finish-to-finish", "start-to-finish"]),
+  lag: z.number().int().min(0),
+});
+
 export const taskFormSchema = z.object({
   projectCode: z.string().min(1, { message: "Project is required." }),
   wbsNodeId: z.string().min(1, { message: "WBS node is required." }),
@@ -30,6 +36,8 @@ export const taskFormSchema = z.object({
   plannedStart: z.string().min(1, { message: "Planned start is required." }),
   plannedFinish: z.string().min(1, { message: "Planned finish is required." }),
   assignments: z.array(assignmentSchema),
+  dependencies: z.array(dependencySchema),
 });
 
 export type TaskFormValues = z.infer<typeof taskFormSchema>;
+export type DependencyFormValue = z.infer<typeof dependencySchema>;

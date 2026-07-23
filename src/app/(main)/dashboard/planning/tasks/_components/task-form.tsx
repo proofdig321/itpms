@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { type TaskFormValues, taskFormSchema, taskPriorities, taskTypes } from "@/lib/schemas/task";
 import type { Project } from "@/types/project";
+import type { Task } from "@/types/task";
 import type { User } from "@/types/user";
 import type { WbsNode } from "@/types/wbs";
 
@@ -39,6 +40,7 @@ interface TaskFormProps {
   projects: Project[];
   wbsNodes: WbsNode[];
   users: User[];
+  availableTasks?: Pick<Task, "id" | "taskCode" | "name">[];
 }
 
 export function TaskForm({
@@ -49,6 +51,7 @@ export function TaskForm({
   projects,
   wbsNodes,
   users,
+  availableTasks = [],
 }: TaskFormProps) {
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
@@ -63,6 +66,7 @@ export function TaskForm({
       plannedStart: "",
       plannedFinish: "",
       assignments: [],
+      dependencies: [],
       ...defaultValues,
     },
   });
@@ -70,6 +74,15 @@ export function TaskForm({
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "assignments",
+  });
+
+  const {
+    fields: depFields,
+    append: appendDep,
+    remove: removeDep,
+  } = useFieldArray({
+    control: form.control,
+    name: "dependencies",
   });
 
   const selectedProjectCode = form.watch("projectCode");
@@ -248,6 +261,97 @@ export function TaskForm({
             </Field>
           )}
         />
+
+        {/* Dependencies */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <FieldLabel>Dependencies</FieldLabel>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => appendDep({ taskId: "", type: "finish-to-start", lag: 0 })}
+            >
+              <Plus className="mr-1 h-3.5 w-3.5" />
+              Add
+            </Button>
+          </div>
+
+          {depFields.length === 0 && (
+            <p className="text-muted-foreground text-sm">No dependencies. Click "Add" to link predecessor tasks.</p>
+          )}
+
+          {depFields.map((item, index) => (
+            <div key={item.id} className="grid gap-3 rounded-md border p-3 sm:grid-cols-[1fr_1fr_60px_auto]">
+              <Controller
+                control={form.control}
+                name={`dependencies.${index}.taskId`}
+                render={({ field, fieldState }) => (
+                  <Field className="gap-1">
+                    <FieldLabel className="text-xs">Predecessor Task</FieldLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full" aria-invalid={fieldState.invalid}>
+                        <SelectValue placeholder="Select task" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableTasks.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.taskCode} — {t.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name={`dependencies.${index}.type`}
+                render={({ field }) => (
+                  <Field className="gap-1">
+                    <FieldLabel className="text-xs">Type</FieldLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="finish-to-start">Finish to Start</SelectItem>
+                        <SelectItem value="start-to-start">Start to Start</SelectItem>
+                        <SelectItem value="finish-to-finish">Finish to Finish</SelectItem>
+                        <SelectItem value="start-to-finish">Start to Finish</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name={`dependencies.${index}.lag`}
+                render={({ field }) => (
+                  <Field className="gap-1">
+                    <FieldLabel className="text-xs">Lag</FieldLabel>
+                    <Input
+                      type="number"
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                    />
+                  </Field>
+                )}
+              />
+              <div className="flex items-end">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => removeDep(index)}
+                  aria-label="Remove"
+                >
+                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
 
         {/* Assignments */}
         <div className="flex flex-col gap-3">

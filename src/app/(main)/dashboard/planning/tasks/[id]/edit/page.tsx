@@ -46,6 +46,7 @@ export default async function EditTaskPage({ params }: EditTaskPageProps) {
               plannedStart: task.plannedStart,
               plannedFinish: task.plannedFinish,
               assignments: task.assignments ?? [],
+              dependencies: [],
             }}
             projects={projects}
             wbsNodes={wbsNodes}

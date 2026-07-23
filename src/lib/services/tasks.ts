@@ -41,10 +41,14 @@ function mapApiTask(raw: Record<string, unknown>): Task {
 
 export async function createTask(projectCode: string, values: TaskFormValues): Promise<Task> {
   if (API_BASE_URL) {
+    const payload = {
+      ...values,
+      dependencies: values.dependencies?.length ? values.dependencies : undefined,
+    };
     const response = await fetch(`${API_BASE_URL}/tasks`, {
       method: "POST",
       headers: getAuthHeaders("json"),
-      body: JSON.stringify(values),
+      body: JSON.stringify(payload),
     });
     if (handleUnauthorized(response)) throw new Error("Session expired");
     const raw = await response.json();
