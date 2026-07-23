@@ -22,6 +22,13 @@ import { getUsers } from "@/lib/services/users";
 
 import { DeleteProjectDialog } from "./_components/delete-project-dialog";
 
+function formatDate(dateStr: string): string {
+  if (!dateStr) return "—";
+  const [year, month, day] = dateStr.split("T")[0].split("-");
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${day} ${months[Number.parseInt(month) - 1]} ${year}`;
+}
+
 const statusConfig: Record<string, { label: string; className: string }> = {
   "on-track": {
     label: "On Track",
@@ -158,17 +165,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               </CardHeader>
               <CardContent>
                 <p className="text-sm">
-                  {new Date(project.plannedStart).toLocaleDateString("en-ZA", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
+                  {formatDate(project.plannedStart)}
                   {" — "}
-                  {new Date(project.plannedFinish).toLocaleDateString("en-ZA", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
+                  {formatDate(project.plannedFinish)}
                 </p>
               </CardContent>
             </Card>
@@ -381,15 +380,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                       </div>
                       <div>
                         <p className="text-muted-foreground text-xs">Actual Start</p>
-                        <p className="font-medium">
-                          {schedule.actualStart
-                            ? new Date(schedule.actualStart).toLocaleDateString("en-ZA", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              })
-                            : "—"}
-                        </p>
+                        <p className="font-medium">{schedule.actualStart ? formatDate(schedule.actualStart) : "—"}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -431,13 +422,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                   <CardTitle className="font-normal text-muted-foreground text-sm">Projected End Date</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="font-semibold text-sm">
-                    {new Date(forecast.projectedEndDate).toLocaleDateString("en-ZA", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </p>
+                  <p className="font-semibold text-sm">{formatDate(forecast.projectedEndDate)}</p>
                 </CardContent>
               </Card>
               <Card>
