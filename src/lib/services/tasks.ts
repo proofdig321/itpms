@@ -96,7 +96,7 @@ export async function deleteTask(id: string): Promise<void> {
 
 export async function updateTaskProgress(
   id: string,
-  data: { percentComplete: number; remarks: string; userId: string },
+  data: { percentComplete: number; remarks: string; updatedBy: string },
 ): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/tasks/${id}/progress`, {
     method: "POST",

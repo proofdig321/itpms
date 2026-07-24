@@ -169,7 +169,7 @@ The following are wired on the frontend but return server errors (endpoints not 
 |----------|------------------|
 | `POST /api/v1/projects/{id}/archive` | No body |
 | `POST /api/v1/projects/{id}/close` | No body |
-| `POST /api/v1/tasks/{id}/progress` | `{ "percentComplete": 60, "remarks": "..." }` |
+| `POST /api/v1/tasks/{id}/progress` | `{ "percentComplete": 60, "remarks": "...", "updatedBy": "{userId}" }` |
 | `POST /api/v1/tasks/{id}/hold` | No body |
 | `POST /api/v1/tasks/{id}/resume` | No body |
 | `POST /api/v1/tasks/{id}/cancel` | No body |

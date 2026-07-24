@@ -176,7 +176,7 @@ function ActionsCell({ task }: { task: Task }) {
     setIsUpdating(true);
     try {
       const userId = getSessionUser()?.id || "";
-      await updateTaskProgress(task.id, { percentComplete, remarks, userId });
+      await updateTaskProgress(task.id, { percentComplete, remarks, updatedBy: userId });
       toast.success("Progress updated successfully.");
       setShowProgress(false);
       setRemarks("");
