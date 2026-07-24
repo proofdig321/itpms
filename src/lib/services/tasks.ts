@@ -49,7 +49,8 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
   });
   if (handleUnauthorized(response)) throw new Error("Session expired");
   const text = await response.text();
-  let raw: Record<string, unknown> = {};
+  // biome-ignore lint: dynamic error shape
+  let raw: any = null;
   try {
     raw = JSON.parse(text);
   } catch {
@@ -57,11 +58,9 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
   }
   if (!response.ok)
     throw new Error(
-      raw.errors
-        ? JSON.stringify(raw.errors)
-        : ((raw.message as string) ?? text.slice(0, 300) ?? "Failed to create task"),
+      raw?.errors ? JSON.stringify(raw.errors) : (raw?.message ?? text.slice(0, 300) ?? "Failed to create task"),
     );
-  return mapApiTask(raw.data ?? raw);
+  return mapApiTask(raw?.data ?? raw);
 }
 
 export async function updateTask(id: string, values: Partial<TaskFormValues>): Promise<Task | undefined> {
