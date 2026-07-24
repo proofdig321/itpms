@@ -1,6 +1,5 @@
 import "server-only";
 
-import { tasks as mockTasks } from "@/data/tasks";
 import { taskPriorities, taskStatuses, taskTypes } from "@/lib/schemas/task";
 import type { Task } from "@/types/task";
 
@@ -60,7 +59,12 @@ export async function getTasks(projectCode?: string): Promise<Task[]> {
   if (projectCode) {
     return getTasksByProject(projectCode);
   }
-  return mockTasks;
+  const data = await fetchApi<Record<string, unknown>>("/tasks/project");
+  if (data) {
+    const items = Array.isArray(data) ? data : (data.data as Record<string, unknown>[] | undefined);
+    if (items && Array.isArray(items)) return items.map(mapApiTask);
+  }
+  return [];
 }
 
 export async function getTasksByProject(projectCode: string): Promise<Task[]> {
@@ -69,12 +73,12 @@ export async function getTasksByProject(projectCode: string): Promise<Task[]> {
     const items = Array.isArray(data) ? data : (data.data as Record<string, unknown>[] | undefined);
     if (items && Array.isArray(items)) return items.map(mapApiTask);
   }
-  return mockTasks.filter((t) => t.projectCode === projectCode);
+  return [];
 }
 
 export async function getTaskById(id: string): Promise<Task | undefined> {
   const data = await fetchApi<Record<string, unknown>>(`/tasks/${id}`);
   const raw = (data?.data as Record<string, unknown>) ?? data;
   if (raw?.id) return mapApiTask(raw);
-  return mockTasks.find((t) => t.id === id);
+  return undefined;
 }
