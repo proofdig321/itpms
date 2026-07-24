@@ -42,7 +42,7 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
   const payload = {
     ...values,
     dependencies: values.dependencies?.length
-      ? values.dependencies.map((d) => ({ ...d, dependencyType: d.dependencyType.toLowerCase() }))
+      ? values.dependencies.map(({ dependencyType, ...d }) => ({ ...d, dependency_type: dependencyType }))
       : undefined,
   };
   console.log("[createTask] payload:", JSON.stringify(payload, null, 2));
