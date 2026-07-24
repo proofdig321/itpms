@@ -197,18 +197,55 @@ Same Sidebar component. Different navigation. No forking.
 
 ## Theme System
 
-### Tokens
+### Overview
 
-| Token | Description |
-|-------|-------------|
-| Brand | Primary, secondary, accent colours |
-| Spacing | Base scale (4px grid) |
-| Radius | Border radius scale |
-| Typography | Font family, size scale, weight |
-| Elevation | Shadow levels |
-| Motion | Transition durations and easing |
-| Status Colours | Green / Amber / Red / Gray semantic mapping |
-| Chart Palette | Consistent data visualisation colours |
+The theme system is a complete preference engine. It handles theme mode,
+color presets, fonts, layout options, and sidebar behaviour — all persisted
+to cookies and applied before hydration to prevent flicker.
+
+### Files to Carry Across
+
+| File | Purpose |
+|------|---------|
+| `src/styles/presets/brutalist.css` | Neo Brutalism color preset |
+| `src/styles/presets/soft-pop.css` | Soft Pop color preset |
+| `src/styles/presets/tangerine.css` | Tangerine color preset |
+| `src/lib/preferences/theme.ts` | Preset registry + ThemeMode/ThemePreset types (auto-generated) |
+| `src/lib/preferences/theme-utils.ts` | `applyThemeMode`, `applyThemePreset`, system theme subscription |
+| `src/lib/preferences/layout.ts` | Sidebar variant, collapsible, content layout, navbar style types |
+| `src/lib/preferences/layout-utils.ts` | DOM attribute appliers for layout preferences |
+| `src/lib/preferences/preferences-config.ts` | All preference keys, defaults, and persistence modes |
+| `src/lib/preferences/preferences-storage.ts` | Persistence writer (cookie / localStorage / server-action) |
+| `src/stores/preferences/preferences-store.ts` | Zustand vanilla store for all preferences |
+| `src/stores/preferences/preferences-provider.tsx` | React context provider + DOM sync + system theme listener |
+| `src/scripts/theme-boot.tsx` | Pre-hydration script — reads cookies and sets `data-*` attributes before React mounts |
+| `src/scripts/generate-theme-presets.ts` | Build script — scans preset CSS files and auto-generates `theme.ts` |
+
+### How It Works
+
+1. `ThemeBootScript` runs in `<head>` before hydration — reads cookies, sets `data-theme-mode`, `data-theme-preset`, `data-font`, `data-content-layout`, `data-navbar-style`, `data-sidebar-variant`, `data-sidebar-collapsible` on `<html>`
+2. CSS variables in preset files activate via `[data-theme-preset="value"]` selectors
+3. `PreferencesStoreProvider` mounts, reads DOM state, syncs to Zustand store
+4. User changes a preference → store updates → DOM attribute updates → CSS variables update → `persistPreference()` writes to cookie
+5. On next load, `ThemeBootScript` reads the cookie and restores the preference before React mounts
+
+### Preferences
+
+| Key | Type | Options | Default |
+|-----|------|---------|--------|
+| `theme_mode` | `light \| dark \| system` | Light, Dark, System | `light` |
+| `theme_preset` | `default \| brutalist \| soft-pop \| tangerine` | Default, Brutalist, Soft Pop, Tangerine | `default` |
+| `font` | `FontKey` | Geist, others from registry | `geist` |
+| `content_layout` | `centered \| full-width` | Centered, Full Width | `centered` |
+| `navbar_style` | `sticky \| scroll` | Sticky, Scroll | `sticky` |
+| `sidebar_variant` | `sidebar \| inset \| floating` | Sidebar, Inset, Floating | `inset` |
+| `sidebar_collapsible` | `icon \| offcanvas` | Icon, Offcanvas | `icon` |
+
+### Adding a New Preset
+
+1. Create `src/styles/presets/{name}.css` with `label:` and `value:` comments and CSS variable overrides
+2. Run `npm run generate:presets` — `theme.ts` updates automatically
+3. The new preset appears in the theme switcher immediately
 
 ### Status Colour Mapping (System-Wide)
 
@@ -219,10 +256,16 @@ Same Sidebar component. Different navigation. No forking.
 | error / critical / delayed | Red | Action required |
 | neutral / inactive / completed | Gray | No action needed |
 
-### Modes
-- Light and dark mode via CSS variables
-- Color preset support — applications supply a preset, shell applies it
-- No hardcoded colours in components
+### Tokens
+
+| Token | Description |
+|-------|-------------|
+| Brand | Primary, secondary, accent — defined per preset via CSS variables |
+| Spacing | 4px base grid via Tailwind |
+| Radius | Border radius scale via `--radius` CSS variable |
+| Typography | Font family via `data-font` attribute |
+| Status Colours | Green / Amber / Red / Gray — semantic, not preset-specific |
+| Chart Palette | Consistent across light/dark via CSS variables |
 
 ---
 
