@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import type { TaskFormValues } from "@/lib/schemas/task";
 import { createTask } from "@/lib/services/tasks";
 import type { Project } from "@/types/project";
-import type { Task } from "@/types/task";
 import type { User } from "@/types/user";
 import type { WbsNode } from "@/types/wbs";
 
@@ -19,10 +18,9 @@ interface CreateTaskFormProps {
   projects: Project[];
   wbsNodes: WbsNode[];
   users: User[];
-  availableTasks: Pick<Task, "id" | "taskCode" | "name" | "projectCode">[];
 }
 
-export function CreateTaskForm({ projects, wbsNodes, users, availableTasks }: CreateTaskFormProps) {
+export function CreateTaskForm({ projects, wbsNodes, users }: CreateTaskFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -47,7 +45,6 @@ export function CreateTaskForm({ projects, wbsNodes, users, availableTasks }: Cr
       projects={projects}
       wbsNodes={wbsNodes}
       users={users}
-      availableTasks={availableTasks}
     />
   );
 }

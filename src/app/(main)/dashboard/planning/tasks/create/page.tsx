@@ -1,13 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getProjects } from "@/lib/services/projects-queries";
-import { getTasks } from "@/lib/services/tasks-queries";
 import { getUsers } from "@/lib/services/users";
 import { getWbsByProject } from "@/lib/services/wbs";
 
 import { CreateTaskForm } from "./_components/create-task-form";
 
 export default async function CreateTaskPage() {
-  const [projects, users, allTasks] = await Promise.all([getProjects(), getUsers(), getTasks()]);
+  const [projects, users] = await Promise.all([getProjects(), getUsers()]);
   const wbsResults = await Promise.all(projects.map((p) => getWbsByProject(p.projectCode)));
   const wbsNodes = wbsResults.flat();
 
@@ -22,7 +21,7 @@ export default async function CreateTaskPage() {
           <CardTitle>Task Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <CreateTaskForm projects={projects} wbsNodes={wbsNodes} users={users} availableTasks={allTasks} />
+          <CreateTaskForm projects={projects} wbsNodes={wbsNodes} users={users} />
         </CardContent>
       </Card>
     </div>

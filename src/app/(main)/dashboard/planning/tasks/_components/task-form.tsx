@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
@@ -14,6 +16,8 @@ import type { Project } from "@/types/project";
 import type { Task } from "@/types/task";
 import type { User } from "@/types/user";
 import type { WbsNode } from "@/types/wbs";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 const typeLabels: Record<(typeof taskTypes)[number], string> = {
   planning: "Planning",
@@ -40,7 +44,6 @@ interface TaskFormProps {
   projects: Project[];
   wbsNodes: WbsNode[];
   users: User[];
-  availableTasks?: Pick<Task, "id" | "taskCode" | "name" | "projectCode">[];
 }
 
 export function TaskForm({
@@ -51,7 +54,6 @@ export function TaskForm({
   projects,
   wbsNodes,
   users,
-  availableTasks = [],
 }: TaskFormProps) {
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
@@ -85,9 +87,36 @@ export function TaskForm({
     name: "dependencies",
   });
 
+  const [projectTasks, setProjectTasks] = useState<Pick<Task, "id" | "taskCode" | "name">[]>([]);
+
   const selectedProjectCode = form.watch("projectCode");
   const filteredWbsNodes = wbsNodes.filter((n) => n.projectCode === selectedProjectCode);
-  const filteredAvailableTasks = availableTasks.filter((t) => (t as Task).projectCode === selectedProjectCode);
+
+  useEffect(() => {
+    if (!selectedProjectCode || !API_BASE_URL) {
+      setProjectTasks([]);
+      return;
+    }
+    const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+    fetch(`${API_BASE_URL}/tasks/project?projectCode=${selectedProjectCode}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        const items = Array.isArray(data) ? data : (data.data ?? []);
+        setProjectTasks(
+          items.map((t: Record<string, unknown>) => ({
+            id: t.id as string,
+            taskCode: (t.taskCode as string) ?? "",
+            name: t.name as string,
+          })),
+        );
+      })
+      .catch(() => setProjectTasks([]));
+  }, [selectedProjectCode]);
 
   return (
     <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
@@ -295,7 +324,7 @@ export function TaskForm({
                         <SelectValue placeholder="Select task" />
                       </SelectTrigger>
                       <SelectContent>
-                        {filteredAvailableTasks.map((t) => (
+                        {projectTasks.map((t) => (
                           <SelectItem key={t.id} value={t.id}>
                             {t.taskCode} — {t.name}
                           </SelectItem>
