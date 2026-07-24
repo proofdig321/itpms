@@ -35,5 +35,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-dashboard-platform-export/
-dashboard-platform-export.zip
