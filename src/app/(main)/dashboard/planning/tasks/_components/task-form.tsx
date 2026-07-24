@@ -40,7 +40,7 @@ interface TaskFormProps {
   projects: Project[];
   wbsNodes: WbsNode[];
   users: User[];
-  availableTasks?: Pick<Task, "id" | "taskCode" | "name">[];
+  availableTasks?: Pick<Task, "id" | "taskCode" | "name" | "projectCode">[];
 }
 
 export function TaskForm({
@@ -87,6 +87,7 @@ export function TaskForm({
 
   const selectedProjectCode = form.watch("projectCode");
   const filteredWbsNodes = wbsNodes.filter((n) => n.projectCode === selectedProjectCode);
+  const filteredAvailableTasks = availableTasks.filter((t) => (t as Task).projectCode === selectedProjectCode);
 
   return (
     <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
@@ -294,7 +295,7 @@ export function TaskForm({
                         <SelectValue placeholder="Select task" />
                       </SelectTrigger>
                       <SelectContent>
-                        {availableTasks.map((t) => (
+                        {filteredAvailableTasks.map((t) => (
                           <SelectItem key={t.id} value={t.id}>
                             {t.taskCode} — {t.name}
                           </SelectItem>

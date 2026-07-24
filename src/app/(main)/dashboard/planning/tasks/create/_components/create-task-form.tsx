@@ -19,7 +19,7 @@ interface CreateTaskFormProps {
   projects: Project[];
   wbsNodes: WbsNode[];
   users: User[];
-  availableTasks: Pick<Task, "id" | "taskCode" | "name">[];
+  availableTasks: Pick<Task, "id" | "taskCode" | "name" | "projectCode">[];
 }
 
 export function CreateTaskForm({ projects, wbsNodes, users, availableTasks }: CreateTaskFormProps) {
