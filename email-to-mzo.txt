@@ -59,13 +59,6 @@ depends on this.
 
 ---
 
-6. WBS OWNER ASSIGNMENT
-
-The ownerId validation/FK mismatch reported in backend-issues-report.md — has this
-been resolved? The owner dropdown is still disabled on the frontend pending confirmation.
-
----
-
 Thanks for the quick fix on the dependency validation today.
 
 Kind regards,
