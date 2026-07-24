@@ -1,7 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getBaselinesByProject } from "@/lib/services/analytics";
-import { getProjectById } from "@/lib/services/projects-queries";
+import { getProjectById, getProjects } from "@/lib/services/projects-queries";
+
+import { ProjectSelector } from "../_components/project-selector";
+import { ProjectSync } from "../_components/project-sync";
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR", maximumFractionDigits: 0 }).format(
@@ -9,16 +12,43 @@ function formatCurrency(amount: number) {
   );
 }
 
-export default async function ChangeImpactPage() {
-  const [baselines, project] = await Promise.all([getBaselinesByProject("ITPMS-001"), getProjectById("1")]);
+function formatDate(dateStr: string): string {
+  if (!dateStr) return "—";
+  const [year, month, day] = dateStr.split("T")[0].split("-");
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${day} ${months[Number.parseInt(month) - 1]} ${year}`;
+}
+
+interface ChangeImpactPageProps {
+  searchParams: Promise<{ project?: string }>;
+}
+
+export default async function ChangeImpactPage({ searchParams }: ChangeImpactPageProps) {
+  const params = await searchParams;
+  const projects = await getProjects();
+  const fallback = projects[0]?.projectCode ?? "";
+  const selectedCode = params.project ?? "";
+
+  if (!selectedCode) {
+    return <ProjectSync basePath="/dashboard/planning/change-impact" fallbackCode={fallback} />;
+  }
+
+  const selectedProject = projects.find((p) => p.projectCode === selectedCode);
+  const [baselines, project] = await Promise.all([
+    getBaselinesByProject(selectedCode),
+    selectedProject ? getProjectById(selectedProject.id) : Promise.resolve(undefined),
+  ]);
 
   const approvedBaseline = baselines.find((b) => b.status === "approved");
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-semibold text-2xl tracking-tight">Change Impact Analysis</h1>
-        <p className="text-muted-foreground text-sm">Compare current plan against approved baseline.</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="font-semibold text-2xl tracking-tight">Change Impact Analysis</h1>
+          <p className="text-muted-foreground text-sm">Compare current plan against approved baseline.</p>
+        </div>
+        <ProjectSelector projects={projects} selectedCode={selectedCode} basePath="/dashboard/planning/change-impact" />
       </div>
 
       {!approvedBaseline ? (
@@ -34,7 +64,7 @@ export default async function ChangeImpactPage() {
         <Card>
           <CardHeader>
             <CardTitle className="font-normal text-muted-foreground text-sm">
-              ITPMS-001 — Baseline v{approvedBaseline.version} vs Current Plan
+              {selectedCode} — Baseline v{approvedBaseline.version} vs Current Plan
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -52,48 +82,26 @@ export default async function ChangeImpactPage() {
                   <TableRow>
                     <TableCell className="font-medium">Budget</TableCell>
                     <TableCell className="tabular-nums">{formatCurrency(approvedBaseline.totalCost)}</TableCell>
-                    <TableCell className="tabular-nums">{formatCurrency(2950000)}</TableCell>
-                    <TableCell className="text-red-600 tabular-nums">
-                      {formatCurrency(2950000 - approvedBaseline.totalCost)}
-                    </TableCell>
+                    <TableCell className="tabular-nums">—</TableCell>
+                    <TableCell>—</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="font-medium">Start Date</TableCell>
-                    <TableCell>
-                      {new Date(approvedBaseline.startDate).toLocaleDateString("en-ZA", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </TableCell>
-                    <TableCell>
-                      {project
-                        ? new Date(project.plannedStart).toLocaleDateString("en-ZA", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })
-                        : "—"}
-                    </TableCell>
-                    <TableCell>No change</TableCell>
+                    <TableCell>{formatDate(approvedBaseline.startDate)}</TableCell>
+                    <TableCell>{project ? formatDate(project.plannedStart) : "—"}</TableCell>
+                    <TableCell>—</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="font-medium">End Date</TableCell>
-                    <TableCell>
-                      {new Date(approvedBaseline.endDate).toLocaleDateString("en-ZA", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </TableCell>
-                    <TableCell>15 Jul 2025</TableCell>
-                    <TableCell className="text-red-600">+15 days</TableCell>
+                    <TableCell>{formatDate(approvedBaseline.endDate)}</TableCell>
+                    <TableCell>{project ? formatDate(project.plannedFinish) : "—"}</TableCell>
+                    <TableCell>—</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="font-medium">Scope</TableCell>
                     <TableCell className="max-w-[200px] truncate">{approvedBaseline.scope}</TableCell>
-                    <TableCell>Unchanged</TableCell>
-                    <TableCell>No change</TableCell>
+                    <TableCell>—</TableCell>
+                    <TableCell>—</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
