@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { type TaskFormValues, taskFormSchema, taskPriorities, taskTypes } from "@/lib/schemas/task";
+import { getAuthHeaders } from "@/lib/services/api-helpers";
 import type { Project } from "@/types/project";
 import type { Task } from "@/types/task";
 import type { User } from "@/types/user";
@@ -97,12 +98,8 @@ export function TaskForm({
       setProjectTasks([]);
       return;
     }
-    const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
     fetch(`${API_BASE_URL}/tasks/project?projectCode=${selectedProjectCode}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
+      headers: getAuthHeaders(),
     })
       .then((r) => r.json())
       .then((data) => {
