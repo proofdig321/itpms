@@ -1,8 +1,10 @@
 import "server-only";
 
-import { projects as mockProjects, type Project } from "@/data/projects";
+import type { Project } from "@/data/projects";
 
 import { getServerAuthHeaders } from "./server-api-helpers";
+
+export type { Project };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
@@ -41,15 +43,16 @@ function mapApiProject(raw: Record<string, unknown>): Project {
 
 export async function getProjects(): Promise<Project[]> {
   const data = await fetchApi<Record<string, unknown>[]>("/projects");
-  if (data && Array.isArray(data)) {
-    return data.map(mapApiProject);
-  }
-  return mockProjects;
+  if (data && Array.isArray(data)) return data.map(mapApiProject);
+  const wrapped = data as Record<string, unknown> | null;
+  if (wrapped?.data && Array.isArray(wrapped.data))
+    return (wrapped.data as Record<string, unknown>[]).map(mapApiProject);
+  return [];
 }
 
 export async function getProjectById(id: string): Promise<Project | undefined> {
   const data = await fetchApi<Record<string, unknown>>(`/projects/${id}`);
   const raw = (data?.data as Record<string, unknown>) ?? data;
   if (raw?.id) return mapApiProject(raw);
-  return mockProjects.find((p) => p.id === id);
+  return undefined;
 }

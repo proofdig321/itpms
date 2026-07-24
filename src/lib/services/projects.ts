@@ -1,4 +1,4 @@
-import { projects as mockProjects, type Project } from "@/data/projects";
+import type { Project } from "@/data/projects";
 import type { ProjectFormValues } from "@/lib/schemas/project";
 
 import { getAuthHeaders, handleUnauthorized } from "./api-helpers";
@@ -21,9 +21,28 @@ function mapApiProject(raw: Record<string, unknown>): Project {
 }
 
 export async function createProject(values: ProjectFormValues): Promise<Project> {
-  if (API_BASE_URL) {
-    const response = await fetch(`${API_BASE_URL}/projects`, {
-      method: "POST",
+  const response = await fetch(`${API_BASE_URL}/projects`, {
+    method: "POST",
+    headers: getAuthHeaders("json"),
+    body: JSON.stringify({
+      title: values.title,
+      description: values.description,
+      managerId: values.managerId,
+      plannedStart: values.plannedStart,
+      plannedFinish: values.plannedFinish,
+    }),
+  });
+  if (handleUnauthorized(response)) throw new Error("Session expired");
+  const raw = await response.json();
+  if (response.ok) return mapApiProject(raw.data ?? raw.project ?? raw);
+  throw new Error(raw.message ?? "Failed to create project");
+}
+
+export async function updateProject(id: string, values: Partial<ProjectFormValues>): Promise<Project | undefined> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+      method: "PUT",
       headers: getAuthHeaders("json"),
       body: JSON.stringify({
         title: values.title,
@@ -33,115 +52,61 @@ export async function createProject(values: ProjectFormValues): Promise<Project>
         plannedFinish: values.plannedFinish,
       }),
     });
-    if (handleUnauthorized(response)) throw new Error("Session expired");
-    const raw = await response.json();
-    if (response.ok) return mapApiProject(raw.data ?? raw.project ?? raw);
-    throw new Error(raw.message ?? "Failed to create project");
+  } catch (e) {
+    throw new Error(`Network error: Unable to reach API server. ${e instanceof Error ? e.message : ""}`);
   }
-
-  const project: Project = {
-    id: crypto.randomUUID(),
-    projectCode: `ITP-${new Date().getFullYear()}-${String(mockProjects.length + 1).padStart(4, "0")}`,
-    title: values.title,
-    description: values.description,
-    status: "not-started",
-    progress: 0,
-    managerId: values.managerId,
-    plannedStart: values.plannedStart,
-    plannedFinish: values.plannedFinish,
-    createdAt: new Date().toISOString(),
-  };
-  mockProjects.push(project);
-  return project;
-}
-
-export async function updateProject(id: string, values: Partial<ProjectFormValues>): Promise<Project | undefined> {
-  if (API_BASE_URL) {
-    let response: Response;
-    try {
-      response = await fetch(`${API_BASE_URL}/projects/${id}`, {
-        method: "PUT",
-        headers: getAuthHeaders("json"),
-        body: JSON.stringify({
-          title: values.title,
-          description: values.description,
-          managerId: values.managerId,
-          plannedStart: values.plannedStart,
-          plannedFinish: values.plannedFinish,
-        }),
-      });
-    } catch (e) {
-      throw new Error(`Network error: Unable to reach API server. ${e instanceof Error ? e.message : ""}`);
-    }
-    if (handleUnauthorized(response)) throw new Error("Session expired");
-    const text = await response.text();
-    // biome-ignore lint: any needed for dynamic error shape
-    let raw: any = null;
-    try {
-      raw = JSON.parse(text);
-    } catch {
-      /* not JSON */
-    }
-    if (response.ok && raw) return mapApiProject(raw.data ?? raw.project ?? raw);
-    const errMsg =
-      raw?.message ??
-      raw?.error?.message ??
-      (raw?.errors ? JSON.stringify(raw.errors) : null) ??
-      (raw?.exception ? `${raw.exception}: ${raw.trace?.[0]?.file ?? ""}` : null) ??
-      (text.slice(0, 200) || `Server error ${response.status}`);
-    console.error("[updateProject] PUT /projects failed:", response.status, text.slice(0, 500));
-    throw new Error(errMsg);
+  if (handleUnauthorized(response)) throw new Error("Session expired");
+  const text = await response.text();
+  // biome-ignore lint: any needed for dynamic error shape
+  let raw: any = null;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    /* not JSON */
   }
-
-  const index = mockProjects.findIndex((p) => p.id === id);
-  if (index === -1) return undefined;
-  mockProjects[index] = { ...mockProjects[index], ...values };
-  return mockProjects[index];
+  if (response.ok && raw) return mapApiProject(raw.data ?? raw.project ?? raw);
+  const errMsg =
+    raw?.message ??
+    raw?.error?.message ??
+    (raw?.errors ? JSON.stringify(raw.errors) : null) ??
+    (raw?.exception ? `${raw.exception}: ${raw.trace?.[0]?.file ?? ""}` : null) ??
+    (text.slice(0, 200) || `Server error ${response.status}`);
+  console.error("[updateProject] PUT /projects failed:", response.status, text.slice(0, 500));
+  throw new Error(errMsg);
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  if (API_BASE_URL) {
-    const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
-      method: "DELETE",
-      headers: getAuthHeaders(),
-    });
-    if (handleUnauthorized(response)) throw new Error("Session expired");
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message ?? "Failed to delete project");
-    }
-    return;
+  const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+  if (handleUnauthorized(response)) throw new Error("Session expired");
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message ?? "Failed to delete project");
   }
-
-  const index = mockProjects.findIndex((p) => p.id === id);
-  if (index === -1) return;
-  mockProjects.splice(index, 1);
 }
 
 export async function archiveProject(id: string): Promise<void> {
-  if (API_BASE_URL) {
-    const response = await fetch(`${API_BASE_URL}/projects/${id}/archive`, {
-      method: "POST",
-      headers: getAuthHeaders(),
-    });
-    if (handleUnauthorized(response)) throw new Error("Session expired");
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message ?? "Failed to archive project");
-    }
+  const response = await fetch(`${API_BASE_URL}/projects/${id}/archive`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+  });
+  if (handleUnauthorized(response)) throw new Error("Session expired");
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message ?? "Failed to archive project");
   }
 }
 
 export async function closeProject(id: string): Promise<void> {
-  if (API_BASE_URL) {
-    const response = await fetch(`${API_BASE_URL}/projects/${id}/close`, {
-      method: "POST",
-      headers: getAuthHeaders(),
-    });
-    if (handleUnauthorized(response)) throw new Error("Session expired");
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message ?? "Failed to close project");
-    }
+  const response = await fetch(`${API_BASE_URL}/projects/${id}/close`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+  });
+  if (handleUnauthorized(response)) throw new Error("Session expired");
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message ?? "Failed to close project");
   }
 }

@@ -1,4 +1,4 @@
-import { wbsNodes as mockWbsNodes, type WbsNode } from "@/data/wbs";
+import type { WbsNode } from "@/types/wbs";
 
 import { getServerAuthHeaders } from "./server-api-helpers";
 
@@ -40,30 +40,15 @@ function mapApiWbsNode(raw: Record<string, unknown>): WbsNode {
 
 export async function getWbsByProject(projectCode: string): Promise<WbsNode[]> {
   const data = await fetchApi<Record<string, unknown>>(`/wbs?projectCode=${projectCode}`);
-
   if (data) {
     const items = Array.isArray(data) ? data : (data.data as Record<string, unknown>[] | undefined);
-    if (items && Array.isArray(items)) {
-      return items.map(mapApiWbsNode);
-    }
+    if (items && Array.isArray(items)) return items.map(mapApiWbsNode);
   }
-
-  try {
-    return mockWbsNodes.filter((node) => node.projectCode === projectCode);
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 export async function getWbsNodeById(id: string): Promise<WbsNode | undefined> {
   const data = await fetchApi<Record<string, unknown>>(`/wbs/${id}`);
-  if (data?.id) {
-    return mapApiWbsNode(data);
-  }
-
-  try {
-    return mockWbsNodes.find((node) => node.id === id);
-  } catch {
-    return undefined;
-  }
+  if (data?.id) return mapApiWbsNode(data);
+  return undefined;
 }

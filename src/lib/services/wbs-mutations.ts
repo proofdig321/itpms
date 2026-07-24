@@ -1,4 +1,3 @@
-import { wbsNodes as mockWbsNodes } from "@/data/wbs";
 import type { WbsNodeFormValues } from "@/lib/schemas/wbs";
 import type { WbsNode } from "@/types/wbs";
 
@@ -26,113 +25,61 @@ function mapApiWbsNode(raw: Record<string, unknown>): WbsNode {
 }
 
 export async function createWbsNode(projectCode: string, values: WbsNodeFormValues): Promise<WbsNode> {
-  if (API_BASE_URL) {
-    const response = await fetch(`${API_BASE_URL}/wbs`, {
-      method: "POST",
-      headers: getAuthHeaders("json"),
-      body: JSON.stringify({
-        projectCode,
-        name: values.name,
-        description: values.description || null,
-        level: values.level,
-        ownerId: values.ownerId || null,
-        parentId: values.parentId || null,
-        plannedStart: values.plannedStart || null,
-        plannedFinish: values.plannedFinish || null,
-      }),
-    });
-
-    if (handleUnauthorized(response)) throw new Error("Session expired");
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.message || `Failed to create WBS node (${response.status})`);
-    }
-
-    const raw = await response.json();
-    return mapApiWbsNode(raw.data ?? raw.wbs ?? raw);
+  const response = await fetch(`${API_BASE_URL}/wbs`, {
+    method: "POST",
+    headers: getAuthHeaders("json"),
+    body: JSON.stringify({
+      projectCode,
+      name: values.name,
+      description: values.description || null,
+      level: values.level,
+      ownerId: values.ownerId || null,
+      parentId: values.parentId || null,
+      plannedStart: values.plannedStart || null,
+      plannedFinish: values.plannedFinish || null,
+    }),
+  });
+  if (handleUnauthorized(response)) throw new Error("Session expired");
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.message || `Failed to create WBS node (${response.status})`);
   }
-
-  const node: WbsNode = {
-    id: crypto.randomUUID(),
-    projectCode,
-    code: "",
-    sequence: 0,
-    depth: 0,
-    name: values.name,
-    description: values.description,
-    level: values.level,
-    status: "not-started",
-    progress: 0,
-    ownerId: values.ownerId ?? null,
-    parentId: values.parentId ?? null,
-    plannedStart: values.plannedStart,
-    plannedFinish: values.plannedFinish,
-  };
-  mockWbsNodes.push(node);
-  return node;
+  const raw = await response.json();
+  return mapApiWbsNode(raw.data ?? raw.wbs ?? raw);
 }
 
 export async function updateWbsNode(id: string, values: Partial<WbsNodeFormValues>): Promise<WbsNode | undefined> {
-  if (API_BASE_URL) {
-    const payload: Record<string, unknown> = {};
-    if (values.name !== undefined) payload.name = values.name;
-    if (values.description !== undefined) payload.description = values.description || null;
-    if (values.level !== undefined) payload.level = values.level;
-    if (values.ownerId !== undefined) payload.ownerId = values.ownerId || null;
-    if (values.parentId !== undefined) payload.parentId = values.parentId || null;
-    if (values.plannedStart !== undefined) payload.plannedStart = values.plannedStart || null;
-    if (values.plannedFinish !== undefined) payload.plannedFinish = values.plannedFinish || null;
+  const payload: Record<string, unknown> = {};
+  if (values.name !== undefined) payload.name = values.name;
+  if (values.description !== undefined) payload.description = values.description || null;
+  if (values.level !== undefined) payload.level = values.level;
+  if (values.ownerId !== undefined) payload.ownerId = values.ownerId || null;
+  if (values.parentId !== undefined) payload.parentId = values.parentId || null;
+  if (values.plannedStart !== undefined) payload.plannedStart = values.plannedStart || null;
+  if (values.plannedFinish !== undefined) payload.plannedFinish = values.plannedFinish || null;
 
-    const response = await fetch(`${API_BASE_URL}/wbs/${id}`, {
-      method: "PUT",
-      headers: getAuthHeaders("json"),
-      body: JSON.stringify(payload),
-    });
-
-    if (handleUnauthorized(response)) throw new Error("Session expired");
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.message || `Failed to update WBS node (${response.status})`);
-    }
-
-    const raw = await response.json();
-    return mapApiWbsNode(raw.data ?? raw.wbs ?? raw);
+  const response = await fetch(`${API_BASE_URL}/wbs/${id}`, {
+    method: "PUT",
+    headers: getAuthHeaders("json"),
+    body: JSON.stringify(payload),
+  });
+  if (handleUnauthorized(response)) throw new Error("Session expired");
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.message || `Failed to update WBS node (${response.status})`);
   }
-
-  const index = mockWbsNodes.findIndex((n) => n.id === id);
-  if (index === -1) return undefined;
-  mockWbsNodes[index] = { ...mockWbsNodes[index], ...values };
-  return mockWbsNodes[index];
+  const raw = await response.json();
+  return mapApiWbsNode(raw.data ?? raw.wbs ?? raw);
 }
 
 export async function deleteWbsNode(id: string): Promise<void> {
-  if (API_BASE_URL) {
-    const response = await fetch(`${API_BASE_URL}/wbs/${id}`, {
-      method: "DELETE",
-      headers: getAuthHeaders(),
-    });
-
-    if (handleUnauthorized(response)) throw new Error("Session expired");
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.message || `Failed to delete WBS node (${response.status})`);
-    }
-    return;
+  const response = await fetch(`${API_BASE_URL}/wbs/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+  if (handleUnauthorized(response)) throw new Error("Session expired");
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.message || `Failed to delete WBS node (${response.status})`);
   }
-
-  const index = mockWbsNodes.findIndex((n) => n.id === id);
-  if (index === -1) return;
-  const idsToRemove = new Set<string>();
-  const collectChildren = (parentId: string) => {
-    idsToRemove.add(parentId);
-    for (const node of mockWbsNodes) {
-      if (node.parentId === parentId) {
-        collectChildren(node.id);
-      }
-    }
-  };
-  collectChildren(id);
-  const remaining = mockWbsNodes.filter((n) => !idsToRemove.has(n.id));
-  mockWbsNodes.length = 0;
-  mockWbsNodes.push(...remaining);
 }
