@@ -334,6 +334,7 @@ export function TaskForm({
               <Controller
                 control={form.control}
                 name={`dependencies.${index}.dependencyType`}
+                defaultValue="FS"
                 render={({ field }) => (
                   <Field className="gap-1">
                     <FieldLabel className="text-xs">Type</FieldLabel>
