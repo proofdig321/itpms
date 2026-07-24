@@ -48,8 +48,19 @@ export async function createTask(projectCode: string, values: TaskFormValues): P
     }),
   });
   if (handleUnauthorized(response)) throw new Error("Session expired");
-  const raw = await response.json();
-  if (!response.ok) throw new Error(raw.errors ? JSON.stringify(raw.errors) : (raw.message ?? "Failed to create task"));
+  const text = await response.text();
+  let raw: Record<string, unknown> = {};
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    /* not JSON */
+  }
+  if (!response.ok)
+    throw new Error(
+      raw.errors
+        ? JSON.stringify(raw.errors)
+        : ((raw.message as string) ?? text.slice(0, 300) ?? "Failed to create task"),
+    );
   return mapApiTask(raw.data ?? raw);
 }
 

@@ -21,7 +21,7 @@ export const assignmentSchema = z.object({
 
 export const dependencySchema = z.object({
   predecessorTaskId: z.string().min(1, { message: "Predecessor task is required." }),
-  dependency_type: z.enum(["FS", "SS", "FF", "SF"]),
+  dependencyType: z.enum(["FS", "SS", "FF", "SF"]),
   lag: z.number().int().min(0),
   mandatory: z.boolean(),
 });
