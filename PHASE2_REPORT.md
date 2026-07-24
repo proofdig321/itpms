@@ -190,13 +190,13 @@ Full contract details in `API_CONTRACT.md`.
 ## Integration Path
 
 ```
-Current state:
+Current state (Projects, WBS, Tasks, Users):
+  UI → service layer → Laravel /api/v1/ (live)
+
+Pending backend implementation (Resources, Costs, Procurement, Risks, Analytics, Monitoring):
   UI → service layer → mock data (src/data/)
 
-When Laravel is ready:
-  UI → service layer → apiClient → Laravel /api/v1/
-
-Change required:
+When remaining endpoints are ready:
   Replace service function internals only
   Zero UI component changes needed
 ```

@@ -447,7 +447,7 @@ Laravel must store and return these exact string values.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/v1/tasks?projectCode=ITP-2026-0001` | Get tasks for a project |
+| GET | `/api/v1/tasks/project?projectCode=ITP-2026-0001` | Get tasks for a project |
 | GET | `/api/v1/tasks/{id}` | Get single task |
 | POST | `/api/v1/tasks` | Create task |
 | PUT | `/api/v1/tasks/{id}` | Update task |
@@ -478,7 +478,15 @@ interface Task {
   actualFinish?: string;
   percentComplete: number;   // 0-100, updated via POST /tasks/{id}/progress
   assignments: TaskAssignment[];
+  dependencies: TaskDependency[];
   createdAt: string;
+}
+
+interface TaskDependency {
+  predecessorTaskId: string;
+  dependencyType: "FS" | "SS" | "FF" | "SF";  // camelCase — confirmed by backend
+  lag: number;
+  mandatory: boolean;
 }
 
 interface TaskAssignment {
@@ -546,9 +554,9 @@ All will follow the same response format, error format, and naming conventions d
 | `/api/v1/wbs` | POST | `lib/services/wbs-mutations.ts` | ✅ E2E Tested | Returns computed code/depth/sequence |
 | `/api/v1/wbs/{id}` | PUT | `lib/services/wbs-mutations.ts` | ✅ E2E Tested | Sends `plannedStart`/`plannedFinish` |
 | `/api/v1/wbs/{id}` | DELETE | `lib/services/wbs-mutations.ts` | ✅ E2E Tested | Soft delete |
-| `/api/v1/tasks?projectCode={code}` | GET | `lib/services/tasks-queries.ts` | ✅ E2E Tested | Wrapped in `{ data: [...] }` |
+| `/api/v1/tasks/project?projectCode={code}` | GET | `lib/services/tasks-queries.ts` | ✅ E2E Tested | Wrapped in `{ data: [...] }` |
 | `/api/v1/tasks/{id}` | GET | `lib/services/tasks-queries.ts` | ✅ E2E Tested | Wrapped in `{ data: {} }` |
-| `/api/v1/tasks` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | Returns taskCode, full object |
+| `/api/v1/tasks` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | Supports assignments + dependencies with `dependencyType` (camelCase) |
 | `/api/v1/tasks/{id}` | PUT | `lib/services/tasks.ts` | ✅ E2E Tested | Requires `projectCode` + `wbsNodeId` in body |
 | `/api/v1/tasks/{id}` | DELETE | `lib/services/tasks.ts` | ✅ E2E Tested | Soft delete |
 | `/api/v1/tasks/{id}/progress` | POST | `lib/services/tasks.ts` | ⏳ Pending Backend | Frontend wired, returns server error |

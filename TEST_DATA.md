@@ -84,8 +84,23 @@ Test all CRUD operations via the dashboard UI.
 
 ### CREATE — 5 Tasks (under Project 1: Municipal CCTV Network)
 
+> When creating Task 3–5, add a dependency to a preceding task to test the dependency flow.
+
 | # | Name | Description | WBS Node | Type | Priority | Planned Start | Planned Finish |
 |---|------|-------------|----------|------|----------|---------------|----------------|
+| 1 | Conduct Site Assessments | Visit all 12 municipal buildings to assess camera mounting points | Site Surveys | planning | high | 2026-08-01 | 2026-08-31 |
+| 2 | Draft Camera Spec Document | Document resolution, FPS, storage, and integration requirements | Camera Specifications | documentation | medium | 2026-08-15 | 2026-09-01 |
+| 3 | Issue RFQ for CCTV Equipment | Prepare and distribute RFQ to approved vendors | Procurement & Vendor Management | procurement | high | 2026-09-01 | 2026-09-20 |
+| 4 | Evaluate Vendor Proposals | Score and rank vendor submissions against requirements | Procurement & Vendor Management | planning | critical | 2026-09-21 | 2026-10-10 |
+| 5 | Configure NVR Storage | Set up network video recorders and configure retention policies | Installation | implementation | medium | 2026-11-01 | 2026-11-30 |
+
+### Dependencies (add when creating tasks 3–5)
+
+| Task | Predecessor | Type | Lag | Mandatory |
+|------|-------------|------|-----|-----------|
+| 3 | Task 1 | FS | 0 | Yes |
+| 4 | Task 3 | FS | 1 | Yes |
+| 5 | Task 4 | FS | 0 | No |
 | 1 | Conduct Site Assessments | Visit all 12 municipal buildings to assess camera mounting points | Site Surveys | planning | high | 2026-08-01 | 2026-08-31 |
 | 2 | Draft Camera Spec Document | Document resolution, FPS, storage, and integration requirements | Camera Specifications | documentation | medium | 2026-08-15 | 2026-09-01 |
 | 3 | Issue RFQ for CCTV Equipment | Prepare and distribute RFQ to approved vendors | Procurement & Vendor Management | procurement | high | 2026-09-01 | 2026-09-20 |
@@ -139,6 +154,7 @@ Test all CRUD operations via the dashboard UI.
 | 10 | Edit WBS node 3 — name and date change persist | ✅ |
 | 11 | Delete WBS node 4 — removed from tree | ✅ |
 | 12 | Create 5 tasks with assignments (no status field in form) | ✅ |
+| 12a | Create task with dependency — predecessor task + type FS/SS/FF/SF | ✅ |
 | 13 | Task list shows all 5 with assignment count | ✅ |
 | 14 | Edit task 1 — name and priority change persist | ✅ |
 | 15 | Delete task 5 — removed from list | ✅ |
