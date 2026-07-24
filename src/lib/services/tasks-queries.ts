@@ -68,7 +68,7 @@ export async function getTasks(projectCode?: string): Promise<Task[]> {
 }
 
 export async function getTasksByProject(projectCode: string): Promise<Task[]> {
-  const data = await fetchApi<Record<string, unknown>>(`/tasks/${projectCode}`);
+  const data = await fetchApi<Record<string, unknown>>(`/tasks/project?projectCode=${projectCode}`);
   if (data) {
     const items = Array.isArray(data) ? data : (data.data as Record<string, unknown>[] | undefined);
     if (items && Array.isArray(items)) return items.map(mapApiTask);
