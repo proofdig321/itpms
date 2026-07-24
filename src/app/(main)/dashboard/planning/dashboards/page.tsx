@@ -5,8 +5,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCriticalPath, getEvmByProject, getForecast } from "@/lib/services/analytics";
 import { getCostItemsByProject } from "@/lib/services/costs";
 import { getProcurementByProject } from "@/lib/services/procurement";
+import { getProjects } from "@/lib/services/projects-queries";
 import { getResourcesByProject } from "@/lib/services/resources";
 import { getRisksByProject } from "@/lib/services/risks";
+
+import { ProjectSelector } from "../_components/project-selector";
+import { ProjectSync } from "../_components/project-sync";
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR", maximumFractionDigits: 0 }).format(
@@ -14,15 +18,28 @@ function formatCurrency(amount: number) {
   );
 }
 
-export default async function PlanningDashboardsPage() {
+interface PlanningDashboardsPageProps {
+  searchParams: Promise<{ project?: string }>;
+}
+
+export default async function PlanningDashboardsPage({ searchParams }: PlanningDashboardsPageProps) {
+  const params = await searchParams;
+  const projects = await getProjects();
+  const fallback = projects[0]?.projectCode ?? "";
+  const selectedCode = params.project ?? "";
+
+  if (!selectedCode) {
+    return <ProjectSync basePath="/dashboard/planning/dashboards" fallbackCode={fallback} />;
+  }
+
   const [evm, _forecast, criticalTasks, costs, risks, resources, procurement] = await Promise.all([
-    getEvmByProject("ITPMS-001"),
-    getForecast("ITPMS-001"),
-    getCriticalPath("ITPMS-001"),
-    getCostItemsByProject("ITPMS-001"),
-    getRisksByProject("ITPMS-001"),
-    getResourcesByProject("ITPMS-001"),
-    getProcurementByProject("ITPMS-001"),
+    getEvmByProject(selectedCode),
+    getForecast(selectedCode),
+    getCriticalPath(selectedCode),
+    getCostItemsByProject(selectedCode),
+    getRisksByProject(selectedCode),
+    getResourcesByProject(selectedCode),
+    getProcurementByProject(selectedCode),
   ]);
 
   const totalBudget = costs.reduce((sum, c) => sum + c.estimatedAmount, 0);
@@ -33,9 +50,12 @@ export default async function PlanningDashboardsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-semibold text-2xl tracking-tight">Planning Dashboards</h1>
-        <p className="text-muted-foreground text-sm">Project Manager and ICT Director views.</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="font-semibold text-2xl tracking-tight">Planning Dashboards</h1>
+          <p className="text-muted-foreground text-sm">Project Manager and ICT Director views.</p>
+        </div>
+        <ProjectSelector projects={projects} selectedCode={selectedCode} basePath="/dashboard/planning/dashboards" />
       </div>
 
       <Tabs defaultValue="pm">
@@ -44,20 +64,8 @@ export default async function PlanningDashboardsPage() {
           <TabsTrigger value="director">ICT Director</TabsTrigger>
         </TabsList>
 
-        {/* Project Manager Dashboard */}
         <TabsContent value="pm" className="mt-4">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-normal text-muted-foreground text-sm">Progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-2">
-                  <Progress value={45} className="h-2 flex-1" />
-                  <span className="font-semibold tabular-nums">45%</span>
-                </div>
-              </CardContent>
-            </Card>
             <Card>
               <CardHeader>
                 <CardTitle className="font-normal text-muted-foreground text-sm">Budget Status</CardTitle>
@@ -83,10 +91,17 @@ export default async function PlanningDashboardsPage() {
                 <p className="font-semibold text-2xl tabular-nums">{resources.length}</p>
               </CardContent>
             </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-normal text-muted-foreground text-sm">High Risks</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="font-semibold text-2xl tabular-nums">{highRisks.length}</p>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
-        {/* ICT Director Dashboard */}
         <TabsContent value="director" className="mt-4">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card>
@@ -129,10 +144,18 @@ export default async function PlanningDashboardsPage() {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="font-normal text-muted-foreground text-sm">High Risks</CardTitle>
+                <CardTitle className="font-normal text-muted-foreground text-sm">
+                  EVM — {evm ? `SPI ${evm.spiIndex.toFixed(2)} / CPI ${evm.cpiIndex.toFixed(2)}` : "No data"}
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="font-semibold text-2xl tabular-nums">{highRisks.length}</p>
+                {evm ? (
+                  <div className="flex items-center gap-2">
+                    <Progress value={Math.min(evm.spiIndex * 100, 100)} className="h-2 flex-1" />
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">—</p>
+                )}
               </CardContent>
             </Card>
           </div>
