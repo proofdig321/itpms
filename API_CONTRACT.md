@@ -81,21 +81,18 @@ All endpoints follow:
 ### Project Object
 
 ```typescript
-type ProjectStatus =
-  | "on-track"
-  | "at-risk"
-  | "delayed"
-  | "completed"
-  | "not-started";
+type ProjectStatus = "not-started" | "in-progress" | "completed" | "archived" | "closed" | "cancelled";
+type ProjectHealth = "on-track" | "at-risk" | "delayed" | "critical";
 
 interface Project {
   id: string;
   projectCode: string;       // Format: ITP-YYYY-XXXX (per FR-PI-002)
   title: string;
   description: string;
-  status: ProjectStatus;     // Server-computed based on progress
+  status: ProjectStatus;     // Server-computed
+  health?: ProjectHealth;    // Server-computed
   progress: number;          // 0-100, server-computed from tasks
-  manager: string;
+  managerId: string | null;
   plannedStart: string;      // ISO 8601 date
   plannedFinish: string;     // ISO 8601 date
   createdAt: string;         // ISO 8601 datetime
@@ -414,12 +411,16 @@ interface WbsNode {
 
 ## 9. STATUS ENUMS (System-Wide)
 
-This enum is used across ALL modules consistently:
-
 ### Project Status
 
 ```typescript
-type ProjectStatus = "on-track" | "at-risk" | "delayed" | "completed" | "not-started";
+type ProjectStatus = "not-started" | "in-progress" | "completed" | "archived" | "closed" | "cancelled";
+```
+
+### Project Health
+
+```typescript
+type ProjectHealth = "on-track" | "at-risk" | "delayed" | "critical";
 ```
 
 ### WBS Status
@@ -429,11 +430,15 @@ type WbsStatus = "not-started" | "in-progress" | "completed";
 ```
 
 Visual mapping (frontend responsibility):
+- `not-started` → GRAY
+- `in-progress` → BLUE
+- `completed` → GRAY (neutral)
+- `archived` / `closed` → GRAY
+- `cancelled` → RED
 - `on-track` → GREEN
 - `at-risk` → AMBER
 - `delayed` → RED
-- `completed` → GRAY (neutral)
-- `not-started` → GRAY (neutral)
+- `critical` → DARK RED
 
 Laravel must store and return these exact string values.
 
@@ -447,7 +452,7 @@ Laravel must store and return these exact string values.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/v1/tasks/{projectCode}` | Get tasks for a project |
+| GET | `/api/v1/tasks?projectCode={code}` | Get tasks for a project |
 | GET | `/api/v1/tasks` | Get all tasks in the system |
 | GET | `/api/v1/tasks/{id}` | Get single task |
 | POST | `/api/v1/tasks` | Create task |
@@ -508,7 +513,7 @@ interface TaskAssignment {
   - `POST /api/v1/tasks/{id}/hold`
   - `POST /api/v1/tasks/{id}/resume`
   - `POST /api/v1/tasks/{id}/cancel`
-- Progress updated via: `POST /api/v1/tasks/{id}/progress` with `{ percentComplete, remarks }`
+- Progress updated via: `POST /api/v1/tasks/{id}/progress` with `{ percentComplete, remarks, updatedBy }`
 - `PUT /tasks/{id}` must NOT require ownership authorization — same open policy as WBS
 - Single task response wrapped in `{ data: {} }`, list wrapped in `{ data: [] }`
 
@@ -551,19 +556,25 @@ All will follow the same response format, error format, and naming conventions d
 | `/api/v1/projects/{id}` | DELETE | `lib/services/projects.ts` | ✅ E2E Tested | Soft delete |
 | `/api/v1/projects/{id}/archive` | POST | `lib/services/projects.ts` | ⏳ Pending Backend | Frontend wired, returns server error |
 | `/api/v1/projects/{id}/close` | POST | `lib/services/projects.ts` | ⏳ Pending Backend | Frontend wired, returns server error |
+| `/api/v1/projects/{projectCode}/dashboard` | GET | `lib/services/project-dashboard.ts` | ✅ E2E Tested | Nested object with project, schedule, metrics, health, summary |
+| `/api/v1/projects/{projectCode}/metrics` | GET | `lib/services/project-dashboard.ts` | ✅ E2E Tested | Returns expectedProgress, actualProgress, scheduleVariance etc |
+| `/api/v1/projects/{projectCode}/health` | GET | `lib/services/project-dashboard.ts` | ✅ E2E Tested | Returns health, score, recommendations |
+| `/api/v1/projects/{projectCode}/forecast` | GET | `lib/services/project-dashboard.ts` | ✅ E2E Tested | Returns forecastFinish, remainingWorkingDays, forecastDuration |
+| `/api/v1/projects/{projectCode}/schedule` | GET | `lib/services/project-dashboard.ts` | ✅ E2E Tested | Returns plannedStart, plannedFinish, forecastFinish, progress |
+| `/api/v1/projects/{projectCode}/schedule/progress` | GET | `lib/services/project-dashboard.ts` | ✅ E2E Tested | Returns plannedProgress, actualProgress |
 | `/api/v1/wbs?projectCode={code}` | GET | `lib/services/wbs.ts` | ✅ E2E Tested | Paginated response |
 | `/api/v1/wbs` | POST | `lib/services/wbs-mutations.ts` | ✅ E2E Tested | Returns computed code/depth/sequence |
 | `/api/v1/wbs/{id}` | PUT | `lib/services/wbs-mutations.ts` | ✅ E2E Tested | Sends `plannedStart`/`plannedFinish` |
 | `/api/v1/wbs/{id}` | DELETE | `lib/services/wbs-mutations.ts` | ✅ E2E Tested | Soft delete |
-| `/api/v1/tasks/{projectCode}` | GET | `lib/services/tasks-queries.ts` | ✅ E2E Tested | Wrapped in `{ data: [...] }` |
+| `/api/v1/tasks?projectCode={code}` | GET | `lib/services/tasks-queries.ts` | ✅ E2E Tested | Wrapped in `{ data: [...] }` |
 | `/api/v1/tasks/{id}` | GET | `lib/services/tasks-queries.ts` | ✅ E2E Tested | Wrapped in `{ data: {} }` |
 | `/api/v1/tasks` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | Supports assignments + dependencies with `dependencyType` (camelCase) |
-| `/api/v1/tasks/{id}` | PUT | `lib/services/tasks.ts` | ✅ E2E Tested | Requires `projectCode` + `wbsNodeId` in body |
-| `/api/v1/tasks/{id}` | DELETE | `lib/services/tasks.ts` | ✅ E2E Tested | Soft delete |
-| `/api/v1/tasks/{id}/progress` | POST | `lib/services/tasks.ts` | ⏳ Pending Backend | Frontend wired, returns server error |
-| `/api/v1/tasks/{id}/hold` | POST | `lib/services/tasks.ts` | ⏳ Pending Backend | Frontend wired, returns server error |
-| `/api/v1/tasks/{id}/resume` | POST | `lib/services/tasks.ts` | ⏳ Pending Backend | Frontend wired, returns server error |
-| `/api/v1/tasks/{id}/cancel` | POST | `lib/services/tasks.ts` | ⏳ Pending Backend | Frontend wired, returns server error |
+| `/api/v1/tasks/{id}` | PUT | `lib/services/tasks.ts` | ❌ Backend 500 | Server error — Mzo investigating |
+| `/api/v1/tasks/{id}` | DELETE | `lib/services/tasks.ts` | ❌ Backend 500 | Server error — Mzo investigating |
+| `/api/v1/tasks/{id}/progress` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | Body: `{ percentComplete, remarks, updatedBy }` |
+| `/api/v1/tasks/{id}/hold` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | No body |
+| `/api/v1/tasks/{id}/resume` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | No body |
+| `/api/v1/tasks/{id}/cancel` | POST | `lib/services/tasks.ts` | ⏳ Pending Verification | Frontend wired |
 | `/api/v1/users` | GET | `lib/services/users.ts` | ✅ E2E Tested | Used for dropdowns |
 | `/api/v1/auth/azure-login` | POST | `lib/auth/auth-service.ts` | ✅ E2E Tested | Azure AD flow |
 
