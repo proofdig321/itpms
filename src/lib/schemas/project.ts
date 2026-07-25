@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const projectStatuses = ["on-track", "at-risk", "delayed", "completed", "not-started"] as const;
+export const projectStatuses = ["not-started", "in-progress", "completed", "archived", "closed", "cancelled"] as const;
 
 const baseProjectFormSchema = z.object({
   title: z.string().min(1, { message: "Title is required." }),

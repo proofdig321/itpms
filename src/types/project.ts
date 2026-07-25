@@ -3,7 +3,8 @@ export interface Project {
   projectCode: string;
   title: string;
   description: string;
-  status: "on-track" | "at-risk" | "delayed" | "completed" | "not-started";
+  status: "not-started" | "in-progress" | "completed" | "archived" | "closed" | "cancelled";
+  health?: "on-track" | "at-risk" | "delayed" | "critical";
   progress: number;
   managerId: string | null;
   plannedStart: string;

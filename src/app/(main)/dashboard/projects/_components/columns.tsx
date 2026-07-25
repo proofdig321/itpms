@@ -31,28 +31,30 @@ import { Progress } from "@/components/ui/progress";
 import { archiveProject, closeProject, deleteProject } from "@/lib/services/projects";
 import type { Project } from "@/types/project";
 
-const statusConfig: Record<Project["status"], { label: string; className: string }> = {
-  "on-track": {
-    label: "On Track",
-    className:
-      "border-green-300 bg-green-50 text-green-700 dark:border-green-700 dark:bg-green-950 dark:text-green-300",
+const statusConfig: Record<string, { label: string; className: string }> = {
+  "not-started": {
+    label: "Not Started",
+    className: "border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400",
   },
-  "at-risk": {
-    label: "At Risk",
-    className:
-      "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-300",
-  },
-  delayed: {
-    label: "Delayed",
-    className: "border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-950 dark:text-red-300",
+  "in-progress": {
+    label: "In Progress",
+    className: "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-300",
   },
   completed: {
     label: "Completed",
     className: "border-gray-300 bg-gray-50 text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300",
   },
-  "not-started": {
-    label: "Not Started",
-    className: "border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400",
+  archived: {
+    label: "Archived",
+    className: "border-gray-300 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400",
+  },
+  closed: {
+    label: "Closed",
+    className: "border-gray-300 bg-gray-50 text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300",
+  },
+  cancelled: {
+    label: "Cancelled",
+    className: "border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-950 dark:text-red-300",
   },
 };
 

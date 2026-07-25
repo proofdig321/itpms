@@ -1,57 +1,84 @@
 export interface ProjectDashboard {
-  projectCode: string;
-  title: string;
-  status: string;
-  progress: number;
-  plannedStart: string;
-  plannedFinish: string;
-  manager: string;
-  totalTasks: number;
-  completedTasks: number;
-  overdueTasks: number;
+  project: {
+    id: string;
+    projectCode: string;
+    status: string;
+    health: string;
+    healthReason: string;
+    progress: number;
+    manager: string | null;
+  };
+  schedule: {
+    plannedStart: string;
+    plannedFinish: string;
+    actualStart: string | null;
+    actualFinish: string | null;
+    forecastFinish: string;
+    remainingWorkingDays: number;
+    forecastDuration: number;
+  };
+  metrics: {
+    expectedProgress: number;
+    actualProgress: number;
+    scheduleVariance: number;
+    schedulePerformanceIndex: number;
+    totalTasks: number;
+    completedTasks: number;
+    overdueTasks: number;
+    overdueTaskPercentage: number;
+    criticalPathDelayed: boolean;
+  };
+  summary: {
+    progress: number;
+    completedTasks: number;
+    remainingTasks: number;
+    forecastFinish: string;
+  };
 }
 
 export interface ProjectMetrics {
-  projectCode: string;
+  expectedProgress: number;
+  actualProgress: number;
+  scheduleVariance: number;
+  schedulePerformanceIndex: number;
   totalTasks: number;
   completedTasks: number;
-  inProgressTasks: number;
-  notStartedTasks: number;
   overdueTasks: number;
   onHoldTasks: number;
-  completionRate: number;
-  overdueRate: number;
+  overdueTaskPercentage: number;
+  criticalPathDelayed: boolean;
+  forecastFinish: string;
 }
 
 export interface ProjectHealth {
   projectCode: string;
-  overallHealth: "good" | "warning" | "critical";
-  scheduleHealth: "good" | "warning" | "critical";
-  scopeHealth: "good" | "warning" | "critical";
-  issues: string[];
+  health: "on-track" | "at-risk" | "delayed" | "critical";
+  score: number;
+  status: string;
+  scheduleVarianceDays: number;
+  progressVariance: number;
+  forecastFinish: string;
+  plannedProgress: number;
+  actualProgress: number;
+  overdueTasks: number;
+  onHoldTasks: number;
   recommendations: string[];
 }
 
 export interface ProjectForecast {
-  projectCode: string;
-  projectedEndDate: string;
-  daysVariance: number;
-  onTrack: boolean;
-  completionProbability: number;
-  remainingTasks: number;
-  remainingDays: number;
+  forecastFinish: string;
+  remainingWorkingDays: number;
+  forecastDuration: number;
 }
 
 export interface ProjectSchedule {
-  projectCode: string;
   plannedStart: string;
   plannedFinish: string;
   actualStart: string | null;
   actualFinish: string | null;
-  totalDuration: number;
-  elapsedDays: number;
-  remainingDays: number;
-  tasks: ScheduleTask[];
+  forecastFinish: string;
+  progress: number;
+  status: string;
 }
 
 export interface ScheduleTask {
@@ -65,8 +92,6 @@ export interface ScheduleTask {
 
 export interface ScheduleProgress {
   projectCode: string;
-  overallProgress: number;
   plannedProgress: number;
-  scheduleVariance: number;
-  taskBreakdown: { status: string; count: number; percentage: number }[];
+  actualProgress: number;
 }

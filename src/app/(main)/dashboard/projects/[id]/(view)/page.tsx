@@ -30,6 +30,33 @@ function formatDate(dateStr: string): string {
 }
 
 const statusConfig: Record<string, { label: string; className: string }> = {
+  "not-started": {
+    label: "Not Started",
+    className: "border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400",
+  },
+  "in-progress": {
+    label: "In Progress",
+    className: "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-300",
+  },
+  completed: {
+    label: "Completed",
+    className: "border-gray-300 bg-gray-50 text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300",
+  },
+  archived: {
+    label: "Archived",
+    className: "border-gray-300 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400",
+  },
+  closed: {
+    label: "Closed",
+    className: "border-gray-300 bg-gray-50 text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300",
+  },
+  cancelled: {
+    label: "Cancelled",
+    className: "border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-950 dark:text-red-300",
+  },
+};
+
+const healthConfig: Record<string, { label: string; className: string }> = {
   "on-track": {
     label: "On Track",
     className:
@@ -44,30 +71,9 @@ const statusConfig: Record<string, { label: string; className: string }> = {
     label: "Delayed",
     className: "border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-950 dark:text-red-300",
   },
-  completed: {
-    label: "Completed",
-    className: "border-gray-300 bg-gray-50 text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300",
-  },
-  "not-started": {
-    label: "Not Started",
-    className: "border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400",
-  },
-};
-
-const healthConfig: Record<string, { label: string; className: string }> = {
-  good: {
-    label: "Good",
-    className:
-      "border-green-300 bg-green-50 text-green-700 dark:border-green-700 dark:bg-green-950 dark:text-green-300",
-  },
-  warning: {
-    label: "Warning",
-    className:
-      "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-300",
-  },
   critical: {
     label: "Critical",
-    className: "border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-950 dark:text-red-300",
+    className: "border-red-400 bg-red-100 text-red-800 dark:border-red-600 dark:bg-red-900 dark:text-red-200",
   },
 };
 
@@ -93,6 +99,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   ]);
 
   const status = statusConfig[project.status] ?? statusConfig["not-started"];
+  const healthBadge = healthConfig[project.health ?? ""] ?? null;
   const managerName = project.managerId
     ? (users.find((u) => u.id === project.managerId)?.name ?? project.managerId)
     : "Unassigned";
@@ -137,6 +144,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               </CardHeader>
               <CardContent className="flex items-center gap-3">
                 <Badge className={status.className}>{status.label}</Badge>
+                {healthBadge && <Badge className={healthBadge.className}>{healthBadge.label}</Badge>}
               </CardContent>
             </Card>
 
@@ -145,8 +153,10 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 <CardTitle className="font-normal text-muted-foreground text-sm">Progress</CardTitle>
               </CardHeader>
               <CardContent className="flex items-center gap-3">
-                <Progress value={dashboard?.progress ?? project.progress} className="h-2 flex-1" />
-                <span className="font-medium text-sm tabular-nums">{dashboard?.progress ?? project.progress}%</span>
+                <Progress value={dashboard?.summary?.progress ?? project.progress} className="h-2 flex-1" />
+                <span className="font-medium text-sm tabular-nums">
+                  {dashboard?.summary?.progress ?? project.progress}%
+                </span>
               </CardContent>
             </Card>
 
@@ -201,32 +211,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 </CardHeader>
                 <CardContent>
                   <p className="font-semibold text-2xl tabular-nums">{metrics.completedTasks}</p>
-                  <p className="text-muted-foreground text-xs">{metrics.completionRate}% completion rate</p>
+                  <p className="text-muted-foreground text-xs">{metrics.overdueTaskPercentage}% overdue rate</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-normal text-muted-foreground text-sm">In Progress</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="font-semibold text-2xl tabular-nums">{metrics.inProgressTasks}</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-normal text-muted-foreground text-sm">Not Started</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="font-semibold text-2xl tabular-nums">{metrics.notStartedTasks}</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-normal text-muted-foreground text-sm">Overdue</CardTitle>
+                  <CardTitle className="font-normal text-muted-foreground text-sm">Overdue Tasks</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="font-semibold text-2xl tabular-nums text-red-600">{metrics.overdueTasks}</p>
-                  <p className="text-muted-foreground text-xs">{metrics.overdueRate}% overdue rate</p>
                 </CardContent>
               </Card>
               <Card>
@@ -235,6 +228,29 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 </CardHeader>
                 <CardContent>
                   <p className="font-semibold text-2xl tabular-nums">{metrics.onHoldTasks}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-normal text-muted-foreground text-sm">Schedule Variance</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p
+                    className={`font-semibold text-2xl tabular-nums ${metrics.scheduleVariance >= 0 ? "text-green-600" : "text-red-600"}`}
+                  >
+                    {metrics.scheduleVariance > 0 ? "+" : ""}
+                    {metrics.scheduleVariance}%
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-normal text-muted-foreground text-sm">
+                    Schedule Performance Index
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="font-semibold text-2xl tabular-nums">{metrics.schedulePerformanceIndex}</p>
                 </CardContent>
               </Card>
             </div>
@@ -250,53 +266,37 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               <div className="grid gap-4 sm:grid-cols-3">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="font-normal text-muted-foreground text-sm">Overall Health</CardTitle>
+                    <CardTitle className="font-normal text-muted-foreground text-sm">Health</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Badge className={(healthConfig[health.overallHealth] ?? healthConfig.warning).className}>
-                      {(healthConfig[health.overallHealth] ?? healthConfig.warning).label}
+                    <Badge className={(healthConfig[health.health] ?? healthConfig["at-risk"]).className}>
+                      {(healthConfig[health.health] ?? healthConfig["at-risk"]).label}
                     </Badge>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle className="font-normal text-muted-foreground text-sm">Schedule Health</CardTitle>
+                    <CardTitle className="font-normal text-muted-foreground text-sm">Health Score</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <Badge className={(healthConfig[health.scheduleHealth] ?? healthConfig.warning).className}>
-                      {(healthConfig[health.scheduleHealth] ?? healthConfig.warning).label}
-                    </Badge>
+                  <CardContent className="flex items-center gap-3">
+                    <Progress value={health.score} className="h-2 flex-1" />
+                    <span className="font-medium text-sm tabular-nums">{health.score}</span>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle className="font-normal text-muted-foreground text-sm">Scope Health</CardTitle>
+                    <CardTitle className="font-normal text-muted-foreground text-sm">Schedule Variance</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Badge className={(healthConfig[health.scopeHealth] ?? healthConfig.warning).className}>
-                      {(healthConfig[health.scopeHealth] ?? healthConfig.warning).label}
-                    </Badge>
+                    <p
+                      className={`font-semibold text-lg tabular-nums ${health.scheduleVarianceDays <= 0 ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {health.scheduleVarianceDays > 0 ? "+" : ""}
+                      {health.scheduleVarianceDays}d
+                    </p>
                   </CardContent>
                 </Card>
               </div>
-
-              {health.issues.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="font-normal text-muted-foreground text-sm">Issues</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="flex flex-col gap-1">
-                      {health.issues.map((issue, i) => (
-                        <li key={i} className="text-sm text-red-600">
-                          • {issue}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
-
               {health.recommendations.length > 0 && (
                 <Card>
                   <CardHeader>
@@ -321,18 +321,18 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
         {/* Schedule */}
         <TabsContent value="schedule" className="mt-4">
-          {schedule || scheduleProgress ? (
+          {schedule ? (
             <div className="flex flex-col gap-4">
               {scheduleProgress && (
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <Card>
                     <CardHeader>
-                      <CardTitle className="font-normal text-muted-foreground text-sm">Overall Progress</CardTitle>
+                      <CardTitle className="font-normal text-muted-foreground text-sm">Actual Progress</CardTitle>
                     </CardHeader>
                     <CardContent className="flex items-center gap-3">
-                      <Progress value={scheduleProgress.overallProgress ?? 0} className="h-2 flex-1" />
+                      <Progress value={scheduleProgress.actualProgress ?? 0} className="h-2 flex-1" />
                       <span className="font-medium text-sm tabular-nums">
-                        {scheduleProgress.overallProgress ?? "—"}%
+                        {scheduleProgress.actualProgress ?? "—"}%
                       </span>
                     </CardContent>
                   </Card>
@@ -347,79 +347,35 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                       </span>
                     </CardContent>
                   </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="font-normal text-muted-foreground text-sm">Schedule Variance</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p
-                        className={`font-semibold text-lg tabular-nums ${
-                          (scheduleProgress.scheduleVariance ?? 0) < 0 ? "text-red-600" : "text-green-600"
-                        }`}
-                      >
-                        {scheduleProgress.scheduleVariance == null
-                          ? "—"
-                          : `${scheduleProgress.scheduleVariance > 0 ? "+" : ""}${scheduleProgress.scheduleVariance}%`}
-                      </p>
-                    </CardContent>
-                  </Card>
                 </div>
               )}
-
-              {schedule && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="font-normal text-muted-foreground text-sm">Timeline</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-col gap-2">
-                    <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
-                      <div>
-                        <p className="text-muted-foreground text-xs">Total Duration</p>
-                        <p className="font-medium">
-                          {schedule.totalDuration ?? "—"} {schedule.totalDuration != null ? "days" : ""}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Elapsed</p>
-                        <p className="font-medium">
-                          {schedule.elapsedDays ?? "—"} {schedule.elapsedDays != null ? "days" : ""}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Remaining</p>
-                        <p className="font-medium">
-                          {schedule.remainingDays ?? "—"} {schedule.remainingDays != null ? "days" : ""}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Actual Start</p>
-                        <p className="font-medium">{schedule.actualStart ? formatDate(schedule.actualStart) : "—"}</p>
-                      </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-normal text-muted-foreground text-sm">Timeline</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-2">
+                  <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+                    <div>
+                      <p className="text-muted-foreground text-xs">Planned Start</p>
+                      <p className="font-medium">{schedule.plannedStart ? formatDate(schedule.plannedStart) : "—"}</p>
                     </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {schedule?.tasks && schedule.tasks.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="font-normal text-muted-foreground text-sm">Tasks</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col gap-2">
-                      {schedule.tasks.map((task) => (
-                        <div key={task.id} className="flex items-center gap-3 text-sm">
-                          <span className="w-48 truncate font-medium">{task.name}</span>
-                          <Progress value={task.percentComplete} className="h-1.5 flex-1" />
-                          <span className="w-10 text-right tabular-nums text-muted-foreground text-xs">
-                            {task.percentComplete}%
-                          </span>
-                        </div>
-                      ))}
+                    <div>
+                      <p className="text-muted-foreground text-xs">Planned Finish</p>
+                      <p className="font-medium">{schedule.plannedFinish ? formatDate(schedule.plannedFinish) : "—"}</p>
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                    <div>
+                      <p className="text-muted-foreground text-xs">Forecast Finish</p>
+                      <p className="font-medium">
+                        {schedule.forecastFinish ? formatDate(schedule.forecastFinish) : "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-xs">Actual Start</p>
+                      <p className="font-medium">{schedule.actualStart ? formatDate(schedule.actualStart) : "—"}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           ) : (
             <p className="text-muted-foreground text-sm">Schedule data not available.</p>
@@ -429,67 +385,29 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         {/* Forecast */}
         <TabsContent value="forecast" className="mt-4">
           {forecast ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-3">
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-normal text-muted-foreground text-sm">Projected End Date</CardTitle>
+                  <CardTitle className="font-normal text-muted-foreground text-sm">Forecast Finish</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="font-semibold text-sm">{formatDate(forecast.projectedEndDate)}</p>
+                  <p className="font-semibold text-sm">{formatDate(forecast.forecastFinish)}</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-normal text-muted-foreground text-sm">Days Variance</CardTitle>
+                  <CardTitle className="font-normal text-muted-foreground text-sm">Remaining Working Days</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p
-                    className={`font-semibold text-2xl tabular-nums ${forecast.daysVariance > 0 ? "text-red-600" : "text-green-600"}`}
-                  >
-                    {forecast.daysVariance > 0 ? "+" : ""}
-                    {forecast.daysVariance}d
-                  </p>
+                  <p className="font-semibold text-2xl tabular-nums">{forecast.remainingWorkingDays}</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-normal text-muted-foreground text-sm">On Track</CardTitle>
+                  <CardTitle className="font-normal text-muted-foreground text-sm">Forecast Duration</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Badge
-                    className={
-                      forecast.onTrack
-                        ? "border-green-300 bg-green-50 text-green-700 dark:border-green-700 dark:bg-green-950 dark:text-green-300"
-                        : "border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-950 dark:text-red-300"
-                    }
-                  >
-                    {forecast.onTrack ? "Yes" : "No"}
-                  </Badge>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-normal text-muted-foreground text-sm">Completion Probability</CardTitle>
-                </CardHeader>
-                <CardContent className="flex items-center gap-3">
-                  <Progress value={forecast.completionProbability} className="h-2 flex-1" />
-                  <span className="font-medium text-sm tabular-nums">{forecast.completionProbability}%</span>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-normal text-muted-foreground text-sm">Remaining Tasks</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="font-semibold text-2xl tabular-nums">{forecast.remainingTasks}</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-normal text-muted-foreground text-sm">Remaining Days</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="font-semibold text-2xl tabular-nums">{forecast.remainingDays}</p>
+                  <p className="font-semibold text-2xl tabular-nums">{forecast.forecastDuration} days</p>
                 </CardContent>
               </Card>
             </div>

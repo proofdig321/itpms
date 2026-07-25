@@ -1,5 +1,5 @@
-import type { Project } from "@/data/projects";
 import type { ProjectFormValues } from "@/lib/schemas/project";
+import type { Project } from "@/types/project";
 
 import { getAuthHeaders, handleUnauthorized } from "./api-helpers";
 

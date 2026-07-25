@@ -1,10 +1,8 @@
 import "server-only";
 
-import type { Project } from "@/data/projects";
+import type { Project } from "@/types/project";
 
 import { getServerAuthHeaders } from "./server-api-helpers";
-
-export type { Project };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
@@ -23,7 +21,14 @@ async function fetchApi<T>(endpoint: string): Promise<T | null> {
   }
 }
 
-const validStatuses: Project["status"][] = ["on-track", "at-risk", "delayed", "completed", "not-started"];
+const validStatuses: Project["status"][] = [
+  "not-started",
+  "in-progress",
+  "completed",
+  "archived",
+  "closed",
+  "cancelled",
+];
 
 function mapApiProject(raw: Record<string, unknown>): Project {
   const rawStatus = raw.status as string;
@@ -33,6 +38,7 @@ function mapApiProject(raw: Record<string, unknown>): Project {
     title: raw.title as string,
     description: (raw.description as string) ?? "",
     status: validStatuses.includes(rawStatus as Project["status"]) ? (rawStatus as Project["status"]) : "not-started",
+    health: (raw.health as Project["health"]) ?? undefined,
     progress: (raw.progress as number) ?? 0,
     managerId: (raw.managerId as string) ?? null,
     plannedStart: (raw.plannedStart as string) ?? (raw.startDate as string) ?? "",
