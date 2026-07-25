@@ -98,7 +98,7 @@ export function TaskForm({
       setProjectTasks([]);
       return;
     }
-    fetch(`${API_BASE_URL}/tasks/project?projectCode=${selectedProjectCode}`, {
+    fetch(`${API_BASE_URL}/tasks?projectCode=${selectedProjectCode}`, {
       headers: getAuthHeaders(),
     })
       .then((r) => r.json())
