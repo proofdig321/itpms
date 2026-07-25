@@ -12,13 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { type TaskFormValues, taskFormSchema, taskPriorities, taskTypes } from "@/lib/schemas/task";
-import { getAuthHeaders } from "@/lib/services/api-helpers";
+import { getTasksByProject } from "@/lib/services/tasks";
 import type { Project } from "@/types/project";
 import type { Task } from "@/types/task";
 import type { User } from "@/types/user";
 import type { WbsNode } from "@/types/wbs";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 const typeLabels: Record<(typeof taskTypes)[number], string> = {
   planning: "Planning",
@@ -94,24 +92,12 @@ export function TaskForm({
   const filteredWbsNodes = wbsNodes.filter((n) => n.projectCode === selectedProjectCode);
 
   useEffect(() => {
-    if (!selectedProjectCode || !API_BASE_URL) {
+    if (!selectedProjectCode) {
       setProjectTasks([]);
       return;
     }
-    fetch(`${API_BASE_URL}/tasks?projectCode=${selectedProjectCode}`, {
-      headers: getAuthHeaders(),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        const items = Array.isArray(data) ? data : (data.data ?? []);
-        setProjectTasks(
-          items.map((t: Record<string, unknown>) => ({
-            id: t.id as string,
-            taskCode: (t.taskCode as string) ?? "",
-            name: t.name as string,
-          })),
-        );
-      })
+    getTasksByProject(selectedProjectCode)
+      .then(setProjectTasks)
       .catch(() => setProjectTasks([]));
   }, [selectedProjectCode]);
 

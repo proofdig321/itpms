@@ -38,6 +38,20 @@ function mapApiTask(raw: Record<string, unknown>): Task {
   };
 }
 
+export async function getTasksByProject(projectCode: string): Promise<Pick<Task, "id" | "taskCode" | "name">[]> {
+  const response = await fetch(`${API_BASE_URL}/tasks?projectCode=${projectCode}`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) return [];
+  const data = await response.json();
+  const items: Record<string, unknown>[] = Array.isArray(data) ? data : (data.data ?? []);
+  return items.map((t) => ({
+    id: t.id as string,
+    taskCode: (t.taskCode as string) ?? "",
+    name: t.name as string,
+  }));
+}
+
 export async function createTask(projectCode: string, values: TaskFormValues): Promise<Task> {
   const payload = {
     ...values,
