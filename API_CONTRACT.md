@@ -482,16 +482,24 @@ interface Task {
   plannedFinish: string;     // ISO 8601 date
   actualStart?: string;
   actualFinish?: string;
+  plannedCost: string;       // Decimal string e.g. "5000.00" — confirmed by live API
+  actualCost: string;        // Decimal string e.g. "0.00" — confirmed by live API
   percentComplete: number;   // 0-100, updated via POST /tasks/{id}/progress
+  remarks: string | null;
   assignments: TaskAssignment[];
-  dependencies: TaskDependency[];
+  predecessorDependencies: TaskDependency[];  // Accepted on POST/PUT but NOT persisted — backend defect, Mzo investigating
+  progressHistory: TaskProgressEntry[];
+  comments: TaskComment[];
+  approvals: TaskApproval[];
   createdAt: string;
+  updatedAt: string;
 }
 
 interface TaskDependency {
   predecessorTaskId: string;
   dependencyType: "FS" | "SS" | "FF" | "SF";  // camelCase — confirmed by backend
   lag: number;
+  lead: number;                                // confirmed by backend (Mzo, 2026)
   mandatory: boolean;
 }
 
@@ -501,6 +509,32 @@ interface TaskAssignment {
   userName?: string;         // Backend-resolved
   role: string;
   allocation: number;        // 0-100
+}
+
+interface TaskProgressEntry {
+  id: string;
+  progressDate: string;      // ISO 8601 date — confirmed by live API
+  percentComplete: number;
+  remarks: string | null;
+  updatedBy: string;
+  updatedByName?: string;    // Backend-resolved
+  createdAt: string;
+}
+
+interface TaskComment {
+  id: string;
+  comment: string;
+  userId: string;
+  userName?: string;
+  createdAt: string;
+}
+
+interface TaskApproval {
+  id: string;
+  status: string;
+  approvedBy?: string;
+  approvedByName?: string;
+  createdAt: string;
 }
 ```
 
@@ -513,9 +547,23 @@ interface TaskAssignment {
   - `POST /api/v1/tasks/{id}/hold`
   - `POST /api/v1/tasks/{id}/resume`
   - `POST /api/v1/tasks/{id}/cancel`
-- Progress updated via: `POST /api/v1/tasks/{id}/progress` with `{ percentComplete, remarks, updatedBy }`
-- `PUT /tasks/{id}` must NOT require ownership authorization — same open policy as WBS
+- Progress updated via: `POST /api/v1/tasks/{id}/progress` with `{ percentComplete, remarks, updatedBy, progressDate, actualCost? }` — `progressDate` is ISO 8601 date, `actualCost` is optional (both confirmed by live API)
+- `predecessorDependencies` is the confirmed payload key for task dependencies (renamed from `dependencies` — Mzo, 2026)
+- Frontend form uses `dependencies` as internal field array name; service layer translates to `predecessorDependencies` on send
+- `predecessorDependencies` defect status (confirmed 2026-08-15):
+  - POST /tasks: accepted
+  - PUT /tasks/{id}: accepted
+  - GET /tasks/{id}: empty (`predecessorDependencies: []`)
+  - GET /tasks/{id}/dependencies: empty (`{"data":[]}`)
+  - Classification: Backend persistence/return defect
+  - Frontend serialization: Verified correct
+  - Frontend workaround: None
+  - Backend clarification: Required from Mzo
+- `plannedCost` is accepted on POST and PUT, stored and returned as decimal string e.g. `"5000.00"` — confirmed by live API
+- `PUT /tasks/{id}` working as of 2026-08-15 (was previously 500)
+- `DELETE /tasks/{id}` working as of 2026-08-15 (was previously 500)
 - Single task response wrapped in `{ data: {} }`, list wrapped in `{ data: [] }`
+- WBS nodes for a project are fetched dynamically client-side when project is selected in the task form — not pre-loaded at page render
 
 ---
 
@@ -568,10 +616,10 @@ All will follow the same response format, error format, and naming conventions d
 | `/api/v1/wbs/{id}` | DELETE | `lib/services/wbs-mutations.ts` | ✅ E2E Tested | Soft delete |
 | `/api/v1/tasks?projectCode={code}` | GET | `lib/services/tasks-queries.ts` | ✅ E2E Tested | Wrapped in `{ data: [...] }` |
 | `/api/v1/tasks/{id}` | GET | `lib/services/tasks-queries.ts` | ✅ E2E Tested | Wrapped in `{ data: {} }` |
-| `/api/v1/tasks` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | Supports assignments + dependencies with `dependencyType` (camelCase) |
-| `/api/v1/tasks/{id}` | PUT | `lib/services/tasks.ts` | ❌ Backend 500 | Server error — Mzo investigating |
-| `/api/v1/tasks/{id}` | DELETE | `lib/services/tasks.ts` | ❌ Backend 500 | Server error — Mzo investigating |
-| `/api/v1/tasks/{id}/progress` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | Body: `{ percentComplete, remarks, updatedBy }` |
+| `/api/v1/tasks` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | Sends `predecessorDependencies` (accepted, not persisted — backend defect), `lag`, `lead`, `plannedCost` per task |
+| `/api/v1/tasks/{id}` | PUT | `lib/services/tasks.ts` | ✅ E2E Tested | Working as of 2026-08-15, accepts `plannedCost` |
+| `/api/v1/tasks/{id}` | DELETE | `lib/services/tasks.ts` | ✅ E2E Tested | Working as of 2026-08-15 |
+| `/api/v1/tasks/{id}/progress` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | Body: `{ percentComplete, remarks, updatedBy, progressDate, actualCost? }` — `progressDate` confirmed required, `actualCost` optional |
 | `/api/v1/tasks/{id}/hold` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | No body |
 | `/api/v1/tasks/{id}/resume` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | No body |
 | `/api/v1/tasks/{id}/cancel` | POST | `lib/services/tasks.ts` | ⏳ Pending Verification | Frontend wired |
