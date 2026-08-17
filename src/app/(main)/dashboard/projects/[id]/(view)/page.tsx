@@ -17,7 +17,7 @@ import {
   getProjectSchedule,
   getScheduleProgress,
 } from "@/lib/services/project-dashboard";
-import { getProjectById } from "@/lib/services/projects-queries";
+import { getProjectByCode } from "@/lib/services/projects-queries";
 import { getUsers } from "@/lib/services/users";
 
 import { DeleteProjectDialog } from "./_components/delete-project-dialog";
@@ -83,7 +83,7 @@ interface ProjectDetailPageProps {
 
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { id } = await params;
-  const [project, users] = await Promise.all([getProjectById(id), getUsers()]);
+  const [project, users] = await Promise.all([getProjectByCode(id), getUsers()]);
 
   if (!project) {
     notFound();
@@ -114,14 +114,14 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         <div className="flex gap-2">
           <PermissionGate permission="projects.update">
             <Button asChild variant="outline">
-              <Link href={`/dashboard/projects/${project.id}/edit`}>
+              <Link href={`/dashboard/projects/${project.projectCode}/edit`}>
                 <Pencil className="h-4 w-4" />
                 Edit
               </Link>
             </Button>
           </PermissionGate>
           <PermissionGate permission="projects.delete">
-            <DeleteProjectDialog projectId={project.id} projectTitle={project.title} />
+            <DeleteProjectDialog projectId={project.projectCode} projectTitle={project.title} />
           </PermissionGate>
         </div>
       </div>

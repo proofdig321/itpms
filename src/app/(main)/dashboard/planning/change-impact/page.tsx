@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getBaselinesByProject } from "@/lib/services/analytics";
-import { getProjectById, getProjects } from "@/lib/services/projects-queries";
+import { getProjects } from "@/lib/services/projects-queries";
 
 import { ProjectSelector } from "../_components/project-selector";
 import { ProjectSync } from "../_components/project-sync";
@@ -34,10 +34,8 @@ export default async function ChangeImpactPage({ searchParams }: ChangeImpactPag
   }
 
   const selectedProject = projects.find((p) => p.projectCode === selectedCode);
-  const [baselines, project] = await Promise.all([
-    getBaselinesByProject(selectedCode),
-    selectedProject ? getProjectById(selectedProject.id) : Promise.resolve(undefined),
-  ]);
+  const [baselines] = await Promise.all([getBaselinesByProject(selectedCode)]);
+  const project = selectedProject;
 
   const approvedBaseline = baselines.find((b) => b.status === "approved");
 

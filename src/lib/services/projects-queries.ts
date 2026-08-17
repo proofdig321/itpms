@@ -56,9 +56,20 @@ export async function getProjects(): Promise<Project[]> {
   return [];
 }
 
-export async function getProjectById(id: string): Promise<Project | undefined> {
-  const data = await fetchApi<Record<string, unknown>>(`/projects/${id}`);
-  const raw = (data?.data as Record<string, unknown>) ?? data;
-  if (raw?.id) return mapApiProject(raw);
-  return undefined;
+export async function getProjectByCode(projectCode: string): Promise<Project | undefined> {
+  if (!API_BASE_URL) return undefined;
+  try {
+    const headers = await getServerAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/projects/${projectCode}`, {
+      headers,
+      cache: "no-store",
+    });
+    if (!response.ok) return undefined;
+    const data = await response.json();
+    const raw = (data?.data as Record<string, unknown>) ?? data;
+    if (raw?.id) return mapApiProject(raw);
+    return undefined;
+  } catch {
+    return undefined;
+  }
 }

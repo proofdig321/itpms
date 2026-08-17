@@ -10,17 +10,15 @@ import type { TaskFormValues } from "@/lib/schemas/task";
 import { createTask } from "@/lib/services/tasks";
 import type { Project } from "@/types/project";
 import type { User } from "@/types/user";
-import type { WbsNode } from "@/types/wbs";
 
 import { TaskForm } from "../../_components/task-form";
 
 interface CreateTaskFormProps {
   projects: Project[];
-  wbsNodes: WbsNode[];
   users: User[];
 }
 
-export function CreateTaskForm({ projects, wbsNodes, users }: CreateTaskFormProps) {
+export function CreateTaskForm({ projects, users }: CreateTaskFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,7 +41,6 @@ export function CreateTaskForm({ projects, wbsNodes, users }: CreateTaskFormProp
       submitLabel="Create Task"
       isSubmitting={isSubmitting}
       projects={projects}
-      wbsNodes={wbsNodes}
       users={users}
     />
   );

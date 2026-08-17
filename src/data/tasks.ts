@@ -2,8 +2,20 @@ import type { Task } from "@/types/task";
 
 export type { Task };
 
+const defaults = {
+  plannedCost: "0.00",
+  actualCost: "0.00",
+  remarks: null,
+  predecessorDependencies: [],
+  progressHistory: [],
+  comments: [],
+  approvals: [],
+  updatedAt: "",
+};
+
 export const tasks: Task[] = [
   {
+    ...defaults,
     id: "t1",
     projectCode: "ITPMS-001",
     wbsNodeId: "w1-2-2-1",
@@ -24,6 +36,7 @@ export const tasks: Task[] = [
     createdAt: "2025-02-28",
   },
   {
+    ...defaults,
     id: "t2",
     projectCode: "ITPMS-001",
     wbsNodeId: "w1-2-2-1",
@@ -43,6 +56,7 @@ export const tasks: Task[] = [
     createdAt: "2025-03-01",
   },
   {
+    ...defaults,
     id: "t3",
     projectCode: "ITPMS-001",
     wbsNodeId: "w1-2-2-2",
@@ -61,6 +75,7 @@ export const tasks: Task[] = [
     createdAt: "2025-03-01",
   },
   {
+    ...defaults,
     id: "t4",
     projectCode: "ITPMS-001",
     wbsNodeId: "w1-3",
@@ -79,6 +94,7 @@ export const tasks: Task[] = [
     createdAt: "2025-04-01",
   },
   {
+    ...defaults,
     id: "t5",
     projectCode: "ITPMS-002",
     taskCode: "TSK-00005",

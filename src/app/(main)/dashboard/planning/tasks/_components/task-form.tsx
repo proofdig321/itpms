@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { type TaskFormValues, taskFormSchema, taskPriorities, taskTypes } from "@/lib/schemas/task";
 import { getTasksByProject } from "@/lib/services/tasks";
+import { getWbsNodesByProject } from "@/lib/services/wbs-client";
 import type { Project } from "@/types/project";
 import type { Task } from "@/types/task";
 import type { User } from "@/types/user";
@@ -41,7 +42,7 @@ interface TaskFormProps {
   submitLabel?: string;
   isSubmitting?: boolean;
   projects: Project[];
-  wbsNodes: WbsNode[];
+  wbsNodes?: WbsNode[];
   users: User[];
 }
 
@@ -51,7 +52,7 @@ export function TaskForm({
   submitLabel = "Save Task",
   isSubmitting = false,
   projects,
-  wbsNodes,
+  wbsNodes = [],
   users,
 }: TaskFormProps) {
   const form = useForm<TaskFormValues>({
@@ -87,18 +88,24 @@ export function TaskForm({
   });
 
   const [projectTasks, setProjectTasks] = useState<Pick<Task, "id" | "taskCode" | "name">[]>([]);
+  const [wbsNodesForProject, setWbsNodesForProject] = useState<WbsNode[]>(
+    wbsNodes.filter((n) => n.projectCode === defaultValues?.projectCode),
+  );
 
   const selectedProjectCode = form.watch("projectCode");
-  const filteredWbsNodes = wbsNodes.filter((n) => n.projectCode === selectedProjectCode);
 
   useEffect(() => {
     if (!selectedProjectCode) {
       setProjectTasks([]);
+      setWbsNodesForProject([]);
       return;
     }
     getTasksByProject(selectedProjectCode)
       .then(setProjectTasks)
       .catch(() => setProjectTasks([]));
+    getWbsNodesByProject(selectedProjectCode)
+      .then(setWbsNodesForProject)
+      .catch(() => setWbsNodesForProject([]));
   }, [selectedProjectCode]);
 
   return (
@@ -139,7 +146,7 @@ export function TaskForm({
                     <SelectValue placeholder="Select WBS node" />
                   </SelectTrigger>
                   <SelectContent>
-                    {filteredWbsNodes.map((n) => (
+                    {wbsNodesForProject.map((n) => (
                       <SelectItem key={n.id} value={n.id}>
                         {n.code} — {n.name}
                       </SelectItem>
@@ -275,6 +282,28 @@ export function TaskForm({
           )}
         />
 
+        <Controller
+          control={form.control}
+          name="plannedCost"
+          render={({ field, fieldState }) => (
+            <Field className="gap-1.5 sm:max-w-[200px]" data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="task-planned-cost">
+                Planned Cost (ZAR) <span className="font-normal text-muted-foreground text-xs">(optional)</span>
+              </FieldLabel>
+              <Input
+                id="task-planned-cost"
+                type="number"
+                min={0}
+                placeholder="e.g. 50000"
+                value={field.value ?? ""}
+                onChange={(e) => field.onChange(e.target.value === "" ? undefined : e.target.valueAsNumber)}
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
         {/* Dependencies */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
@@ -283,7 +312,9 @@ export function TaskForm({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => appendDep({ predecessorTaskId: "", dependencyType: "FS", lag: 0, mandatory: true })}
+              onClick={() =>
+                appendDep({ predecessorTaskId: "", dependencyType: "FS", lag: 0, lead: 0, mandatory: true })
+              }
             >
               <Plus className="mr-1 h-3.5 w-3.5" />
               Add
@@ -295,7 +326,7 @@ export function TaskForm({
           )}
 
           {depFields.map((item, index) => (
-            <div key={item.id} className="grid gap-3 rounded-md border p-3 sm:grid-cols-[1fr_1fr_60px_auto]">
+            <div key={item.id} className="grid gap-3 rounded-md border p-3 sm:grid-cols-[1fr_1fr_60px_60px_auto]">
               <Controller
                 control={form.control}
                 name={`dependencies.${index}.predecessorTaskId`}
@@ -344,6 +375,20 @@ export function TaskForm({
                 render={({ field }) => (
                   <Field className="gap-1">
                     <FieldLabel className="text-xs">Lag</FieldLabel>
+                    <Input
+                      type="number"
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                    />
+                  </Field>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name={`dependencies.${index}.lead`}
+                render={({ field }) => (
+                  <Field className="gap-1">
+                    <FieldLabel className="text-xs">Lead</FieldLabel>
                     <Input
                       type="number"
                       value={field.value}

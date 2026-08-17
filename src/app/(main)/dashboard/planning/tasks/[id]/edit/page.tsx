@@ -45,7 +45,8 @@ export default async function EditTaskPage({ params }: EditTaskPageProps) {
               duration: task.duration ?? 1,
               plannedStart: task.plannedStart,
               plannedFinish: task.plannedFinish,
-              assignments: task.assignments ?? [],
+              plannedCost: task.plannedCost ? Number(task.plannedCost) : undefined,
+              assignments: task.assignments.map(({ userId, role, allocation }) => ({ userId, role, allocation })),
               dependencies: [],
             }}
             projects={projects}

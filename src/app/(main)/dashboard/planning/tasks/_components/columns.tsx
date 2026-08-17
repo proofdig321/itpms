@@ -99,7 +99,7 @@ export const columns: ColumnDef<Task>[] = [
     header: "Priority",
     cell: ({ row }) => {
       const priority = row.getValue("priority") as TaskPriority;
-      const config = priorityConfig[priority] ?? priorityConfig["medium"];
+      const config = priorityConfig[priority] ?? priorityConfig.medium;
       return <Badge className={config.className}>{config.label}</Badge>;
     },
   },
@@ -157,6 +157,8 @@ function ActionsCell({ task }: { task: Task }) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [percentComplete, setPercentComplete] = useState(task.percentComplete);
   const [remarks, setRemarks] = useState("");
+  const [actualCost, setActualCost] = useState<string>("");
+  const [progressDate, setProgressDate] = useState(() => new Date().toISOString().split("T")[0]);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -176,10 +178,18 @@ function ActionsCell({ task }: { task: Task }) {
     setIsUpdating(true);
     try {
       const userId = getSessionUser()?.id || "";
-      await updateTaskProgress(task.id, { percentComplete, remarks, updatedBy: userId });
+      await updateTaskProgress(task.id, {
+        percentComplete,
+        remarks,
+        updatedBy: userId,
+        progressDate,
+        ...(actualCost !== "" && { actualCost: Number(actualCost) }),
+      });
       toast.success("Progress updated successfully.");
       setShowProgress(false);
       setRemarks("");
+      setActualCost("");
+      setProgressDate(new Date().toISOString().split("T")[0]);
       router.refresh();
     } catch {
       toast.error("Failed to update progress.");
@@ -263,6 +273,15 @@ function ActionsCell({ task }: { task: Task }) {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
+              <Label htmlFor="progressDate">Progress Date</Label>
+              <Input
+                id="progressDate"
+                type="date"
+                value={progressDate}
+                onChange={(e) => setProgressDate(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="percentComplete">Percent Complete</Label>
               <Input
                 id="percentComplete"
@@ -280,6 +299,19 @@ function ActionsCell({ task }: { task: Task }) {
                 placeholder="e.g. Equipment delivered and installation started."
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="actualCost">
+                Actual Cost (ZAR) <span className="font-normal text-muted-foreground text-xs">(optional)</span>
+              </Label>
+              <Input
+                id="actualCost"
+                type="number"
+                min={0}
+                placeholder="e.g. 15000"
+                value={actualCost}
+                onChange={(e) => setActualCost(e.target.value)}
               />
             </div>
           </div>

@@ -69,7 +69,7 @@ export const columns: ColumnDef<Project>[] = [
     cell: ({ row }) => {
       const project = row.original;
       return (
-        <Link href={`/dashboard/projects/${project.id}`} className="hover:underline">
+        <Link href={`/dashboard/projects/${project.projectCode}`} className="hover:underline">
           {project.title}
         </Link>
       );
@@ -135,7 +135,7 @@ function ActionsCell({ project }: { project: Project }) {
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      await deleteProject(project.id);
+      await deleteProject(project.projectCode);
       toast.success("Project deleted successfully.");
       router.refresh();
     } catch {
@@ -148,7 +148,7 @@ function ActionsCell({ project }: { project: Project }) {
 
   const handleArchive = async () => {
     try {
-      await archiveProject(project.id);
+      await archiveProject(project.projectCode);
       toast.success("Project archived.");
       router.refresh();
     } catch {
@@ -158,7 +158,7 @@ function ActionsCell({ project }: { project: Project }) {
 
   const handleClose = async () => {
     try {
-      await closeProject(project.id);
+      await closeProject(project.projectCode);
       toast.success("Project closed.");
       router.refresh();
     } catch {
@@ -176,7 +176,7 @@ function ActionsCell({ project }: { project: Project }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`/dashboard/projects/${project.id}/edit`}>
+            <Link href={`/dashboard/projects/${project.projectCode}/edit`}>
               <Pencil className="mr-2 h-3.5 w-3.5" />
               Edit
             </Link>

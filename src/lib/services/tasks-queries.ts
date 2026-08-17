@@ -43,15 +43,59 @@ function mapApiTask(raw: Record<string, unknown>): Task {
     plannedFinish: raw.plannedFinish as string,
     actualStart: (raw.actualStart as string) ?? undefined,
     actualFinish: (raw.actualFinish as string) ?? undefined,
+    plannedCost: (raw.plannedCost as string) ?? "0.00",
+    actualCost: (raw.actualCost as string) ?? "0.00",
     percentComplete: (raw.percentComplete as number) ?? 0,
+    remarks: (raw.remarks as string) ?? null,
     assignments: Array.isArray(raw.assignments)
       ? (raw.assignments as Record<string, unknown>[]).map((a) => ({
+          id: (a.id as string) ?? undefined,
           userId: a.userId as string,
+          userName: (a.userName as string) ?? undefined,
           role: (a.role as string) ?? "",
           allocation: (a.allocation as number) ?? 100,
         }))
       : [],
+    predecessorDependencies: Array.isArray(raw.predecessorDependencies)
+      ? (raw.predecessorDependencies as Record<string, unknown>[]).map((d) => ({
+          predecessorTaskId: d.predecessorTaskId as string,
+          dependencyType: d.dependencyType as Task["predecessorDependencies"][number]["dependencyType"],
+          lag: (d.lag as number) ?? 0,
+          lead: (d.lead as number) ?? 0,
+          mandatory: (d.mandatory as boolean) ?? false,
+        }))
+      : [],
+    progressHistory: Array.isArray(raw.progressHistory)
+      ? (raw.progressHistory as Record<string, unknown>[]).map((p) => ({
+          id: p.id as string,
+          progressDate: p.progressDate as string,
+          percentComplete: p.percentComplete as number,
+          remarks: (p.remarks as string) ?? null,
+          updatedBy: p.updatedBy as string,
+          updatedByName: (p.updatedByName as string) ?? undefined,
+          createdAt: p.createdAt as string,
+        }))
+      : [],
+    comments: Array.isArray(raw.comments)
+      ? (raw.comments as Record<string, unknown>[]).map((c) => ({
+          id: c.id as string,
+          comment: c.comment as string,
+          userId: c.userId as string,
+          userName: (c.userName as string) ?? undefined,
+          createdAt: c.createdAt as string,
+        }))
+      : [],
+    approvals: Array.isArray(raw.approvals)
+      ? (raw.approvals as Record<string, unknown>[]).map((a) => ({
+          id: a.id as string,
+          status: a.status as string,
+          approvedBy: (a.approvedBy as string) ?? undefined,
+          approvedByName: (a.approvedByName as string) ?? undefined,
+          createdAt: a.createdAt as string,
+        }))
+      : [],
     createdAt: (raw.createdAt as string) ?? "",
+    updatedAt: (raw.updatedAt as string) ?? "",
   };
 }
 

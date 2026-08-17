@@ -23,6 +23,7 @@ export const dependencySchema = z.object({
   predecessorTaskId: z.string().min(1, { message: "Predecessor task is required." }),
   dependencyType: z.enum(["FS", "SS", "FF", "SF"]),
   lag: z.number().int().min(0),
+  lead: z.number().int().min(0),
   mandatory: z.boolean(),
 });
 
@@ -36,6 +37,7 @@ export const taskFormSchema = z.object({
   duration: z.number().min(1, { message: "Duration must be at least 1 working day." }),
   plannedStart: z.string().min(1, { message: "Planned start is required." }),
   plannedFinish: z.string().min(1, { message: "Planned finish is required." }),
+  plannedCost: z.number().min(0).optional(),
   assignments: z.array(assignmentSchema),
   dependencies: z.array(dependencySchema),
 });

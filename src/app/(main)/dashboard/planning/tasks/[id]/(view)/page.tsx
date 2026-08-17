@@ -107,8 +107,8 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
             <CardTitle className="font-normal text-muted-foreground text-sm">Priority</CardTitle>
           </CardHeader>
           <CardContent>
-            <Badge className={(priorityConfig[task.priority] ?? priorityConfig["medium"]).className}>
-              {(priorityConfig[task.priority] ?? priorityConfig["medium"]).label}
+            <Badge className={(priorityConfig[task.priority] ?? priorityConfig.medium).className}>
+              {(priorityConfig[task.priority] ?? priorityConfig.medium).label}
             </Badge>
           </CardContent>
         </Card>
@@ -156,12 +156,21 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-muted-foreground text-sm">Assignee</CardTitle>
+            <CardTitle className="font-normal text-muted-foreground text-sm">Cost</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="font-medium text-sm">
-              {task.assignments?.length ? task.assignments.map((a) => a.role).join(", ") : "Unassigned"}
-            </p>
+          <CardContent className="flex gap-6 text-sm">
+            <div>
+              <p className="text-muted-foreground text-xs">Planned</p>
+              <p className="font-medium">
+                R {Number(task.plannedCost).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs">Actual</p>
+              <p className="font-medium">
+                R {Number(task.actualCost).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -174,6 +183,71 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
           <p className="text-sm">{task.description}</p>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-normal text-muted-foreground text-sm">Assignments</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {task.assignments.length === 0 ? (
+            <p className="text-muted-foreground text-sm">No assignments.</p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {task.assignments.map((a) => (
+                <div key={a.id ?? a.userId} className="flex items-center justify-between text-sm">
+                  <span className="font-medium">{a.userName ?? a.userId}</span>
+                  <span className="text-muted-foreground">
+                    {a.role} — {a.allocation}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {task.progressHistory.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-normal text-muted-foreground text-sm">Progress History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-3">
+              {task.progressHistory.map((p) => (
+                <div key={p.id} className="flex items-start justify-between gap-4 text-sm">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-medium">{p.percentComplete}% complete</span>
+                    {p.remarks && <span className="text-muted-foreground">{p.remarks}</span>}
+                    <span className="text-muted-foreground text-xs">{p.updatedByName ?? p.updatedBy}</span>
+                  </div>
+                  <span className="whitespace-nowrap text-muted-foreground text-xs">{p.progressDate}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {task.comments.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-normal text-muted-foreground text-sm">Comments</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-3">
+              {task.comments.map((c) => (
+                <div key={c.id} className="flex flex-col gap-0.5 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{c.userName ?? c.userId}</span>
+                    <span className="text-muted-foreground text-xs">{c.createdAt}</span>
+                  </div>
+                  <p className="text-muted-foreground">{c.comment}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
