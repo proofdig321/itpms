@@ -15,6 +15,14 @@
         "@modelcontextprotocol/server-filesystem",
         "/workspaces/itpms"
       ]
+    },
+    "itpms-backend-mirror": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/workspaces/itpms-backend-mirror"
+      ]
     }
   }
 }

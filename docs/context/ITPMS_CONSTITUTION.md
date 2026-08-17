@@ -66,7 +66,75 @@ When Filament and the live API disagree → live API wins.
 
 ---
 
-## 3. Technology Constraints (Locked)
+## 3. Evidence Hierarchy
+
+Every API question must be answered by consulting evidence in this order:
+
+```
+1. Live API          — what is actually running right now (ground truth)
+2. Backend mirror    — what Mzo implemented (optional, when available)
+3. API_CONTRACT.md   — our documented integration boundary (update to match reality)
+```
+
+When sources disagree:
+- Live API overrides everything
+- Backend mirror explains WHY the live API behaves as it does
+- `API_CONTRACT.md` is updated to match — never the other way
+
+### Three adapter architecture
+
+```
+                 ITPMS MCP
+                    │
+        ┌───────────┼───────────┐
+        ▼           ▼           ▼
+   OUR REPO     BACKEND REPO   LIVE API
+        │           │           │
+        ▼           ▼           ▼
+ Constitution   Implementation Runtime
+ Decisions      Evidence        Evidence
+ State
+```
+
+### Backend mirror — optional external evidence adapter
+
+Path: `/workspaces/itpms-backend-mirror`
+MCP server: `itpms-backend-mirror` (filesystem, read-only)
+
+**The backend mirror is OPTIONAL.** If it does not exist, nothing breaks.
+The constitution and live API remain fully sufficient.
+
+**The backend mirror is READ-ONLY.** Q must never write to it.
+Mzo owns the backend. We own the frontend. The mirror gives us visibility, not ownership.
+
+**What the mirror answers:**
+
+| Question | Laravel artifact |
+|----------|-----------------|
+| Does a route use projectCode or UUID? | `routes/api.php`, `RouteServiceProvider` |
+| What fields does a request validate? | `app/Http/Requests/*` |
+| What fields does a response return? | `app/Http/Resources/*` |
+| What does Filament expose as valid domain? | `app/Filament/Resources/*` |
+| What is the actual DB schema? | `database/migrations/*` |
+| What model relationships exist? | `app/Models/*` |
+| Is a 500 a missing method or a runtime error? | `app/Http/Controllers/*` |
+
+**How to set up the mirror:**
+```bash
+# One-time clone (read-only deploy key or HTTPS)
+git clone <mzo-repo-url> /workspaces/itpms-backend-mirror
+
+# Update mirror to latest
+cd /workspaces/itpms-backend-mirror && git pull
+```
+
+Record the backend commit hash inspected in `API_CONTRACT.md` when making contract decisions.
+
+**If Mzo does not provide repository access:** nothing changes. Use live API + constitution.
+
+---
+
+## 4. Technology Constraints (Locked)
 
 | Concern | Technology | Rule |
 |---------|-----------|------|
@@ -82,7 +150,7 @@ When Filament and the live API disagree → live API wins.
 
 ---
 
-## 4. Module Structure (Every Module Follows This)
+## 5. Module Structure (Every Module Follows This)
 
 ```
 src/app/(main)/dashboard/{module}/
@@ -112,7 +180,7 @@ src/data/{module}.ts                 ← Mock data (used when backend not implem
 
 ---
 
-## 5. Service Layer Split (Critical — Build Will Fail If Violated)
+## 6. Service Layer Split (Critical — Build Will Fail If Violated)
 
 Next.js App Router enforces strict server/client boundaries.
 `next/headers` cannot be imported in any file imported by a client component — even transitively.
@@ -147,7 +215,7 @@ lib/services/
 
 ---
 
-## 6. Form Pattern
+## 7. Form Pattern
 
 ```
 lib/schemas/{module}.ts         ← Zod schema defines shape and validation
@@ -165,7 +233,7 @@ create/page.tsx                 ← Owns submission. Calls service. Navigates.
 
 ---
 
-## 7. Naming Conventions
+## 8. Naming Conventions
 
 | Thing | Convention | Example |
 |-------|-----------|---------|
@@ -177,7 +245,7 @@ create/page.tsx                 ← Owns submission. Calls service. Navigates.
 
 ---
 
-## 8. HTTP Methods
+## 9. HTTP Methods
 
 Laravel uses `PUT` for updates — not `PATCH`.
 
@@ -189,7 +257,7 @@ Laravel uses `PUT` for updates — not `PATCH`.
 
 ---
 
-## 9. Immutable Fields (Never Editable in Frontend Forms)
+## 10. Immutable Fields (Never Editable in Frontend Forms)
 
 - `id`
 - `projectCode`
@@ -201,7 +269,7 @@ Laravel uses `PUT` for updates — not `PATCH`.
 
 ---
 
-## 10. Status and Health Colour Mapping
+## 11. Status and Health Colour Mapping
 
 | Value | Colour | Badge style |
 |-------|--------|-------------|
@@ -219,7 +287,7 @@ Dark mode variants use `dark:border-*` `dark:bg-*` `dark:text-*` equivalents on 
 
 ---
 
-## 11. RBAC Rules
+## 12. RBAC Rules
 
 - RBAC is UI visibility only — never data filtering
 - `PermissionGate` wraps action buttons and links
@@ -229,7 +297,7 @@ Dark mode variants use `dark:border-*` `dark:bg-*` `dark:text-*` equivalents on 
 
 ---
 
-## 12. Cross-Route State (Zustand)
+## 13. Cross-Route State (Zustand)
 
 ```
 src/stores/planning/planning-store.ts        ← selectedProjectCode, persisted to localStorage
@@ -241,7 +309,7 @@ This ensures selected project persists across Planning, Tasks, WBS, and Timeline
 
 ---
 
-## 13. Domain Shape
+## 14. Domain Shape
 
 ### WBS Hierarchy
 ```
@@ -290,7 +358,7 @@ FS (Finish-to-Start) | SS (Start-to-Start) | FF (Finish-to-Finish) | SF (Start-t
 
 ---
 
-## 14. Route Identity Rules (Confirmed by Live API 2026-08-15)
+## 15. Route Identity Rules (Confirmed by Live API 2026-08-15)
 
 > This is the most important table. Do not assume. Test before implementing.
 
@@ -308,7 +376,7 @@ FS (Finish-to-Start) | SS (Start-to-Start) | FF (Finish-to-Finish) | SF (Start-t
 
 ---
 
-## 15. Known Backend Defects (Do Not Workaround — Flag to Mzo)
+## 16. Known Backend Defects (Do Not Workaround — Flag to Mzo)
 
 | Endpoint | Method | Result | Notes |
 |----------|--------|--------|-------|
@@ -322,7 +390,7 @@ FS (Finish-to-Start) | SS (Start-to-Start) | FF (Finish-to-Finish) | SF (Start-t
 
 ---
 
-## 16. Confirmed API Changes (From Mzo — Already Implemented)
+## 17. Confirmed API Changes (From Mzo — Already Implemented)
 
 | Old | New | Status |
 |-----|-----|--------|
@@ -335,7 +403,7 @@ FS (Finish-to-Start) | SS (Start-to-Start) | FF (Finish-to-Finish) | SF (Start-t
 
 ---
 
-## 17. Live API Testing Procedure
+## 18. Live API Testing Procedure
 
 ### Why it is mandatory
 Every backend change must be verified against the live API before frontend code changes.
@@ -392,7 +460,7 @@ curl -s -H "$H1" -H "$H2" -H "$H3" "$BASE/projects" | python3 -m json.tool
 
 ---
 
-## 18. Implementation State (commit bee9265, 2026-08-15)
+## 19. Implementation State (commit bee9265, 2026-08-15)
 
 | Area | State | Notes |
 |------|-------|-------|
@@ -419,7 +487,7 @@ curl -s -H "$H1" -H "$H2" -H "$H3" "$BASE/projects" | python3 -m json.tool
 
 ---
 
-## 19. What Q Must Not Do
+## 20. What Q Must Not Do
 
 - Do not change frontend code because Mzo said something changed — verify with live API first
 - Do not assume UUID is the route identifier for any new endpoint — test it
@@ -435,7 +503,7 @@ curl -s -H "$H1" -H "$H2" -H "$H3" "$BASE/projects" | python3 -m json.tool
 
 ---
 
-## 20. Before Every Commit
+## 21. Before Every Commit
 
 ```bash
 npx @biomejs/biome check --write   # lint + format + import ordering

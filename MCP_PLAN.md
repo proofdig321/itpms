@@ -69,17 +69,37 @@ When Filament shows a field that the live API doesn't return, test the API — d
 
 Every implementation decision must be reconciled against all three before code is written.
 
-| Source | What it tells us | How we access it |
-|--------|-----------------|-----------------|
-| Laravel repository | Actual routes, controllers, validation, models, migrations, Filament resources | Repo MCP server |
-| `API_CONTRACT.md` | Our documented integration boundary — confirmed live behaviour only | This repository |
-| Live API (ngrok) | What is actually deployed and responding right now | curl with auth token |
+| Source | What it tells us | How we access it | Required? |
+|--------|-----------------|-----------------|----------|
+| Live API (ngrok) | What is actually deployed and responding right now | curl with auth token | ✅ Always |
+| `API_CONTRACT.md` | Our documented integration boundary — confirmed live behaviour only | This repository | ✅ Always |
+| Backend mirror | What Mzo implemented — routes, controllers, validation, models, migrations | `itpms-backend-mirror` MCP server | ⚪ Optional |
 
 ### Order of trust when they disagree
 
 1. Live API — ground truth, what is actually running
-2. Laravel repository — what Mzo implemented (repo MCP resolves this)
+2. Backend mirror — explains WHY the live API behaves as it does
 3. `API_CONTRACT.md` — update to match reality, never the other way
+
+### Backend mirror — optional external evidence adapter
+
+Path: `/workspaces/itpms-backend-mirror` (sibling to our repo, never inside it)
+MCP server: `itpms-backend-mirror` in `.amazonq/mcp.json`
+
+The mirror is read-only. Q must never write to it. Mzo owns the backend.
+If the mirror does not exist, nothing breaks — live API + constitution remain sufficient.
+
+To set up:
+```bash
+git clone <mzo-repo-url> /workspaces/itpms-backend-mirror
+```
+
+To update:
+```bash
+cd /workspaces/itpms-backend-mirror && git pull
+```
+
+Record the backend commit hash in `API_CONTRACT.md` when making contract decisions based on mirror inspection.
 
 ---
 
@@ -256,34 +276,34 @@ Zero errors before commit. Zero errors before push.
 
 ---
 
-## Repo MCP Server — What It Must Answer
+## Backend Mirror — What It Answers
 
-The repo MCP server exposes the Laravel repository. It is needed to answer questions
-that the live API cannot answer alone.
+When the mirror is available at `/workspaces/itpms-backend-mirror`, Q can inspect:
 
 | Question | Laravel artifact |
 |----------|-----------------|
 | What routes exist and what do they bind to? | `routes/api.php` |
-| Does a route use projectCode or UUID binding? | `RouteServiceProvider` or route model binding in controller |
+| Does a route use projectCode or UUID binding? | `RouteServiceProvider` or route model binding |
 | What fields does a request validate? | `app/Http/Requests/*` |
 | What fields does a response return? | `app/Http/Resources/*` |
 | What does Filament expose as valid domain? | `app/Filament/Resources/*` |
 | What is the actual DB schema? | `database/migrations/*` |
 | What model relationships exist? | `app/Models/*` |
+| Is a 500 a missing method or a runtime error? | `app/Http/Controllers/*` |
 
-### Specific questions to answer before continuing
+### Open questions — answer when mirror becomes available
 
 1. Does `routes/api.php` bind `/projects/{id}` to `projectCode` or UUID?
-   — Confirms the `e6b6fc8` fix is correct at the route level, not just empirically
+   — Confirms `e6b6fc8` fix is correct at route level, not just empirically
 
-2. Does `/projects/{id}/archive` and `/projects/{id}/close` have controller methods?
+2. Do `/projects/{id}/archive` and `/projects/{id}/close` have controller methods?
    — Classifies the 500 as missing implementation vs runtime error
 
-3. Does `/tasks/{id}/hold` and `/tasks/{id}/resume` have controller methods?
+3. Do `/tasks/{id}/hold` and `/tasks/{id}/resume` have controller methods?
    — Same classification
 
 4. Does `predecessorDependencies` have a migration column and model relationship?
-   — Confirms whether the persistence defect is a missing migration or missing service call
+   — Confirms whether persistence defect is a missing migration or missing service call
 
 5. What request validation exists for `POST /tasks`?
    — Confirms which fields are required vs optional
