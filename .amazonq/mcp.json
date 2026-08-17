@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "itpms-context": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/workspaces/itpms"
+      ]
+    }
+  }
+}
