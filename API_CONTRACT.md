@@ -68,15 +68,21 @@ All endpoints follow:
 
 > "What exists?"
 
+### Route Identity — CRITICAL
+
+> **All `/projects/{id}` routes resolve by `projectCode` (e.g. `ITP-2026-0001`), NOT by UUID.**
+> Passing a UUID returns 404. This applies to every verb and every sub-endpoint.
+> Confirmed by live API testing 2026-08-15.
+
 ### Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/v1/projects` | List all projects |
-| GET | `/api/v1/projects/{id}` | Get single project |
+| GET | `/api/v1/projects/{projectCode}` | Get single project |
 | POST | `/api/v1/projects` | Create project |
-| PUT | `/api/v1/projects/{id}` | Update project |
-| DELETE | `/api/v1/projects/{id}` | Delete project |
+| PUT | `/api/v1/projects/{projectCode}` | Update project |
+| DELETE | `/api/v1/projects/{projectCode}` | Delete project |
 
 ### Project Object
 
@@ -106,9 +112,16 @@ interface Project {
 - `progress` is server-computed from tasks — NOT sent in create/update payloads
 - Response must be flat (no nested objects)
 - Do NOT rename fields
-- Status transitions via explicit endpoints:
-  - `POST /api/v1/projects/{id}/archive`
-  - `POST /api/v1/projects/{id}/close`
+- Status transitions via explicit endpoints — both use `projectCode`, not UUID:
+  - `POST /api/v1/projects/{projectCode}/archive` — ⚠️ returns 500, backend defect, Mzo investigating
+  - `POST /api/v1/projects/{projectCode}/close` — ⚠️ returns 500, backend defect, Mzo investigating
+- Sub-endpoints also use `projectCode`:
+  - `GET /api/v1/projects/{projectCode}/dashboard`
+  - `GET /api/v1/projects/{projectCode}/metrics`
+  - `GET /api/v1/projects/{projectCode}/health`
+  - `GET /api/v1/projects/{projectCode}/forecast`
+  - `GET /api/v1/projects/{projectCode}/schedule`
+  - `GET /api/v1/projects/{projectCode}/schedule/progress`
 
 ---
 
@@ -363,6 +376,11 @@ If no token is present (user not logged in), requests proceed without the `Autho
 
 > "How is work decomposed?"
 
+### Route Identity
+
+> **`/wbs/{id}` routes resolve by UUID.** `projectCode` is used only as a query parameter for filtering.
+> Confirmed by live API testing 2026-08-15.
+
 ### Endpoints
 
 | Method | Endpoint | Description |
@@ -447,6 +465,11 @@ Laravel must store and return these exact string values.
 ## 10. TASKS MODULE
 
 > "What work needs to be done?"
+
+### Route Identity
+
+> **`/tasks/{id}` routes resolve by UUID.** `projectCode` is used only as a query parameter for filtering.
+> Confirmed by live API testing 2026-08-15.
 
 ### Endpoints
 
@@ -598,12 +621,12 @@ All will follow the same response format, error format, and naming conventions d
 | Endpoint | Method | Frontend Service | Status | Notes |
 |----------|--------|-----------------|--------|-------|
 | `/api/v1/projects` | GET | `lib/services/projects-queries.ts` | ✅ E2E Tested | Flat array response |
-| `/api/v1/projects/{id}` | GET | `lib/services/projects-queries.ts` | ✅ E2E Tested | Flat object response |
+| `/api/v1/projects/{projectCode}` | GET | `lib/services/projects-queries.ts` | ✅ E2E Tested | Resolves by projectCode — UUID returns 404 |
 | `/api/v1/projects` | POST | `lib/services/projects.ts` | ✅ E2E Tested | Sends `plannedStart`/`plannedFinish` |
-| `/api/v1/projects/{id}` | PUT | `lib/services/projects.ts` | ✅ E2E Tested | Only sends dates if non-empty |
-| `/api/v1/projects/{id}` | DELETE | `lib/services/projects.ts` | ✅ E2E Tested | Soft delete |
-| `/api/v1/projects/{id}/archive` | POST | `lib/services/projects.ts` | ⏳ Pending Backend | Frontend wired, returns server error |
-| `/api/v1/projects/{id}/close` | POST | `lib/services/projects.ts` | ⏳ Pending Backend | Frontend wired, returns server error |
+| `/api/v1/projects/{projectCode}` | PUT | `lib/services/projects.ts` | ✅ E2E Tested | Resolves by projectCode — confirmed 200 |
+| `/api/v1/projects/{projectCode}` | DELETE | `lib/services/projects.ts` | ✅ E2E Tested | Resolves by projectCode |
+| `/api/v1/projects/{projectCode}/archive` | POST | `lib/services/projects.ts` | ⚠️ Backend Defect | Identifier correct (projectCode), backend returns 500 — Mzo investigating |
+| `/api/v1/projects/{projectCode}/close` | POST | `lib/services/projects.ts` | ⚠️ Backend Defect | Identifier correct (projectCode), backend returns 500 — Mzo investigating |
 | `/api/v1/projects/{projectCode}/dashboard` | GET | `lib/services/project-dashboard.ts` | ✅ E2E Tested | Nested object with project, schedule, metrics, health, summary |
 | `/api/v1/projects/{projectCode}/metrics` | GET | `lib/services/project-dashboard.ts` | ✅ E2E Tested | Returns expectedProgress, actualProgress, scheduleVariance etc |
 | `/api/v1/projects/{projectCode}/health` | GET | `lib/services/project-dashboard.ts` | ✅ E2E Tested | Returns health, score, recommendations |
@@ -620,8 +643,8 @@ All will follow the same response format, error format, and naming conventions d
 | `/api/v1/tasks/{id}` | PUT | `lib/services/tasks.ts` | ✅ E2E Tested | Working as of 2026-08-15, accepts `plannedCost` |
 | `/api/v1/tasks/{id}` | DELETE | `lib/services/tasks.ts` | ✅ E2E Tested | Working as of 2026-08-15 |
 | `/api/v1/tasks/{id}/progress` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | Body: `{ percentComplete, remarks, updatedBy, progressDate, actualCost? }` — `progressDate` confirmed required, `actualCost` optional |
-| `/api/v1/tasks/{id}/hold` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | No body |
-| `/api/v1/tasks/{id}/resume` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | No body |
+| `/api/v1/tasks/{id}/hold` | POST | `lib/services/tasks.ts` | ⚠️ Backend Defect | Identifier correct (UUID), backend returns 500 — Mzo investigating |
+| `/api/v1/tasks/{id}/resume` | POST | `lib/services/tasks.ts` | ⚠️ Backend Defect | Identifier correct (UUID), backend returns 500 — Mzo investigating |
 | `/api/v1/tasks/{id}/cancel` | POST | `lib/services/tasks.ts` | ⏳ Pending Verification | Frontend wired |
 | `/api/v1/users` | GET | `lib/services/users.ts` | ✅ E2E Tested | Used for dropdowns |
 | `/api/v1/auth/azure-login` | POST | `lib/auth/auth-service.ts` | ✅ E2E Tested | Azure AD flow |
