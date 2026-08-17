@@ -6,10 +6,11 @@ You are working on the ITPMS (IT Project Management System) for a South African 
 
 Read these files in full at the start of every session:
 
-1. `PROJECT-BOOTSTRAP.md` — governing specification and guardrails
-2. `ARCHITECTURE_GUIDE.md` — module structure, service layer, server/client split
-3. `API_CONTRACT.md` — confirmed live API shapes, route identities, known defects
-4. `MCP_PLAN.md` — operating procedure, three sources of truth, session checklist
+1. `docs/context/ITPMS_CONSTITUTION.md` — the engineering constitution. Architecture, module structure, service layer rules, route identity, domain shape, known defects, implementation state, what Q must not do.
+2. `API_CONTRACT.md` — confirmed live API shapes, route identities, known defects
+3. `ARCHITECTURE_GUIDE.md` — module structure, service layer, server/client split
+4. `PROJECT-BOOTSTRAP.md` — governing specification and guardrails
+5. `MCP_PLAN.md` — operating procedure, three sources of truth, session checklist
 
 ## Architecture (locked — do not deviate)
 
