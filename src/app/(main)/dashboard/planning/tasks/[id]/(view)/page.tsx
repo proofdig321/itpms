@@ -33,6 +33,27 @@ const priorityConfig: Record<string, { label: string; className: string }> = {
   },
 };
 
+const approvalActionConfig: Record<string, { label: string; className: string }> = {
+  submitted: {
+    label: "Submitted",
+    className: "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-300",
+  },
+  approved: {
+    label: "Approved",
+    className:
+      "border-green-300 bg-green-50 text-green-700 dark:border-green-700 dark:bg-green-950 dark:text-green-300",
+  },
+  rejected: {
+    label: "Rejected",
+    className: "border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-950 dark:text-red-300",
+  },
+  cancelled: {
+    label: "Cancelled",
+    className:
+      "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-300",
+  },
+};
+
 const statusConfig: Record<string, { label: string; className: string }> = {
   draft: {
     label: "Draft",
@@ -254,6 +275,32 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
                     <span className="text-muted-foreground text-xs">{c.createdAt}</span>
                   </div>
                   <p className="text-muted-foreground">{c.comment}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {task.approvals.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-normal text-muted-foreground text-sm">Approval History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-3">
+              {task.approvals.map((a) => (
+                <div key={a.id} className="flex items-start justify-between gap-4 text-sm">
+                  <div className="flex flex-col gap-0.5">
+                    <div className="flex items-center gap-2">
+                      <Badge className={approvalActionConfig[a.action]?.className ?? ""}>
+                        {approvalActionConfig[a.action]?.label ?? a.action}
+                      </Badge>
+                      <span className="text-muted-foreground text-xs">{a.performedBy}</span>
+                    </div>
+                    {a.comments && <span className="text-muted-foreground">{a.comments}</span>}
+                  </div>
+                  <span className="whitespace-nowrap text-muted-foreground text-xs">{a.performedAt}</span>
                 </div>
               ))}
             </div>
