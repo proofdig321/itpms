@@ -2,8 +2,6 @@
 
 import { useMemo } from "react";
 
-import { Badge } from "@/components/ui/badge";
-import type { TaskDependency } from "@/types/dependency";
 import type { Task, TaskStatus } from "@/types/task";
 
 const statusColors: Record<TaskStatus, string> = {
@@ -16,19 +14,11 @@ const statusColors: Record<TaskStatus, string> = {
   cancelled: "bg-red-400 dark:bg-red-600",
 };
 
-const dependencyLabels: Record<string, string> = {
-  "finish-to-start": "FS",
-  "start-to-start": "SS",
-  "finish-to-finish": "FF",
-  "start-to-finish": "SF",
-};
-
 interface GanttTimelineProps {
   tasks: Task[];
-  dependencies: TaskDependency[];
 }
 
-export function GanttTimeline({ tasks, dependencies }: GanttTimelineProps) {
+export function GanttTimeline({ tasks }: GanttTimelineProps) {
   const validTasks = useMemo(
     () =>
       tasks.filter(
@@ -51,15 +41,19 @@ export function GanttTimeline({ tasks, dependencies }: GanttTimelineProps) {
     return { startDate: min, endDate: max, totalDays: days };
   }, [validTasks]);
 
+  // Build predecessor map from task.predecessorDependencies (already loaded with tasks)
   const taskDeps = useMemo(() => {
-    const map = new Map<string, TaskDependency[]>();
-    for (const dep of dependencies) {
-      const existing = map.get(dep.targetTaskId) ?? [];
-      existing.push(dep);
-      map.set(dep.targetTaskId, existing);
+    const map = new Map<string, string[]>();
+    for (const task of tasks) {
+      if (task.predecessorDependencies.length > 0) {
+        map.set(
+          task.id,
+          task.predecessorDependencies.map((d) => d.dependencyType),
+        );
+      }
     }
     return map;
-  }, [dependencies]);
+  }, [tasks]);
 
   const months = useMemo(() => {
     const result: { label: string; left: number }[] = [];
@@ -122,8 +116,6 @@ export function GanttTimeline({ tasks, dependencies }: GanttTimelineProps) {
             const hasdates = task.plannedStart && task.plannedFinish;
             const left = hasdates ? getPosition(task.plannedStart) : 0;
             const width = hasdates ? getWidth(task.plannedStart, task.plannedFinish) : 0;
-            const deps = taskDeps.get(task.id);
-
             return (
               <div key={task.id} className="flex items-center gap-3 px-3 py-2">
                 <div className="w-40 shrink-0 truncate text-sm">{task.name}</div>
@@ -139,10 +131,8 @@ export function GanttTimeline({ tasks, dependencies }: GanttTimelineProps) {
                   </div>
                 </div>
                 <div className="w-16 shrink-0 text-right">
-                  {deps && deps.length > 0 && (
-                    <Badge variant="outline" className="text-xs">
-                      {deps.map((d) => dependencyLabels[d.type]).join(", ")}
-                    </Badge>
+                  {taskDeps.has(task.id) && (
+                    <span className="text-muted-foreground text-xs">{taskDeps.get(task.id)?.join(", ")}</span>
                   )}
                 </div>
               </div>

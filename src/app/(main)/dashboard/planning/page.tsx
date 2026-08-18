@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getDependenciesByProject } from "@/lib/services/dependencies";
 import { getMilestones } from "@/lib/services/planning";
 import { getProjects } from "@/lib/services/projects-queries";
 import { getTasksByProject } from "@/lib/services/tasks-queries";
@@ -71,9 +70,7 @@ async function WbsContent({ projectCode }: { projectCode: string }) {
 
 async function GanttContent({ projectCode }: { projectCode: string }) {
   const tasks = await getTasksByProject(projectCode);
-  const taskIds = tasks.map((t) => t.id);
-  const deps = await getDependenciesByProject(taskIds);
-  return <GanttTimeline tasks={tasks} dependencies={deps} />;
+  return <GanttTimeline tasks={tasks} />;
 }
 
 async function MilestonesContent() {
