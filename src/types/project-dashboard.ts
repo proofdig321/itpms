@@ -52,7 +52,7 @@ export interface ProjectMetrics {
 
 export interface ProjectHealth {
   projectCode: string;
-  health: "on-track" | "at-risk" | "delayed" | "critical";
+  health: "not-planned" | "on-track" | "at-risk" | "delayed" | "critical";
   score: number;
   status: string;
   scheduleVarianceDays: number;

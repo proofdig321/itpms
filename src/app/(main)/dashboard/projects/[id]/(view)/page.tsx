@@ -58,6 +58,10 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 };
 
 const healthConfig: Record<string, { label: string; className: string }> = {
+  "not-planned": {
+    label: "Not Planned",
+    className: "border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400",
+  },
   "on-track": {
     label: "On Track",
     className:
