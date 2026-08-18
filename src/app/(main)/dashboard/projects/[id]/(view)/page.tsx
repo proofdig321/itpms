@@ -27,7 +27,7 @@ function formatDate(dateStr: string): string {
   if (!dateStr) return "—";
   const [year, month, day] = dateStr.split("T")[0].split("-");
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  return `${day} ${months[Number.parseInt(month) - 1]} ${year}`;
+  return `${day} ${months[Number.parseInt(month, 10) - 1]} ${year}`;
 }
 
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -220,7 +220,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                   <CardTitle className="font-normal text-muted-foreground text-sm">Overdue Tasks</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="font-semibold text-2xl tabular-nums text-red-600">{metrics.overdueTasks}</p>
+                  <p className="font-semibold text-2xl text-red-600 tabular-nums">{metrics.overdueTasks}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -305,8 +305,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                   </CardHeader>
                   <CardContent>
                     <ul className="flex flex-col gap-1">
-                      {health.recommendations.map((rec, i) => (
-                        <li key={i} className="text-sm">
+                      {health.recommendations.map((rec) => (
+                        <li key={rec} className="text-sm">
                           • {rec}
                         </li>
                       ))}
