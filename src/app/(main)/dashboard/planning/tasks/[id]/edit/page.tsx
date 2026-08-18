@@ -47,7 +47,15 @@ export default async function EditTaskPage({ params }: EditTaskPageProps) {
               plannedFinish: task.plannedFinish,
               plannedCost: task.plannedCost ? Number(task.plannedCost) : undefined,
               assignments: task.assignments.map(({ userId, role, allocation }) => ({ userId, role, allocation })),
-              dependencies: [],
+              dependencies: task.predecessorDependencies.map(
+                ({ predecessorTaskId, dependencyType, lag, lead, mandatory }) => ({
+                  predecessorTaskId,
+                  dependencyType,
+                  lag,
+                  lead,
+                  mandatory,
+                }),
+              ),
             }}
             projects={projects}
             wbsNodes={wbsNodes}

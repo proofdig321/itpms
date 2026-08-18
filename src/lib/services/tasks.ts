@@ -40,13 +40,18 @@ function mapApiTask(raw: Record<string, unknown>): Task {
         }))
       : [],
     predecessorDependencies: Array.isArray(raw.predecessorDependencies)
-      ? (raw.predecessorDependencies as Record<string, unknown>[]).map((d) => ({
-          predecessorTaskId: d.predecessorTaskId as string,
-          dependencyType: d.dependencyType as Task["predecessorDependencies"][number]["dependencyType"],
-          lag: (d.lag as number) ?? 0,
-          lead: (d.lead as number) ?? 0,
-          mandatory: (d.mandatory as boolean) ?? false,
-        }))
+      ? (raw.predecessorDependencies as Record<string, unknown>[]).map((d) => {
+          // TaskDependencyResource returns { predecessor: { id, name, status }, dependencyType, lag, mandatory }
+          // predecessorTaskId is nested under predecessor.id, not a top-level field
+          const predecessor = d.predecessor as Record<string, unknown> | undefined;
+          return {
+            predecessorTaskId: (predecessor?.id ?? d.predecessorTaskId) as string,
+            dependencyType: d.dependencyType as Task["predecessorDependencies"][number]["dependencyType"],
+            lag: (d.lag as number) ?? 0,
+            lead: (d.lead as number) ?? 0,
+            mandatory: (d.mandatory as boolean) ?? false,
+          };
+        })
       : [],
     progressHistory: Array.isArray(raw.progressHistory)
       ? (raw.progressHistory as Record<string, unknown>[]).map((p) => ({
