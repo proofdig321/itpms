@@ -21,6 +21,7 @@ import { getProjectByCode } from "@/lib/services/projects-queries";
 import { getUsers } from "@/lib/services/users";
 
 import { DeleteProjectDialog } from "./_components/delete-project-dialog";
+import { RecalculateScheduleButton } from "./_components/recalculate-schedule-button";
 
 function formatDate(dateStr: string): string {
   if (!dateStr) return "—";
@@ -323,6 +324,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         <TabsContent value="schedule" className="mt-4">
           {schedule ? (
             <div className="flex flex-col gap-4">
+              <div className="flex justify-end">
+                <PermissionGate permission="projects.update">
+                  <RecalculateScheduleButton projectCode={project.projectCode} />
+                </PermissionGate>
+              </div>
               {scheduleProgress && (
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Card>

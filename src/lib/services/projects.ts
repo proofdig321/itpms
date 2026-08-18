@@ -110,3 +110,15 @@ export async function closeProject(id: string): Promise<void> {
     throw new Error(err.message ?? "Failed to close project");
   }
 }
+
+export async function recalculateSchedule(projectCode: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/projects/${projectCode}/schedule/recalculate`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+  });
+  if (handleUnauthorized(response)) throw new Error("Session expired");
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message ?? "Failed to recalculate schedule");
+  }
+}
