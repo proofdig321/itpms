@@ -5,6 +5,7 @@ export type { Task };
 const defaults = {
   plannedCost: "0.00",
   actualCost: "0.00",
+  approvedPercentComplete: 0,
   remarks: null,
   predecessorDependencies: [],
   progressHistory: [],

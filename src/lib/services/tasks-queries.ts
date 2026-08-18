@@ -1,7 +1,7 @@
 import "server-only";
 
 import { taskPriorities, taskStatuses, taskTypes } from "@/lib/schemas/task";
-import type { Task } from "@/types/task";
+import type { ApprovalAction, Task } from "@/types/task";
 
 import { getServerAuthHeaders } from "./server-api-helpers";
 
@@ -46,6 +46,7 @@ function mapApiTask(raw: Record<string, unknown>): Task {
     plannedCost: (raw.plannedCost as string) ?? "0.00",
     actualCost: (raw.actualCost as string) ?? "0.00",
     percentComplete: (raw.percentComplete as number) ?? 0,
+    approvedPercentComplete: (raw.approvedPercentComplete as number) ?? 0,
     remarks: (raw.remarks as string) ?? null,
     assignments: Array.isArray(raw.assignments)
       ? (raw.assignments as Record<string, unknown>[]).map((a) => ({
@@ -57,13 +58,16 @@ function mapApiTask(raw: Record<string, unknown>): Task {
         }))
       : [],
     predecessorDependencies: Array.isArray(raw.predecessorDependencies)
-      ? (raw.predecessorDependencies as Record<string, unknown>[]).map((d) => ({
-          predecessorTaskId: d.predecessorTaskId as string,
-          dependencyType: d.dependencyType as Task["predecessorDependencies"][number]["dependencyType"],
-          lag: (d.lag as number) ?? 0,
-          lead: (d.lead as number) ?? 0,
-          mandatory: (d.mandatory as boolean) ?? false,
-        }))
+      ? (raw.predecessorDependencies as Record<string, unknown>[]).map((d) => {
+          const predecessor = d.predecessor as Record<string, unknown> | undefined;
+          return {
+            predecessorTaskId: (predecessor?.id ?? d.predecessorTaskId) as string,
+            dependencyType: d.dependencyType as Task["predecessorDependencies"][number]["dependencyType"],
+            lag: (d.lag as number) ?? 0,
+            lead: (d.lead as number) ?? 0,
+            mandatory: (d.mandatory as boolean) ?? false,
+          };
+        })
       : [],
     progressHistory: Array.isArray(raw.progressHistory)
       ? (raw.progressHistory as Record<string, unknown>[]).map((p) => ({
@@ -88,10 +92,13 @@ function mapApiTask(raw: Record<string, unknown>): Task {
     approvals: Array.isArray(raw.approvals)
       ? (raw.approvals as Record<string, unknown>[]).map((a) => ({
           id: a.id as string,
-          status: a.status as string,
-          approvedBy: (a.approvedBy as string) ?? undefined,
-          approvedByName: (a.approvedByName as string) ?? undefined,
-          createdAt: a.createdAt as string,
+          taskId: (a.taskId as string) ?? "",
+          action: (a.action as ApprovalAction) ?? "submitted",
+          performedBy: (a.performedBy as string) ?? "",
+          performedAt: (a.performedAt as string) ?? "",
+          comments: (a.comments as string) ?? null,
+          createdAt: (a.createdAt as string) ?? "",
+          updatedAt: (a.updatedAt as string) ?? "",
         }))
       : [],
     createdAt: (raw.createdAt as string) ?? "",

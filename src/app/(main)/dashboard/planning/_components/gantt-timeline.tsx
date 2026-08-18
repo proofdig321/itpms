@@ -12,6 +12,8 @@ const statusColors: Record<TaskStatus, string> = {
   "in-progress": "bg-green-500 dark:bg-green-600",
   completed: "bg-gray-400 dark:bg-gray-500",
   "on-hold": "bg-amber-500 dark:bg-amber-600",
+  "pending-approval": "bg-blue-400 dark:bg-blue-600",
+  cancelled: "bg-red-400 dark:bg-red-600",
 };
 
 const dependencyLabels: Record<string, string> = {

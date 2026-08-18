@@ -1,5 +1,5 @@
 import { type TaskFormValues, taskPriorities, taskStatuses, taskTypes } from "@/lib/schemas/task";
-import type { Task } from "@/types/task";
+import type { ApprovalAction, Task } from "@/types/task";
 
 import { getAuthHeaders, handleUnauthorized } from "./api-helpers";
 
@@ -29,6 +29,7 @@ function mapApiTask(raw: Record<string, unknown>): Task {
     plannedCost: (raw.plannedCost as string) ?? "0.00",
     actualCost: (raw.actualCost as string) ?? "0.00",
     percentComplete: (raw.percentComplete as number) ?? 0,
+    approvedPercentComplete: (raw.approvedPercentComplete as number) ?? 0,
     remarks: (raw.remarks as string) ?? null,
     assignments: Array.isArray(raw.assignments)
       ? (raw.assignments as Record<string, unknown>[]).map((a) => ({
@@ -76,10 +77,13 @@ function mapApiTask(raw: Record<string, unknown>): Task {
     approvals: Array.isArray(raw.approvals)
       ? (raw.approvals as Record<string, unknown>[]).map((a) => ({
           id: a.id as string,
-          status: a.status as string,
-          approvedBy: (a.approvedBy as string) ?? undefined,
-          approvedByName: (a.approvedByName as string) ?? undefined,
-          createdAt: a.createdAt as string,
+          taskId: (a.taskId as string) ?? "",
+          action: (a.action as ApprovalAction) ?? "submitted",
+          performedBy: (a.performedBy as string) ?? "",
+          performedAt: (a.performedAt as string) ?? "",
+          comments: (a.comments as string) ?? null,
+          createdAt: (a.createdAt as string) ?? "",
+          updatedAt: (a.updatedAt as string) ?? "",
         }))
       : [],
     createdAt: (raw.createdAt as string) ?? "",
@@ -220,4 +224,27 @@ export async function cancelTask(id: string): Promise<void> {
     const err = await response.json().catch(() => ({}));
     throw new Error(err.message ?? "Failed to cancel task");
   }
+}
+
+export async function approveTask(id: string): Promise<Task> {
+  const response = await fetch(`${API_BASE_URL}/tasks/${id}/approve`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+  });
+  if (handleUnauthorized(response)) throw new Error("Session expired");
+  const raw = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(raw?.message ?? "Failed to approve task");
+  return mapApiTask(raw?.data ?? raw);
+}
+
+export async function rejectTask(id: string, reason: string): Promise<Task> {
+  const response = await fetch(`${API_BASE_URL}/tasks/${id}/reject`, {
+    method: "POST",
+    headers: getAuthHeaders("json"),
+    body: JSON.stringify({ reason }),
+  });
+  if (handleUnauthorized(response)) throw new Error("Session expired");
+  const raw = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(raw?.message ?? "Failed to reject task");
+  return mapApiTask(raw?.data ?? raw);
 }

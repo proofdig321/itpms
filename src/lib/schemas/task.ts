@@ -11,7 +11,15 @@ export const taskTypes = [
   "closure",
 ] as const;
 export const taskPriorities = ["critical", "high", "medium", "low"] as const;
-export const taskStatuses = ["draft", "not-started", "in-progress", "completed", "on-hold"] as const;
+export const taskStatuses = [
+  "draft",
+  "not-started",
+  "in-progress",
+  "completed",
+  "on-hold",
+  "pending-approval",
+  "cancelled",
+] as const;
 
 export const assignmentSchema = z.object({
   userId: z.string().min(1, { message: "User is required." }),

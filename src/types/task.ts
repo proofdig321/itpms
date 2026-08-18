@@ -10,7 +10,14 @@ export type TaskType =
 
 export type TaskPriority = "critical" | "high" | "medium" | "low";
 
-export type TaskStatus = "draft" | "not-started" | "in-progress" | "completed" | "on-hold";
+export type TaskStatus =
+  | "draft"
+  | "not-started"
+  | "in-progress"
+  | "completed"
+  | "on-hold"
+  | "pending-approval"
+  | "cancelled";
 
 export interface TaskAssignment {
   id?: string;
@@ -46,12 +53,17 @@ export interface TaskComment {
   createdAt: string;
 }
 
+export type ApprovalAction = "submitted" | "approved" | "rejected" | "cancelled";
+
 export interface TaskApproval {
   id: string;
-  status: string;
-  approvedBy?: string;
-  approvedByName?: string;
+  taskId: string;
+  action: ApprovalAction;
+  performedBy: string;
+  performedAt: string;
+  comments: string | null;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface Task {
@@ -73,6 +85,7 @@ export interface Task {
   plannedCost: string;
   actualCost: string;
   percentComplete: number;
+  approvedPercentComplete: number;
   remarks: string | null;
   assignments: TaskAssignment[];
   predecessorDependencies: TaskDependency[];

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Activity, Ban, MoreHorizontal, Pause, Pencil, Play, Trash2 } from "lucide-react";
+import { Activity, Ban, Check, MoreHorizontal, Pause, Pencil, Play, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -33,7 +33,15 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { getSessionUser } from "@/lib/auth/auth-service";
-import { cancelTask, deleteTask, holdTask, resumeTask, updateTaskProgress } from "@/lib/services/tasks";
+import {
+  approveTask,
+  cancelTask,
+  deleteTask,
+  holdTask,
+  rejectTask,
+  resumeTask,
+  updateTaskProgress,
+} from "@/lib/services/tasks";
 import type { Task, TaskPriority, TaskStatus } from "@/types/task";
 
 const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
@@ -58,6 +66,14 @@ const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
     label: "On Hold",
     className:
       "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-300",
+  },
+  "pending-approval": {
+    label: "Pending Approval",
+    className: "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-300",
+  },
+  cancelled: {
+    label: "Cancelled",
+    className: "border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-950 dark:text-red-300",
   },
 };
 
@@ -153,12 +169,52 @@ function ActionsCell({ task }: { task: Task }) {
   const router = useRouter();
   const [showDelete, setShowDelete] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
+  const [showReject, setShowReject] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
   const [percentComplete, setPercentComplete] = useState(task.percentComplete);
   const [remarks, setRemarks] = useState("");
   const [actualCost, setActualCost] = useState<string>("");
   const [progressDate, setProgressDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [rejectReason, setRejectReason] = useState("");
+
+  const sessionUser = getSessionUser();
+  const canApprove = sessionUser !== null && Boolean(sessionUser.permissions.includes("tasks.approve"));
+  const isPendingApproval = task.status === "pending-approval";
+
+  const handleApprove = async () => {
+    setIsApproving(true);
+    try {
+      await approveTask(task.id);
+      toast.success("Task approved.");
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to approve task.");
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!rejectReason.trim()) {
+      toast.error("A rejection reason is required.");
+      return;
+    }
+    setIsRejecting(true);
+    try {
+      await rejectTask(task.id, rejectReason.trim());
+      toast.success("Task rejected.");
+      setShowReject(false);
+      setRejectReason("");
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to reject task.");
+    } finally {
+      setIsRejecting(false);
+    }
+  };
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -237,6 +293,18 @@ function ActionsCell({ task }: { task: Task }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {canApprove && isPendingApproval && (
+            <>
+              <DropdownMenuItem onSelect={handleApprove} disabled={isApproving}>
+                <Check className="mr-2 h-3.5 w-3.5" />
+                Approve
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowReject(true)}>
+                <X className="mr-2 h-3.5 w-3.5" />
+                Reject
+              </DropdownMenuItem>
+            </>
+          )}
           <DropdownMenuItem asChild>
             <Link href={`/dashboard/planning/tasks/${task.id}/edit`}>
               <Pencil className="mr-2 h-3.5 w-3.5" />
@@ -342,6 +410,31 @@ function ActionsCell({ task }: { task: Task }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={showReject} onOpenChange={setShowReject}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reject Task — {task.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="rejectReason">Rejection Reason</Label>
+            <Textarea
+              id="rejectReason"
+              placeholder="Explain why this task is being rejected..."
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReject(false)} disabled={isRejecting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleReject} disabled={isRejecting || !rejectReason.trim()}>
+              {isRejecting ? "Rejecting..." : "Reject"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

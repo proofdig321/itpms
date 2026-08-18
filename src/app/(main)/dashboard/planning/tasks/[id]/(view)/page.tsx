@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { getTaskById } from "@/lib/services/tasks-queries";
 
 import { DeleteTaskDialog } from "./_components/delete-task-dialog";
+import { TaskApprovalActions } from "./_components/task-approval-actions";
 
 const priorityConfig: Record<string, { label: string; className: string }> = {
   critical: {
@@ -55,6 +56,14 @@ const statusConfig: Record<string, { label: string; className: string }> = {
     className:
       "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-300",
   },
+  "pending-approval": {
+    label: "Pending Approval",
+    className: "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-300",
+  },
+  cancelled: {
+    label: "Cancelled",
+    className: "border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-950 dark:text-red-300",
+  },
 };
 
 interface TaskDetailPageProps {
@@ -77,6 +86,9 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
           <p className="text-muted-foreground text-sm">{task.projectCode}</p>
         </div>
         <div className="flex gap-2">
+          <PermissionGate permission="tasks.approve">
+            {task.status === "pending-approval" && <TaskApprovalActions taskId={task.id} taskName={task.name} />}
+          </PermissionGate>
           <PermissionGate permission="tasks.update">
             <Button asChild variant="outline">
               <Link href={`/dashboard/planning/tasks/${task.id}/edit`}>
