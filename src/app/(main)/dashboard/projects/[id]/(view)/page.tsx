@@ -268,7 +268,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         <TabsContent value="health" className="mt-4">
           {health ? (
             <div className="flex flex-col gap-4">
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <Card>
                   <CardHeader>
                     <CardTitle className="font-normal text-muted-foreground text-sm">Health</CardTitle>
@@ -277,15 +277,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                     <Badge className={(healthConfig[health.health] ?? healthConfig["at-risk"]).className}>
                       {(healthConfig[health.health] ?? healthConfig["at-risk"]).label}
                     </Badge>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="font-normal text-muted-foreground text-sm">Health Score</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex items-center gap-3">
-                    <Progress value={health.score} className="h-2 flex-1" />
-                    <span className="font-medium text-sm tabular-nums">{health.score}</span>
                   </CardContent>
                 </Card>
                 <Card>

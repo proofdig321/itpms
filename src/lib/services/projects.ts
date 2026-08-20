@@ -14,8 +14,8 @@ function mapApiProject(raw: Record<string, unknown>): Project {
     status: raw.status as Project["status"],
     progress: (raw.progress as number) ?? 0,
     managerId: (raw.managerId as string) ?? null,
-    plannedStart: (raw.plannedStart as string) ?? (raw.startDate as string) ?? "",
-    plannedFinish: (raw.plannedFinish as string) ?? (raw.endDate as string) ?? "",
+    plannedStart: (raw.plannedStart as string) ?? "",
+    plannedFinish: (raw.plannedFinish as string) ?? "",
     createdAt: (raw.created_at as string) ?? (raw.createdAt as string) ?? "",
   };
 }
