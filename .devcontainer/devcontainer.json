@@ -1,0 +1,4 @@
+{
+  "name": "ITPMS",
+  "postStartCommand": "bash /workspaces/itpms/.amazonq/restore-mcp-approvals.sh"
+}

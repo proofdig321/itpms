@@ -328,13 +328,16 @@ not-started | in-progress | completed | archived | closed | cancelled
 
 ### Project Health Enum
 ```
-on-track | at-risk | delayed | critical
+on-track | at-risk | delayed | critical | not-planned
 ```
+`not-planned` — returned when project has no tasks (no schedule to evaluate).
 
 ### Task Status Enum
 ```
-draft | not-started | in-progress | completed | on-hold
+draft | not-started | in-progress | pending-approval | completed | on-hold | cancelled
 ```
+`pending-approval` — intermediate state between `in-progress` and `completed` (Mzo fix `813fe86`).
+`cancelled` — terminal state, added in same fix.
 
 ### Task Priority Enum
 ```
@@ -380,13 +383,20 @@ FS (Finish-to-Start) | SS (Start-to-Start) | FF (Finish-to-Finish) | SF (Start-t
 
 | Endpoint | Method | Result | Notes |
 |----------|--------|--------|-------|
-| `/projects/{projectCode}/archive` | POST | 500 | Identifier correct. Backend defect. |
-| `/projects/{projectCode}/close` | POST | 500 | Identifier correct. Backend defect. |
-| `/tasks/{id}/hold` | POST | 500 | Identifier correct. Backend defect. |
-| `/tasks/{id}/resume` | POST | 500 | Identifier correct. Backend defect. |
-| `/tasks/{id}` → `predecessorDependencies` | GET | always `[]` | Accepted on POST/PUT, not persisted. Backend persistence defect. |
+| `/tasks/{id}` → `predecessorDependencies` | GET | always `[]` | Accepted on POST/PUT, not persisted. Mzo investigating. |
 | `/wbs` → `ownerId` | POST/PUT | validation error | FK expects UUID, validation expects integer. Frontend disables owner field. |
 | `/wbs` → sibling sequence | POST | 422 on projects with deletion history | Unique constraint includes soft-deleted records. |
+
+### Fixed by Mzo (mirror commit `813fe86`) — pending live verification
+
+| Endpoint | Was | Fix |
+|----------|-----|-----|
+| `/projects/{projectCode}/archive` | 500 | `StateMachine::normalizeValue()` — enum object now normalised to string |
+| `/projects/{projectCode}/close` | 500 | Same fix |
+| `/tasks/{id}/hold` | 500 | Same fix |
+| `/tasks/{id}/resume` | 500 | Same fix |
+
+> Live verification blocked — ngrok tunnel down. Verify once Mzo restarts tunnel.
 
 ---
 
@@ -410,7 +420,8 @@ Every backend change must be verified against the live API before frontend code 
 Mzo's verbal descriptions are not sufficient. The live API is ground truth.
 
 ### ngrok URL
-Current: `https://b010-196-30-115-34.ngrok-free.app/api/v1`
+Current: **STALE — tunnel down (ERR_NGROK_3200). Mzo must restart and send new URL.**
+Last known: `https://b010-196-30-115-34.ngrok-free.app/api/v1`
 Stored in: `.env.example` and `.env.local`
 
 **The ngrok URL rotates every time Mzo restarts the tunnel.**
@@ -460,18 +471,18 @@ curl -s -H "$H1" -H "$H2" -H "$H3" "$BASE/projects" | python3 -m json.tool
 
 ---
 
-## 19. Implementation State (commit bee9265, 2026-08-15)
+## 19. Implementation State (commit cbc876d, 2026-08-18)
 
 | Area | State | Notes |
 |------|-------|-------|
 | Projects CRUD | ✅ Live | All routes use projectCode |
 | Projects sub-endpoints | ✅ Live | dashboard, metrics, health, forecast, schedule |
-| Projects archive/close | ⚠️ Wired | Backend 500 — Mzo investigating |
+| Projects archive/close | ⚠️ Wired | Backend fix deployed (`813fe86`) — live verification pending (tunnel down) |
 | WBS CRUD | ✅ Live | All routes use UUID |
 | WBS owner assignment | ⚠️ Disabled | Backend FK/validation mismatch |
 | Tasks CRUD | ✅ Live | All routes use UUID |
 | Tasks progress | ✅ Live | progressDate and actualCost confirmed |
-| Tasks hold/resume | ⚠️ Wired | Backend 500 — Mzo investigating |
+| Tasks hold/resume | ⚠️ Wired | Backend fix deployed (`813fe86`) — live verification pending (tunnel down) |
 | Tasks predecessorDependencies | ⚠️ Wired | Backend not persisting — Mzo investigating |
 | Users | ✅ Live | |
 | Auth (Azure AD + Sanctum) | ✅ Live | |

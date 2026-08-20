@@ -11,6 +11,7 @@
     "check": "biome check",
     "check:fix": "biome check --write",
     "prepare": "husky",
+    "postinstall": "bash .amazonq/restore-mcp-approvals.sh",
     "generate:presets": "ts-node -P tsconfig.scripts.json src/scripts/generate-theme-presets.ts"
   },
   "lint-staged": {
