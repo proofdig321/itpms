@@ -420,8 +420,7 @@ Every backend change must be verified against the live API before frontend code 
 Mzo's verbal descriptions are not sufficient. The live API is ground truth.
 
 ### ngrok URL
-Current: **STALE — tunnel down (ERR_NGROK_3200). Mzo must restart and send new URL.**
-Last known: `https://b010-196-30-115-34.ngrok-free.app/api/v1`
+Current: `https://melismatic-lamellately-katelynn.ngrok-free.dev/api/v1`
 Stored in: `.env.example` and `.env.local`
 
 **The ngrok URL rotates every time Mzo restarts the tunnel.**
@@ -453,7 +452,7 @@ Without it: ngrok returns HTML, not JSON.
 ### Session setup
 ```bash
 export TOKEN="<from browser cookie auth_token>"
-export BASE="https://b010-196-30-115-34.ngrok-free.app/api/v1"
+export BASE="https://melismatic-lamellately-katelynn.ngrok-free.dev/api/v1"
 export H1="ngrok-skip-browser-warning: true"
 export H2="Accept: application/json"
 export H3="Authorization: Bearer $TOKEN"
