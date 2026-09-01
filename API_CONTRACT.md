@@ -487,7 +487,7 @@ Laravel must store and return these exact string values.
 ```typescript
 type TaskType = "planning" | "design" | "procurement" | "implementation" | "testing" | "training" | "documentation" | "closure";
 type TaskPriority = "critical" | "high" | "medium" | "low";
-type TaskStatus = "draft" | "not-started" | "in-progress" | "completed" | "on-hold";
+type TaskStatus = "draft" | "not-started" | "in-progress" | "completed" | "on-hold" | "pending-approval" | "cancelled";
 
 interface Task {
   id: string;
@@ -500,7 +500,7 @@ interface Task {
   priority: TaskPriority;
   status: TaskStatus;        // Server-computed based on progress
   duration: number;
-  milestone: boolean;
+  milestone: boolean;        // ⚠️ NOT persisted via API — TaskRepository omits field. Backend defect.
   plannedStart: string;      // ISO 8601 date
   plannedFinish: string;     // ISO 8601 date
   actualStart?: string;
@@ -508,9 +508,10 @@ interface Task {
   plannedCost: string;       // Decimal string e.g. "5000.00" — confirmed by live API
   actualCost: string;        // Decimal string e.g. "0.00" — confirmed by live API
   percentComplete: number;   // 0-100, updated via POST /tasks/{id}/progress
+  approvedPercentComplete: number; // Tracks manager-approved progress (differs from percentComplete at 100%)
   remarks: string | null;
   assignments: TaskAssignment[];
-  predecessorDependencies: TaskDependency[];  // Accepted on POST/PUT but NOT persisted — backend defect, Mzo investigating
+  predecessorDependencies: TaskDependency[];  // Returned correctly when created via dedicated endpoint
   progressHistory: TaskProgressEntry[];
   comments: TaskComment[];
   approvals: TaskApproval[];
@@ -573,15 +574,14 @@ interface TaskApproval {
 - Progress updated via: `POST /api/v1/tasks/{id}/progress` with `{ percentComplete, remarks, updatedBy, progressDate, actualCost? }` — `progressDate` is ISO 8601 date, `actualCost` is optional (both confirmed by live API)
 - `predecessorDependencies` is the confirmed payload key for task dependencies (renamed from `dependencies` — Mzo, 2026)
 - Frontend form uses `dependencies` as internal field array name; service layer translates to `predecessorDependencies` on send
-- `predecessorDependencies` defect status (confirmed 2026-08-15):
-  - POST /tasks: accepted
-  - PUT /tasks/{id}: accepted
-  - GET /tasks/{id}: empty (`predecessorDependencies: []`)
-  - GET /tasks/{id}/dependencies: empty (`{"data":[]}`)
-  - Classification: Backend persistence/return defect
-  - Frontend serialization: Verified correct
-  - Frontend workaround: None
-  - Backend clarification: Required from Mzo
+- `predecessorDependencies` verified live (2026-09-01):
+  - `POST /tasks/{id}/dependencies` (dedicated endpoint): persists correctly, returns full dependency with predecessor/successor objects
+  - `GET /tasks/{id}/dependencies`: returns persisted dependencies correctly
+  - `GET /tasks/{id}`: returns `predecessorDependencies` correctly when created via dedicated endpoint
+  - `DELETE /tasks/{id}/dependencies/{depId}`: returns 500 — backend defect, Mzo to fix
+  - Embedded `predecessorDependencies` in `POST /tasks` body: accepted by validation, persistence unverified
+  - Frontend should use dedicated endpoint for dependency management
+- `milestone` field: accepted in request body but NOT persisted — `TaskRepository` omits field. Backend defect. Do not add milestone UI until fixed.
 - `plannedCost` is accepted on POST and PUT, stored and returned as decimal string e.g. `"5000.00"` — confirmed by live API
 - `PUT /tasks/{id}` working as of 2026-08-15 (was previously 500)
 - `DELETE /tasks/{id}` working as of 2026-08-15 (was previously 500)
@@ -625,8 +625,8 @@ All will follow the same response format, error format, and naming conventions d
 | `/api/v1/projects` | POST | `lib/services/projects.ts` | ✅ E2E Tested | Sends `plannedStart`/`plannedFinish` |
 | `/api/v1/projects/{projectCode}` | PUT | `lib/services/projects.ts` | ✅ E2E Tested | Resolves by projectCode — confirmed 200 |
 | `/api/v1/projects/{projectCode}` | DELETE | `lib/services/projects.ts` | ✅ E2E Tested | Resolves by projectCode |
-| `/api/v1/projects/{projectCode}/archive` | POST | `lib/services/projects.ts` | ⚠️ Backend Defect | Identifier correct (projectCode), backend returns 500 — Mzo investigating |
-| `/api/v1/projects/{projectCode}/close` | POST | `lib/services/projects.ts` | ⚠️ Backend Defect | Identifier correct (projectCode), backend returns 500 — Mzo investigating |
+| `/api/v1/projects/{projectCode}/archive` | POST | `lib/services/projects.ts` | ✅ Live | 422 with state machine message when invalid transition; 200 on valid |
+| `/api/v1/projects/{projectCode}/close` | POST | `lib/services/projects.ts` | ✅ Live | Verified 2026-09-01 |
 | `/api/v1/projects/{projectCode}/dashboard` | GET | `lib/services/project-dashboard.ts` | ✅ E2E Tested | Nested object with project, schedule, metrics, health, summary |
 | `/api/v1/projects/{projectCode}/metrics` | GET | `lib/services/project-dashboard.ts` | ✅ E2E Tested | Returns expectedProgress, actualProgress, scheduleVariance etc |
 | `/api/v1/projects/{projectCode}/health` | GET | `lib/services/project-dashboard.ts` | ✅ E2E Tested | Returns health, score, recommendations |
@@ -643,8 +643,8 @@ All will follow the same response format, error format, and naming conventions d
 | `/api/v1/tasks/{id}` | PUT | `lib/services/tasks.ts` | ✅ E2E Tested | Working as of 2026-08-15, accepts `plannedCost` |
 | `/api/v1/tasks/{id}` | DELETE | `lib/services/tasks.ts` | ✅ E2E Tested | Working as of 2026-08-15 |
 | `/api/v1/tasks/{id}/progress` | POST | `lib/services/tasks.ts` | ✅ E2E Tested | Body: `{ percentComplete, remarks, updatedBy, progressDate, actualCost? }` — `progressDate` confirmed required, `actualCost` optional |
-| `/api/v1/tasks/{id}/hold` | POST | `lib/services/tasks.ts` | ⚠️ Backend Defect | Identifier correct (UUID), backend returns 500 — Mzo investigating |
-| `/api/v1/tasks/{id}/resume` | POST | `lib/services/tasks.ts` | ⚠️ Backend Defect | Identifier correct (UUID), backend returns 500 — Mzo investigating |
+| `/api/v1/tasks/{id}/hold` | POST | `lib/services/tasks.ts` | ✅ Live | Verified 2026-09-01 |
+| `/api/v1/tasks/{id}/resume` | POST | `lib/services/tasks.ts` | ✅ Live | Verified 2026-09-01 |
 | `/api/v1/tasks/{id}/cancel` | POST | `lib/services/tasks.ts` | ⏳ Pending Verification | Frontend wired |
 | `/api/v1/users` | GET | `lib/services/users.ts` | ✅ E2E Tested | Used for dropdowns |
 | `/api/v1/auth/azure-login` | POST | `lib/auth/auth-service.ts` | ✅ E2E Tested | Azure AD flow |

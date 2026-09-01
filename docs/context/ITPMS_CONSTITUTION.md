@@ -383,20 +383,21 @@ FS (Finish-to-Start) | SS (Start-to-Start) | FF (Finish-to-Finish) | SF (Start-t
 
 | Endpoint | Method | Result | Notes |
 |----------|--------|--------|-------|
-| `/tasks/{id}` → `predecessorDependencies` | GET | always `[]` | Accepted on POST/PUT, not persisted. Mzo investigating. |
-| `/wbs` → `ownerId` | POST/PUT | validation error | FK expects UUID, validation expects integer. Frontend disables owner field. |
-| `/wbs` → sibling sequence | POST | 422 on projects with deletion history | Unique constraint includes soft-deleted records. |
+| `PUT /wbs/{id}` → `plannedStart`/`plannedFinish` | PUT | silently ignored | `UpdateWbsNodeRequest` validates `startDate`/`endDate` — wrong field names. Mzo to fix. |
+| `DELETE /tasks/{id}/dependencies/{depId}` | DELETE | 500 Server Error | Dedicated dependency delete endpoint broken. Mzo to fix. |
+| `POST /tasks/{id}/progress` on `on-hold` task | POST | accepted (should reject) | Live behaviour contradicts mirror source. Mzo to investigate. |
+| `milestone` field | POST/PUT | never persists | `TaskRepository::create()` and `update()` omit `milestone`. Zero milestone tasks in DB. Mzo to fix. |
 
-### Fixed by Mzo (mirror commit `813fe86`) — pending live verification
+### Fixed and verified live (2026-09-01)
 
-| Endpoint | Was | Fix |
+| Endpoint | Was | Now |
 |----------|-----|-----|
-| `/projects/{projectCode}/archive` | 500 | `StateMachine::normalizeValue()` — enum object now normalised to string |
-| `/projects/{projectCode}/close` | 500 | Same fix |
-| `/tasks/{id}/hold` | 500 | Same fix |
-| `/tasks/{id}/resume` | 500 | Same fix |
-
-> Live verification blocked — ngrok tunnel down. Verify once Mzo restarts tunnel.
+| `/projects/{projectCode}/archive` | 500 | ✅ 422 with correct state machine message |
+| `/projects/{projectCode}/close` | 500 | ✅ 200 — transitions to `closed` |
+| `/tasks/{id}/hold` | 500 | ✅ 200 — transitions to `on-hold` |
+| `/tasks/{id}/resume` | 500 | ✅ 200 — transitions to `in-progress` |
+| `/wbs` → `ownerId` | validation error | ✅ accepts valid user UUID — frontend owner field re-enabled |
+| `predecessorDependencies` GET always `[]` | defect | ✅ resolved — dependencies persist and are returned correctly via dedicated endpoint |
 
 ---
 
@@ -470,19 +471,23 @@ curl -s -H "$H1" -H "$H2" -H "$H3" "$BASE/projects" | python3 -m json.tool
 
 ---
 
-## 19. Implementation State (commit cbc876d, 2026-08-18)
+## 19. Implementation State (commit cbc876d, 2026-09-01)
 
 | Area | State | Notes |
 |------|-------|-------|
 | Projects CRUD | ✅ Live | All routes use projectCode |
 | Projects sub-endpoints | ✅ Live | dashboard, metrics, health, forecast, schedule |
-| Projects archive/close | ⚠️ Wired | Backend fix deployed (`813fe86`) — live verification pending (tunnel down) |
+| Projects archive/close | ✅ Live | Verified working 2026-09-01 |
 | WBS CRUD | ✅ Live | All routes use UUID |
-| WBS owner assignment | ⚠️ Disabled | Backend FK/validation mismatch |
+| WBS owner assignment | ✅ Live | Backend FK defect resolved — ownerId now accepted |
+| WBS planned date editing | ⚠️ Broken | `UpdateWbsNodeRequest` uses wrong field names (`startDate`/`endDate`). Mzo to fix. |
 | Tasks CRUD | ✅ Live | All routes use UUID |
 | Tasks progress | ✅ Live | progressDate and actualCost confirmed |
-| Tasks hold/resume | ⚠️ Wired | Backend fix deployed (`813fe86`) — live verification pending (tunnel down) |
-| Tasks predecessorDependencies | ⚠️ Wired | Backend not persisting — Mzo investigating |
+| Tasks hold/resume | ✅ Live | Verified working 2026-09-01 |
+| Tasks cancel | ✅ Live | Wired and working |
+| Tasks approve/reject | ✅ Live | Wired and working |
+| Tasks predecessorDependencies | ⚠️ Partial | Dedicated endpoint (`POST /tasks/{id}/dependencies`) persists correctly. DELETE returns 500. Embedded PUT path unverified. |
+| Tasks milestone field | ⚠️ Broken | `TaskRepository` omits `milestone` — never persists. No milestone UI until Mzo fixes. |
 | Users | ✅ Live | |
 | Auth (Azure AD + Sanctum) | ✅ Live | |
 | Resources | ❌ Mock | Backend not implemented |

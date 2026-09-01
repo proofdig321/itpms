@@ -97,7 +97,23 @@ const priorityConfig: Record<TaskPriority, { label: string; className: string }>
   },
 };
 
+const typeLabels: Record<string, string> = {
+  planning: "Planning",
+  design: "Design",
+  procurement: "Procurement",
+  implementation: "Implementation",
+  testing: "Testing",
+  training: "Training",
+  documentation: "Documentation",
+  closure: "Closure",
+};
+
 export const columns: ColumnDef<Task>[] = [
+  {
+    accessorKey: "taskCode",
+    header: "Code",
+    cell: ({ row }) => <span className="font-mono text-muted-foreground text-xs">{row.getValue("taskCode")}</span>,
+  },
   {
     accessorKey: "name",
     header: "Task",
@@ -108,6 +124,14 @@ export const columns: ColumnDef<Task>[] = [
           {task.name}
         </Link>
       );
+    },
+  },
+  {
+    accessorKey: "type",
+    header: "Type",
+    cell: ({ row }) => {
+      const type = row.getValue("type") as string;
+      return <span className="text-sm">{typeLabels[type] ?? type}</span>;
     },
   },
   {
@@ -142,12 +166,33 @@ export const columns: ColumnDef<Task>[] = [
     },
   },
   {
+    accessorKey: "duration",
+    header: "Days",
+    cell: ({ row }) => <span className="text-muted-foreground text-sm">{row.getValue("duration")}</span>,
+  },
+  {
+    accessorKey: "plannedCost",
+    header: "Planned Cost",
+    cell: ({ row }) => {
+      const cost = row.getValue("plannedCost") as string;
+      const num = Number.parseFloat(cost);
+      return (
+        <span className="text-sm tabular-nums">
+          {Number.isNaN(num)
+            ? "—"
+            : `R ${num.toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+        </span>
+      );
+    },
+  },
+  {
     accessorKey: "assignments",
     header: "Assignee",
     cell: ({ row }) => {
       const assignments = row.original.assignments;
-      if (!assignments?.length) return "Unassigned";
-      return `${assignments.length} assigned`;
+      if (!assignments?.length) return <span className="text-muted-foreground text-sm">Unassigned</span>;
+      if (assignments.length === 1) return <span className="text-sm">{assignments[0].userName ?? "1 assigned"}</span>;
+      return <span className="text-sm">{assignments.length} assigned</span>;
     },
   },
   {
@@ -155,7 +200,11 @@ export const columns: ColumnDef<Task>[] = [
     header: "Due",
     cell: ({ row }) => {
       const date = row.getValue("plannedFinish") as string;
-      return new Date(date).toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" });
+      return (
+        <span className="text-sm">
+          {new Date(date).toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" })}
+        </span>
+      );
     },
   },
   {
@@ -247,8 +296,8 @@ function ActionsCell({ task }: { task: Task }) {
       setActualCost("");
       setProgressDate(new Date().toISOString().split("T")[0]);
       router.refresh();
-    } catch {
-      toast.error("Failed to update progress.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update progress.");
     } finally {
       setIsUpdating(false);
     }

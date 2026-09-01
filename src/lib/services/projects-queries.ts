@@ -43,6 +43,7 @@ function mapApiProject(raw: Record<string, unknown>): Project {
     managerId: (raw.managerId as string) ?? null,
     plannedStart: (raw.plannedStart as string) ?? (raw.startDate as string) ?? "",
     plannedFinish: (raw.plannedFinish as string) ?? (raw.endDate as string) ?? "",
+    forecastFinish: (raw.forecastFinish as string) ?? undefined,
     createdAt: (raw.created_at as string) ?? (raw.createdAt as string) ?? "",
   };
 }
