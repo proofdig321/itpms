@@ -241,6 +241,24 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         </dl>
       </div>
 
+      {/* ── Level 2: Description ── */}
+      <div className="rounded-lg border bg-card px-5 py-4">
+        <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Description</p>
+        {task.description || task.remarks ? (
+          <div className="flex flex-col gap-3 text-sm">
+            {task.description && <p>{task.description}</p>}
+            {task.remarks && (
+              <div>
+                <p className="mb-1 text-muted-foreground text-xs">Remarks</p>
+                <p className="text-muted-foreground">{task.remarks}</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="text-muted-foreground text-sm">No description provided.</p>
+        )}
+      </div>
+
       {/* ── Level 2: Schedule ── */}
       <div className="rounded-lg border bg-card px-5 py-4">
         <p className="mb-4 font-medium text-muted-foreground text-xs uppercase tracking-wide">Schedule</p>
@@ -281,24 +299,6 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
             <dd className="font-medium tabular-nums">{formatZAR(task.actualCost)}</dd>
           </div>
         </dl>
-      </div>
-
-      {/* ── Level 2: Description ── */}
-      <div className="rounded-lg border bg-card px-5 py-4">
-        <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Description</p>
-        {task.description || task.remarks ? (
-          <div className="flex flex-col gap-3 text-sm">
-            {task.description && <p>{task.description}</p>}
-            {task.remarks && (
-              <div>
-                <p className="mb-1 text-muted-foreground text-xs">Remarks</p>
-                <p className="text-muted-foreground">{task.remarks}</p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <p className="text-muted-foreground text-sm">No description provided.</p>
-        )}
       </div>
 
       {/* ── Level 3: Assignments ── */}
