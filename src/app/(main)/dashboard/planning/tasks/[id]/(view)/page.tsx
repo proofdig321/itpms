@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { taskTypeLabels } from "@/lib/schemas/task";
 import { getTaskById } from "@/lib/services/tasks-queries";
 import { getUsers } from "@/lib/services/users";
+import { getWbsNodeById } from "@/lib/services/wbs";
 
 import { DeleteTaskDialog } from "./_components/delete-task-dialog";
 import { TaskApprovalActions } from "./_components/task-approval-actions";
@@ -19,13 +20,6 @@ import { TaskApprovalActions } from "./_components/task-approval-actions";
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return "—";
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" });
-}
-
-function formatDateTime(dateStr: string | null | undefined): string {
   if (!dateStr) return "—";
   const d = new Date(dateStr);
   if (Number.isNaN(d.getTime())) return "—";
@@ -126,7 +120,10 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
 
   if (!task) notFound();
 
-  // Build a UUID → name lookup from the users list
+  // Resolve WBS node name — fetch only if wbsNodeId is present
+  const wbsNode = task.wbsNodeId ? await getWbsNodeById(task.wbsNodeId) : undefined;
+  const wbsLabel = wbsNode ? `${wbsNode.code} — ${wbsNode.name}` : "—";
+
   const userMap = new Map(users.map((u) => [u.id, u.name]));
   const resolveName = (uuid: string | null | undefined): string => {
     if (!uuid) return "—";
@@ -139,7 +136,7 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* ── Header ── */}
+      {/* ── Level 1: Identity + actions ── */}
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="font-mono text-muted-foreground text-xs">{task.taskCode}</p>
@@ -164,40 +161,46 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         </div>
       </div>
 
-      {/* ── Status strip ── */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-normal text-muted-foreground text-sm">Status</CardTitle>
+      {/* ── Level 1: Task state strip ── */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="shadow-none">
+          <CardHeader className="pt-4 pb-1">
+            <CardTitle className="font-normal text-muted-foreground text-xs uppercase tracking-wide">Status</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pb-4">
             <Badge className={statusBadge.className}>{statusBadge.label}</Badge>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-normal text-muted-foreground text-sm">Priority</CardTitle>
+        <Card className="shadow-none">
+          <CardHeader className="pt-4 pb-1">
+            <CardTitle className="font-normal text-muted-foreground text-xs uppercase tracking-wide">
+              Priority
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pb-4">
             <Badge className={priorityBadge.className}>{priorityBadge.label}</Badge>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-normal text-muted-foreground text-sm">Progress</CardTitle>
+        <Card className="shadow-none">
+          <CardHeader className="pt-4 pb-1">
+            <CardTitle className="font-normal text-muted-foreground text-xs uppercase tracking-wide">
+              Progress
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pb-4">
             <div className="flex items-center gap-2">
-              <Progress value={task.percentComplete} className="h-2 flex-1" />
+              <Progress value={task.percentComplete} className="h-1.5 flex-1" />
               <span className="font-medium text-sm tabular-nums">{task.percentComplete}%</span>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-normal text-muted-foreground text-sm">Milestone</CardTitle>
+        <Card className="shadow-none">
+          <CardHeader className="pt-4 pb-1">
+            <CardTitle className="font-normal text-muted-foreground text-xs uppercase tracking-wide">
+              Milestone
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pb-4">
             <Badge
               className={
                 task.milestone
@@ -211,111 +214,91 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         </Card>
       </div>
 
-      {/* ── Task Identification ── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Task Identification</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <dl className="grid gap-3 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="text-muted-foreground text-xs">Task Code</dt>
-              <dd className="font-medium font-mono">{task.taskCode}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs">Task Name</dt>
-              <dd className="font-medium">{task.name}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs">Project</dt>
-              <dd className="font-medium">{task.projectCode}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs">WBS Node</dt>
-              <dd className="font-medium">{task.wbsNodeId ?? "—"}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs">Task Type</dt>
-              <dd className="font-medium">{typeLabel}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs">Priority</dt>
-              <dd>
-                <Badge className={priorityBadge.className}>{priorityBadge.label}</Badge>
-              </dd>
-            </div>
-          </dl>
-        </CardContent>
-      </Card>
-
-      {/* ── Schedule ── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Schedule</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wide">Planned</p>
-              <dl className="grid gap-2 text-sm">
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Duration</dt>
-                  <dd className="font-medium tabular-nums">{task.duration} working days</dd>
-                </div>
-                <Separator />
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Start</dt>
-                  <dd className="font-medium">{formatDate(task.plannedStart)}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Finish</dt>
-                  <dd className="font-medium">{formatDate(task.plannedFinish)}</dd>
-                </div>
-              </dl>
-            </div>
-            <div>
-              <p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wide">Actual</p>
-              <dl className="grid gap-2 text-sm">
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Start</dt>
-                  <dd className="font-medium">{formatDate(task.actualStart)}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Finish</dt>
-                  <dd className="font-medium">{formatDate(task.actualFinish)}</dd>
-                </div>
-              </dl>
-            </div>
+      {/* ── Level 2: Task identity ── */}
+      <div className="rounded-lg border bg-card px-5 py-4">
+        <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Task Identification</p>
+        <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+          <div>
+            <dt className="text-muted-foreground text-xs">Task Code</dt>
+            <dd className="font-medium font-mono">{task.taskCode}</dd>
           </div>
-        </CardContent>
-      </Card>
+          <div>
+            <dt className="text-muted-foreground text-xs">Task Name</dt>
+            <dd className="font-medium">{task.name}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground text-xs">Project</dt>
+            <dd className="font-medium">{task.projectCode}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground text-xs">WBS Node</dt>
+            <dd className="font-medium">{wbsLabel}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground text-xs">Task Type</dt>
+            <dd className="font-medium">{typeLabel}</dd>
+          </div>
+        </dl>
+      </div>
 
-      {/* ── Cost ── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Cost</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <dl className="grid gap-3 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="text-muted-foreground text-xs">Planned Cost</dt>
-              <dd className="font-medium tabular-nums">{formatZAR(task.plannedCost)}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs">Actual Cost</dt>
-              <dd className="font-medium tabular-nums">{formatZAR(task.actualCost)}</dd>
-            </div>
-          </dl>
-        </CardContent>
-      </Card>
+      {/* ── Level 2: Schedule ── */}
+      <div className="rounded-lg border bg-card px-5 py-4">
+        <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Schedule</p>
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div>
+            <p className="mb-2 text-muted-foreground text-xs">Planned</p>
+            <dl className="grid gap-2 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">Duration</dt>
+                <dd className="font-medium tabular-nums">{task.duration} working days</dd>
+              </div>
+              <Separator />
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">Start</dt>
+                <dd className="font-medium">{formatDate(task.plannedStart)}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">Finish</dt>
+                <dd className="font-medium">{formatDate(task.plannedFinish)}</dd>
+              </div>
+            </dl>
+          </div>
+          <div>
+            <p className="mb-2 text-muted-foreground text-xs">Actual</p>
+            <dl className="grid gap-2 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">Start</dt>
+                <dd className="font-medium">{formatDate(task.actualStart)}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">Finish</dt>
+                <dd className="font-medium">{formatDate(task.actualFinish)}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
 
-      {/* ── Description & Remarks ── */}
+      {/* ── Level 2: Cost ── */}
+      <div className="rounded-lg border bg-card px-5 py-4">
+        <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Cost</p>
+        <dl className="grid gap-3 text-sm sm:grid-cols-2">
+          <div>
+            <dt className="text-muted-foreground text-xs">Planned</dt>
+            <dd className="font-medium tabular-nums">{formatZAR(task.plannedCost)}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground text-xs">Actual</dt>
+            <dd className="font-medium tabular-nums">{formatZAR(task.actualCost)}</dd>
+          </div>
+        </dl>
+      </div>
+
+      {/* ── Level 2: Description ── */}
       {(task.description || task.remarks) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Description</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4 text-sm">
+        <div className="rounded-lg border bg-card px-5 py-4">
+          <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Description</p>
+          <div className="flex flex-col gap-3 text-sm">
             {task.description && <p>{task.description}</p>}
             {task.remarks && (
               <div>
@@ -323,14 +306,14 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
                 <p className="text-muted-foreground">{task.remarks}</p>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
-      {/* ── Assignments ── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Assignments</CardTitle>
+      {/* ── Level 3: Assignments ── */}
+      <Card className="shadow-none">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Assignments</CardTitle>
         </CardHeader>
         <CardContent>
           {task.assignments.length === 0 ? (
@@ -338,12 +321,12 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
           ) : (
             <div className="flex flex-col divide-y">
               {task.assignments.map((a) => (
-                <div key={a.id ?? a.userId} className="flex items-center justify-between py-2.5 text-sm">
-                  <span className="font-medium">{a.userName ?? resolveName(a.userId)}</span>
-                  <div className="flex items-center gap-3 text-muted-foreground">
-                    {a.role && <span>{a.role}</span>}
-                    <span className="tabular-nums">{a.allocation}%</span>
-                  </div>
+                <div key={a.id ?? a.userId} className="py-2.5">
+                  <p className="font-medium text-sm">{a.userName ?? resolveName(a.userId)}</p>
+                  <p className="text-muted-foreground text-xs">
+                    {a.role ? `${a.role} · ` : ""}
+                    {a.allocation}%
+                  </p>
                 </div>
               ))}
             </div>
@@ -351,24 +334,32 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         </CardContent>
       </Card>
 
-      {/* ── Progress History ── */}
+      {/* ── Level 3: Progress History ── */}
       {task.progressHistory.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Progress History</CardTitle>
+        <Card className="shadow-none">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Progress History</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col divide-y">
-              {task.progressHistory.map((p) => {
+            <div className="flex flex-col">
+              {task.progressHistory.map((p, i) => {
                 const actorName = p.updatedByName ?? resolveName(p.updatedBy);
+                const isLast = i === task.progressHistory.length - 1;
                 return (
-                  <div key={p.id} className="flex items-start justify-between gap-4 py-3 text-sm">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="font-medium">{p.percentComplete}% complete</span>
-                      {p.remarks && <span className="text-muted-foreground">{p.remarks}</span>}
-                      <span className="text-muted-foreground text-xs">{actorName}</span>
+                  <div key={p.id} className="flex gap-3">
+                    {/* timeline connector */}
+                    <div className="flex flex-col items-center">
+                      <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-border" />
+                      {!isLast && <div className="w-px flex-1 bg-border" />}
                     </div>
-                    <span className="shrink-0 text-muted-foreground text-xs">{formatDateTime(p.progressDate)}</span>
+                    <div className={`flex flex-1 items-start justify-between gap-4 pb-4 text-sm ${isLast ? "" : ""}`}>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-medium">{p.percentComplete}% complete</span>
+                        {p.remarks && <span className="text-muted-foreground">{p.remarks}</span>}
+                        <span className="text-muted-foreground text-xs">{actorName}</span>
+                      </div>
+                      <span className="shrink-0 text-muted-foreground text-xs">{formatDate(p.progressDate)}</span>
+                    </div>
                   </div>
                 );
               })}
@@ -377,27 +368,34 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         </Card>
       )}
 
-      {/* ── Approval History ── */}
+      {/* ── Level 3: Approval History ── */}
       {task.approvals.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Approval History</CardTitle>
+        <Card className="shadow-none">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Approval History</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col divide-y">
-              {task.approvals.map((a) => {
+            <div className="flex flex-col">
+              {task.approvals.map((a, i) => {
                 const actorName = resolveName(a.performedBy);
                 const actionCfg = approvalActionConfig[a.action] ?? { label: a.action, className: "" };
+                const isLast = i === task.approvals.length - 1;
                 return (
-                  <div key={a.id} className="flex items-start justify-between gap-4 py-3 text-sm">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <Badge className={actionCfg.className}>{actionCfg.label}</Badge>
-                        <span className="text-muted-foreground text-xs">{actorName}</span>
-                      </div>
-                      {a.comments && <span className="text-muted-foreground">{a.comments}</span>}
+                  <div key={a.id} className="flex gap-3">
+                    <div className="flex flex-col items-center">
+                      <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-border" />
+                      {!isLast && <div className="w-px flex-1 bg-border" />}
                     </div>
-                    <span className="shrink-0 text-muted-foreground text-xs">{formatDateTime(a.performedAt)}</span>
+                    <div className="flex flex-1 items-start justify-between gap-4 pb-4 text-sm">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <Badge className={actionCfg.className}>{actionCfg.label}</Badge>
+                          <span className="text-muted-foreground text-xs">{actorName}</span>
+                        </div>
+                        {a.comments && <span className="text-muted-foreground">{a.comments}</span>}
+                      </div>
+                      <span className="shrink-0 text-muted-foreground text-xs">{formatDate(a.performedAt)}</span>
+                    </div>
                   </div>
                 );
               })}
