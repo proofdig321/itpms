@@ -346,8 +346,10 @@ critical | high | medium | low
 
 ### Task Type Enum
 ```
-planning | design | procurement | implementation | testing | training | documentation | closure
+planning | design | procurement | implementation | testing | training | documentation | closure | other
 ```
+9 canonical values. Enforced by `Rule::enum(TaskType::class)` in `StoreTaskRequest` and `UpdateTaskRequest`.
+Invalid values (e.g. `configuration`) return 422. Single source of truth: `src/lib/schemas/task.ts` → `taskTypes` array and `taskTypeLabels` map.
 
 ### WBS Level Enum
 ```
@@ -471,7 +473,7 @@ curl -s -H "$H1" -H "$H2" -H "$H3" "$BASE/projects" | python3 -m json.tool
 
 ---
 
-## 19. Implementation State (commit cbc876d, 2026-09-01)
+## 19. Implementation State (commit 827a589, 2026-09-01)
 
 | Area | State | Notes |
 |------|-------|-------|
@@ -480,14 +482,15 @@ curl -s -H "$H1" -H "$H2" -H "$H3" "$BASE/projects" | python3 -m json.tool
 | Projects archive/close | ✅ Live | Verified working 2026-09-01 |
 | WBS CRUD | ✅ Live | All routes use UUID |
 | WBS owner assignment | ✅ Live | Backend FK defect resolved — ownerId now accepted |
-| WBS planned date editing | ⚠️ Broken | `UpdateWbsNodeRequest` uses wrong field names (`startDate`/`endDate`). Mzo to fix. |
+| WBS planned date editing | ⚠️ Broken | Fixed in mirror (commit 8b11679) — `UpdateWbsNodeRequest` now uses `plannedStart`/`plannedFinish`. Not yet deployed to live. Still returns 500. |
 | Tasks CRUD | ✅ Live | All routes use UUID |
 | Tasks progress | ✅ Live | progressDate and actualCost confirmed |
 | Tasks hold/resume | ✅ Live | Verified working 2026-09-01 |
 | Tasks cancel | ✅ Live | Wired and working |
 | Tasks approve/reject | ✅ Live | Wired and working |
-| Tasks predecessorDependencies | ⚠️ Partial | Dedicated endpoint (`POST /tasks/{id}/dependencies`) persists correctly. DELETE returns 500. Embedded PUT path unverified. |
-| Tasks milestone field | ⚠️ Broken | `TaskRepository` omits `milestone` — never persists. No milestone UI until Mzo fixes. |
+| Tasks predecessorDependencies | ⚠️ Partial | Dedicated endpoint (`POST /tasks/{id}/dependencies`) persists correctly. DELETE returns 500. Fixed in mirror (8b11679) — route param renamed `{dependency}`. Not yet deployed. |
+| Tasks milestone field | ⚠️ Broken | Fixed in mirror (8b11679) — `TaskRepository` now includes `milestone` in create/update. Not yet deployed. Task detail shows milestone as read-only badge until deployed. |
+| Task detail page | ✅ Live | Full domain parity. WBS UUID resolved to `code — name` via `getWbsNodeById`. UUID-resolved progress/approval history. Timeline history layout. Flat column grid for schedule/cost/identification. Assignments table with column headers. |
 | Users | ✅ Live | |
 | Auth (Azure AD + Sanctum) | ✅ Live | |
 | Resources | ❌ Mock | Backend not implemented |
@@ -502,7 +505,40 @@ curl -s -H "$H1" -H "$H2" -H "$H3" "$BASE/projects" | python3 -m json.tool
 
 ---
 
-## 20. What Q Must Not Do
+## 20. UI Design Decisions (Locked)
+
+The task detail page (`tasks/[id]/(view)/page.tsx`) establishes the ITPMS detail page pattern.
+All future detail pages (project detail, WBS node detail) should follow this structure.
+
+### Section order (domain logic — do not rearrange)
+```
+1. Header          — task code (mono) + name (h1) + project code + action buttons
+2. State strip      — 4 cards: Status / Priority / Progress / Milestone
+3. Identification   — flat column grid: Task Code / Task Name / Project / WBS Node / Task Type
+4. Description      — full-width, immediately after identification (domain logic: what is this task?)
+5. Schedule         — flat 4-col grid: Duration / Planned Start / Planned Finish / Actual Start / Actual Finish
+6. Cost             — flat 2-col grid: Planned Cost / Actual Cost (ZAR format)
+7. Assignments      — mini-table with column headers: Assigned User / Role / Allocation
+8. Progress History — timeline with dot+connector, chronological audit trail
+9. Approval History — same timeline pattern as Progress History
+```
+
+### Visual hierarchy rules
+- State strip cards: `<Card shadow-none>` — dominant layer, communicates current task state
+- Information sections (Identification, Description, Schedule, Cost): `rounded-lg border bg-card px-5 py-4` — quieter, no CardTitle
+- History sections (Assignments, Progress, Approval): `<Card shadow-none>` with `text-sm` CardTitle
+- Section labels: `font-medium text-muted-foreground text-xs uppercase tracking-wide`
+- No UUID ever appears in user-facing UI — always resolve to human-readable name/code
+- Priority appears once only — in the state strip. Never repeated in Identification.
+- Filament is the domain reference. Its visual design is NOT copied.
+
+### WBS UUID resolution
+`getWbsNodeById(task.wbsNodeId)` fetched server-side. Displays `code — name` (e.g. `1 — API Integration Testing`).
+Falls back to `—` if node not found or `wbsNodeId` is null.
+
+---
+
+## 21. What Q Must Not Do
 
 - Do not change frontend code because Mzo said something changed — verify with live API first
 - Do not assume UUID is the route identifier for any new endpoint — test it
