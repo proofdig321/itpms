@@ -214,31 +214,49 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         </Card>
       </div>
 
-      {/* ── Level 2: Task identity ── */}
-      <div className="rounded-lg border bg-card px-5 py-4">
-        <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Task Identification</p>
-        <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
-          <div>
-            <dt className="text-muted-foreground text-xs">Task Code</dt>
-            <dd className="font-medium font-mono">{task.taskCode}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground text-xs">Task Name</dt>
-            <dd className="font-medium">{task.name}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground text-xs">Project</dt>
-            <dd className="font-medium">{task.projectCode}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground text-xs">WBS Node</dt>
-            <dd className="font-medium">{wbsLabel}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground text-xs">Task Type</dt>
-            <dd className="font-medium">{typeLabel}</dd>
-          </div>
-        </dl>
+      {/* ── Level 2: Identification + Description side-by-side on lg ── */}
+      <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+        <div className="rounded-lg border bg-card px-5 py-4">
+          <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Task Identification</p>
+          <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-muted-foreground text-xs">Task Code</dt>
+              <dd className="font-medium font-mono">{task.taskCode}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground text-xs">Task Name</dt>
+              <dd className="font-medium">{task.name}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground text-xs">Project</dt>
+              <dd className="font-medium">{task.projectCode}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground text-xs">WBS Node</dt>
+              <dd className="font-medium">{wbsLabel}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground text-xs">Task Type</dt>
+              <dd className="font-medium">{typeLabel}</dd>
+            </div>
+          </dl>
+        </div>
+        <div className="rounded-lg border bg-card px-5 py-4">
+          <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Description</p>
+          {task.description || task.remarks ? (
+            <div className="flex flex-col gap-3 text-sm">
+              {task.description && <p>{task.description}</p>}
+              {task.remarks && (
+                <div>
+                  <p className="mb-1 text-muted-foreground text-xs">Remarks</p>
+                  <p className="text-muted-foreground">{task.remarks}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-sm">No description provided.</p>
+          )}
+        </div>
       </div>
 
       {/* ── Level 2: Schedule ── */}
@@ -294,22 +312,6 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         </dl>
       </div>
 
-      {/* ── Level 2: Description ── */}
-      {(task.description || task.remarks) && (
-        <div className="rounded-lg border bg-card px-5 py-4">
-          <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Description</p>
-          <div className="flex flex-col gap-3 text-sm">
-            {task.description && <p>{task.description}</p>}
-            {task.remarks && (
-              <div>
-                <p className="mb-1 text-muted-foreground text-xs">Remarks</p>
-                <p className="text-muted-foreground">{task.remarks}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* ── Level 3: Assignments ── */}
       <Card className="shadow-none">
         <CardHeader className="pb-2">
@@ -352,7 +354,7 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
                       <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-border" />
                       {!isLast && <div className="w-px flex-1 bg-border" />}
                     </div>
-                    <div className={`flex flex-1 items-start justify-between gap-4 pb-4 text-sm ${isLast ? "" : ""}`}>
+                    <div className="flex flex-1 items-start justify-between gap-4 pb-4 text-sm">
                       <div className="flex flex-col gap-0.5">
                         <span className="font-medium">{p.percentComplete}% complete</span>
                         {p.remarks && <span className="text-muted-foreground">{p.remarks}</span>}
