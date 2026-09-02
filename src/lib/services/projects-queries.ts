@@ -41,8 +41,8 @@ function mapApiProject(raw: Record<string, unknown>): Project {
     health: (raw.health as Project["health"]) ?? undefined,
     progress: (raw.progress as number) ?? 0,
     managerId: (raw.managerId as string) ?? null,
-    plannedStart: (raw.plannedStart as string) ?? (raw.startDate as string) ?? "",
-    plannedFinish: (raw.plannedFinish as string) ?? (raw.endDate as string) ?? "",
+    plannedStart: ((raw.plannedStart as string) ?? (raw.startDate as string) ?? "").split("T")[0],
+    plannedFinish: ((raw.plannedFinish as string) ?? (raw.endDate as string) ?? "").split("T")[0],
     forecastFinish: (raw.forecastFinish as string) ?? undefined,
     createdAt: (raw.created_at as string) ?? (raw.createdAt as string) ?? "",
   };

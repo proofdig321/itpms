@@ -6,7 +6,8 @@ export type TaskType =
   | "testing"
   | "training"
   | "documentation"
-  | "closure";
+  | "closure"
+  | "other";
 
 export type TaskPriority = "critical" | "high" | "medium" | "low";
 

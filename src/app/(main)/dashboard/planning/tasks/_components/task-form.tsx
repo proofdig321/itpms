@@ -11,7 +11,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { type TaskFormValues, taskFormSchema, taskPriorities, taskTypes } from "@/lib/schemas/task";
+import { type TaskFormValues, taskFormSchema, taskPriorities, taskTypeLabels, taskTypes } from "@/lib/schemas/task";
 import { getTasksByProject } from "@/lib/services/tasks";
 import { getWbsNodesByProject } from "@/lib/services/wbs-client";
 import type { Project } from "@/types/project";
@@ -19,16 +19,6 @@ import type { Task } from "@/types/task";
 import type { User } from "@/types/user";
 import type { WbsNode } from "@/types/wbs";
 
-const typeLabels: Record<(typeof taskTypes)[number], string> = {
-  planning: "Planning",
-  design: "Design",
-  procurement: "Procurement",
-  implementation: "Implementation",
-  testing: "Testing",
-  training: "Training",
-  documentation: "Documentation",
-  closure: "Closure",
-};
 const priorityLabels: Record<(typeof taskPriorities)[number], string> = {
   critical: "Critical",
   high: "High",
@@ -203,7 +193,7 @@ export function TaskForm({
                   <SelectContent>
                     {taskTypes.map((t) => (
                       <SelectItem key={t} value={t}>
-                        {typeLabels[t]}
+                        {taskTypeLabels[t]}
                       </SelectItem>
                     ))}
                   </SelectContent>

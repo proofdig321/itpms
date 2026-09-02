@@ -33,6 +33,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { getSessionUser } from "@/lib/auth/auth-service";
+import { taskTypeLabels } from "@/lib/schemas/task";
 import {
   approveTask,
   cancelTask,
@@ -97,17 +98,6 @@ const priorityConfig: Record<TaskPriority, { label: string; className: string }>
   },
 };
 
-const typeLabels: Record<string, string> = {
-  planning: "Planning",
-  design: "Design",
-  procurement: "Procurement",
-  implementation: "Implementation",
-  testing: "Testing",
-  training: "Training",
-  documentation: "Documentation",
-  closure: "Closure",
-};
-
 export const columns: ColumnDef<Task>[] = [
   {
     accessorKey: "taskCode",
@@ -131,7 +121,7 @@ export const columns: ColumnDef<Task>[] = [
     header: "Type",
     cell: ({ row }) => {
       const type = row.getValue("type") as string;
-      return <span className="text-sm">{typeLabels[type] ?? type}</span>;
+      return <span className="text-sm">{taskTypeLabels[type as keyof typeof taskTypeLabels] ?? type}</span>;
     },
   },
   {

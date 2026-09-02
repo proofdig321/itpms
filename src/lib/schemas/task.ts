@@ -9,7 +9,20 @@ export const taskTypes = [
   "training",
   "documentation",
   "closure",
+  "other",
 ] as const;
+
+export const taskTypeLabels: Record<(typeof taskTypes)[number], string> = {
+  planning: "Planning",
+  design: "Design",
+  procurement: "Procurement",
+  implementation: "Implementation",
+  testing: "Testing",
+  training: "Training",
+  documentation: "Documentation",
+  closure: "Closure",
+  other: "Other",
+};
 export const taskPriorities = ["critical", "high", "medium", "low"] as const;
 export const taskStatuses = [
   "draft",
