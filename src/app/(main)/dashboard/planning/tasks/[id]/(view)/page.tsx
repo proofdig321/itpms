@@ -214,102 +214,91 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         </Card>
       </div>
 
-      {/* ── Level 2: Identification + Description side-by-side on lg ── */}
-      <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
-        <div className="rounded-lg border bg-card px-5 py-4">
-          <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Task Identification</p>
-          <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="text-muted-foreground text-xs">Task Code</dt>
-              <dd className="font-medium font-mono">{task.taskCode}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs">Task Name</dt>
-              <dd className="font-medium">{task.name}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs">Project</dt>
-              <dd className="font-medium">{task.projectCode}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs">WBS Node</dt>
-              <dd className="font-medium">{wbsLabel}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs">Task Type</dt>
-              <dd className="font-medium">{typeLabel}</dd>
-            </div>
-          </dl>
-        </div>
-        <div className="rounded-lg border bg-card px-5 py-4">
-          <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Description</p>
-          {task.description || task.remarks ? (
-            <div className="flex flex-col gap-3 text-sm">
-              {task.description && <p>{task.description}</p>}
-              {task.remarks && (
-                <div>
-                  <p className="mb-1 text-muted-foreground text-xs">Remarks</p>
-                  <p className="text-muted-foreground">{task.remarks}</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-sm">No description provided.</p>
-          )}
-        </div>
+      {/* ── Level 2: Task Identification ── */}
+      <div className="rounded-lg border bg-card px-5 py-4">
+        <p className="mb-4 font-medium text-muted-foreground text-xs uppercase tracking-wide">Task Identification</p>
+        <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
+          <div>
+            <dt className="mb-1 text-muted-foreground text-xs">Task Code</dt>
+            <dd className="font-medium font-mono">{task.taskCode}</dd>
+          </div>
+          <div>
+            <dt className="mb-1 text-muted-foreground text-xs">Task Name</dt>
+            <dd className="font-medium">{task.name}</dd>
+          </div>
+          <div>
+            <dt className="mb-1 text-muted-foreground text-xs">Project</dt>
+            <dd className="font-medium">{task.projectCode}</dd>
+          </div>
+          <div>
+            <dt className="mb-1 text-muted-foreground text-xs">WBS Node</dt>
+            <dd className="font-medium">{wbsLabel}</dd>
+          </div>
+          <div>
+            <dt className="mb-1 text-muted-foreground text-xs">Task Type</dt>
+            <dd className="font-medium">{typeLabel}</dd>
+          </div>
+        </dl>
       </div>
 
       {/* ── Level 2: Schedule ── */}
       <div className="rounded-lg border bg-card px-5 py-4">
-        <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Schedule</p>
-        <div className="grid gap-6 sm:grid-cols-2">
+        <p className="mb-4 font-medium text-muted-foreground text-xs uppercase tracking-wide">Schedule</p>
+        <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
           <div>
-            <p className="mb-2 text-muted-foreground text-xs">Planned</p>
-            <dl className="grid gap-2 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Duration</dt>
-                <dd className="font-medium tabular-nums">{task.duration} working days</dd>
-              </div>
-              <Separator />
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Start</dt>
-                <dd className="font-medium">{formatDate(task.plannedStart)}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Finish</dt>
-                <dd className="font-medium">{formatDate(task.plannedFinish)}</dd>
-              </div>
-            </dl>
+            <dt className="mb-1 text-muted-foreground text-xs">Duration</dt>
+            <dd className="font-medium tabular-nums">{task.duration} working days</dd>
           </div>
           <div>
-            <p className="mb-2 text-muted-foreground text-xs">Actual</p>
-            <dl className="grid gap-2 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Start</dt>
-                <dd className="font-medium">{formatDate(task.actualStart)}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Finish</dt>
-                <dd className="font-medium">{formatDate(task.actualFinish)}</dd>
-              </div>
-            </dl>
+            <dt className="mb-1 text-muted-foreground text-xs">Planned Start</dt>
+            <dd className="font-medium">{formatDate(task.plannedStart)}</dd>
           </div>
-        </div>
+          <div>
+            <dt className="mb-1 text-muted-foreground text-xs">Planned Finish</dt>
+            <dd className="font-medium">{formatDate(task.plannedFinish)}</dd>
+          </div>
+          <div>
+            <dt className="mb-1 text-muted-foreground text-xs">Actual Start</dt>
+            <dd className="font-medium">{formatDate(task.actualStart)}</dd>
+          </div>
+          <div>
+            <dt className="mb-1 text-muted-foreground text-xs">Actual Finish</dt>
+            <dd className="font-medium">{formatDate(task.actualFinish)}</dd>
+          </div>
+        </dl>
       </div>
 
       {/* ── Level 2: Cost ── */}
       <div className="rounded-lg border bg-card px-5 py-4">
-        <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Cost</p>
-        <dl className="grid gap-3 text-sm sm:grid-cols-2">
+        <p className="mb-4 font-medium text-muted-foreground text-xs uppercase tracking-wide">Cost</p>
+        <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
           <div>
-            <dt className="text-muted-foreground text-xs">Planned</dt>
+            <dt className="mb-1 text-muted-foreground text-xs">Planned Cost</dt>
             <dd className="font-medium tabular-nums">{formatZAR(task.plannedCost)}</dd>
           </div>
           <div>
-            <dt className="text-muted-foreground text-xs">Actual</dt>
+            <dt className="mb-1 text-muted-foreground text-xs">Actual Cost</dt>
             <dd className="font-medium tabular-nums">{formatZAR(task.actualCost)}</dd>
           </div>
         </dl>
+      </div>
+
+      {/* ── Level 2: Description ── */}
+      <div className="rounded-lg border bg-card px-5 py-4">
+        <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">Description</p>
+        {task.description || task.remarks ? (
+          <div className="flex flex-col gap-3 text-sm">
+            {task.description && <p>{task.description}</p>}
+            {task.remarks && (
+              <div>
+                <p className="mb-1 text-muted-foreground text-xs">Remarks</p>
+                <p className="text-muted-foreground">{task.remarks}</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="text-muted-foreground text-sm">No description provided.</p>
+        )}
       </div>
 
       {/* ── Level 3: Assignments ── */}
@@ -321,16 +310,22 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
           {task.assignments.length === 0 ? (
             <p className="text-muted-foreground text-sm">No assignments.</p>
           ) : (
-            <div className="flex flex-col divide-y">
-              {task.assignments.map((a) => (
-                <div key={a.id ?? a.userId} className="py-2.5">
-                  <p className="font-medium text-sm">{a.userName ?? resolveName(a.userId)}</p>
-                  <p className="text-muted-foreground text-xs">
-                    {a.role ? `${a.role} · ` : ""}
-                    {a.allocation}%
-                  </p>
-                </div>
-              ))}
+            <div className="text-sm">
+              <div className="mb-2 grid grid-cols-3 text-muted-foreground text-xs">
+                <span>Assigned User</span>
+                <span>Role</span>
+                <span>Allocation</span>
+              </div>
+              <Separator className="mb-3" />
+              <div className="flex flex-col gap-3">
+                {task.assignments.map((a) => (
+                  <div key={a.id ?? a.userId} className="grid grid-cols-3">
+                    <span className="font-medium">{a.userName ?? resolveName(a.userId)}</span>
+                    <span className="text-muted-foreground">{a.role || "—"}</span>
+                    <span className="tabular-nums">{a.allocation}%</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </CardContent>
