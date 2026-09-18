@@ -8,6 +8,7 @@ import { getUsers } from "@/lib/services/users";
 import { getWbsByProject } from "@/lib/services/wbs";
 
 import { GanttTimeline } from "./_components/gantt-timeline";
+import { NoProjectsState } from "./_components/no-projects-state";
 import { PlanningTable } from "./_components/planning-table";
 import { PlanningTableSkeleton } from "./_components/planning-table-skeleton";
 import { ProjectSelector } from "./_components/project-selector";
@@ -23,6 +24,10 @@ export default async function PlanningPage({ searchParams }: PlanningPageProps) 
   const projects = await getProjects();
   const fallback = projects[0]?.projectCode ?? "";
   const selectedCode = params.project ?? "";
+
+  if (projects.length === 0) {
+    return <NoProjectsState />;
+  }
 
   if (!selectedCode) {
     return <ProjectSync basePath="/dashboard/planning" fallbackCode={fallback} />;

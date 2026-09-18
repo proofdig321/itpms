@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getProjects } from "@/lib/services/projects-queries";
 import { getTasksByProject } from "@/lib/services/tasks-queries";
 
+import { NoProjectsState } from "../_components/no-projects-state";
 import { ProjectSelector } from "../_components/project-selector";
 import { ProjectSync } from "../_components/project-sync";
 import { TasksTable } from "./_components/tasks-table";
@@ -23,6 +24,10 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
   const projects = await getProjects();
   const fallback = projects[0]?.projectCode ?? "";
   const selectedCode = params.project ?? "";
+
+  if (projects.length === 0) {
+    return <NoProjectsState />;
+  }
 
   if (!selectedCode) {
     return <ProjectSync basePath="/dashboard/planning/tasks" fallbackCode={fallback} />;

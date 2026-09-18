@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getEvmByProject, getForecast } from "@/lib/services/analytics";
 import { getProjects } from "@/lib/services/projects-queries";
 
+import { NoProjectsState } from "../_components/no-projects-state";
 import { ProjectSelector } from "../_components/project-selector";
 import { ProjectSync } from "../_components/project-sync";
 
@@ -31,6 +32,10 @@ export default async function EvmPage({ searchParams }: EvmPageProps) {
   const projects = await getProjects();
   const fallback = projects[0]?.projectCode ?? "";
   const selectedCode = params.project ?? "";
+
+  if (projects.length === 0) {
+    return <NoProjectsState />;
+  }
 
   if (!selectedCode) {
     return <ProjectSync basePath="/dashboard/planning/evm" fallbackCode={fallback} />;
