@@ -54,7 +54,7 @@ export interface ProjectHealth {
   projectCode: string;
   health: "not-planned" | "on-track" | "at-risk" | "delayed" | "critical";
   status: string;
-  scheduleVarianceDays: number;
+  scheduleVariance: number;
   progressVariance: number;
   forecastFinish: string;
   plannedProgress: number;

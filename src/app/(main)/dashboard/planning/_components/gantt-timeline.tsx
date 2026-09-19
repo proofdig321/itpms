@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import type { Task, TaskStatus } from "@/types/task";
 
 const statusColors: Record<TaskStatus, string> = {
-  draft: "bg-gray-300 dark:bg-gray-600",
   "not-started": "bg-gray-300 dark:bg-gray-600",
   "in-progress": "bg-green-500 dark:bg-green-600",
   completed: "bg-gray-400 dark:bg-gray-500",

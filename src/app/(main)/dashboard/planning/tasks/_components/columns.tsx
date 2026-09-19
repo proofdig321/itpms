@@ -46,10 +46,6 @@ import {
 import type { Task, TaskPriority, TaskStatus } from "@/types/task";
 
 const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
-  draft: {
-    label: "Draft",
-    className: "border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400",
-  },
   "not-started": {
     label: "Not Started",
     className: "border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400",
@@ -97,6 +93,8 @@ const priorityConfig: Record<TaskPriority, { label: string; className: string }>
     className: "border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400",
   },
 };
+
+const LOCKED_STATUSES = ["pending-approval", "completed", "cancelled"] as const;
 
 export const columns: ColumnDef<Task>[] = [
   {
@@ -219,6 +217,7 @@ function ActionsCell({ task }: { task: Task }) {
   const [progressDate, setProgressDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [rejectReason, setRejectReason] = useState("");
 
+  const isLocked = (LOCKED_STATUSES as readonly string[]).includes(task.status);
   const sessionUser = getSessionUser();
   const canApprove = sessionUser !== null && Boolean(sessionUser.permissions.includes("tasks.approve"));
   const isPendingApproval = task.status === "pending-approval";
@@ -344,12 +343,14 @@ function ActionsCell({ task }: { task: Task }) {
               </DropdownMenuItem>
             </>
           )}
-          <DropdownMenuItem asChild>
-            <Link href={`/dashboard/planning/tasks/${task.id}/edit`}>
-              <Pencil className="mr-2 h-3.5 w-3.5" />
-              Edit
-            </Link>
-          </DropdownMenuItem>
+          {!isLocked && (
+            <DropdownMenuItem asChild>
+              <Link href={`/dashboard/planning/tasks/${task.id}/edit`}>
+                <Pencil className="mr-2 h-3.5 w-3.5" />
+                Edit
+              </Link>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onSelect={() => setShowProgress(true)}>
             <Activity className="mr-2 h-3.5 w-3.5" />
             Update Progress

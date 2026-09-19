@@ -285,10 +285,10 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                   </CardHeader>
                   <CardContent>
                     <p
-                      className={`font-semibold text-lg tabular-nums ${health.scheduleVarianceDays <= 0 ? "text-green-600" : "text-red-600"}`}
+                      className={`font-semibold text-lg tabular-nums ${health.scheduleVariance <= 0 ? "text-green-600" : "text-red-600"}`}
                     >
-                      {health.scheduleVarianceDays > 0 ? "+" : ""}
-                      {health.scheduleVarianceDays}d
+                      {health.scheduleVariance > 0 ? "+" : ""}
+                      {health.scheduleVariance}d
                     </p>
                   </CardContent>
                 </Card>

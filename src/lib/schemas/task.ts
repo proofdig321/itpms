@@ -25,7 +25,6 @@ export const taskTypeLabels: Record<(typeof taskTypes)[number], string> = {
 };
 export const taskPriorities = ["critical", "high", "medium", "low"] as const;
 export const taskStatuses = [
-  "draft",
   "not-started",
   "in-progress",
   "completed",

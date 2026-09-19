@@ -55,10 +55,6 @@ const priorityConfig: Record<string, { label: string; className: string }> = {
 };
 
 const statusConfig: Record<string, { label: string; className: string }> = {
-  draft: {
-    label: "Draft",
-    className: "border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400",
-  },
   "not-started": {
     label: "Not Started",
     className: "border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400",
@@ -108,6 +104,8 @@ const approvalActionConfig: Record<string, { label: string; className: string }>
   },
 };
 
+const LOCKED_STATUSES = ["pending-approval", "completed", "cancelled"] as const;
+
 // ─── page ────────────────────────────────────────────────────────────────────
 
 interface TaskDetailPageProps {
@@ -148,12 +146,14 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
             {task.status === "pending-approval" && <TaskApprovalActions taskId={task.id} taskName={task.name} />}
           </PermissionGate>
           <PermissionGate permission="tasks.update">
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/dashboard/planning/tasks/${task.id}/edit`}>
-                <Pencil className="h-4 w-4" />
-                Edit
-              </Link>
-            </Button>
+            {!(LOCKED_STATUSES as readonly string[]).includes(task.status) && (
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/dashboard/planning/tasks/${task.id}/edit`}>
+                  <Pencil className="h-4 w-4" />
+                  Edit
+                </Link>
+              </Button>
+            )}
           </PermissionGate>
           <PermissionGate permission="tasks.delete">
             <DeleteTaskDialog taskId={task.id} taskName={task.name} />

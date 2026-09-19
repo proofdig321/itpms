@@ -5,10 +5,21 @@ export type Permission =
   | "projects.view"
   | "projects.update"
   | "projects.delete"
+  | "projects.start"
+  | "projects.complete"
+  | "projects.close"
+  | "projects.archive"
   | "tasks.create"
   | "tasks.view"
   | "tasks.update"
   | "tasks.delete"
+  | "tasks.reset"
+  | "tasks.approve"
+  | "tasks.update-progress"
+  | "tasks.hold"
+  | "tasks.resume"
+  | "tasks.reject"
+  | "tasks.cancel"
   | "wbs.create"
   | "wbs.view"
   | "wbs.update"
@@ -30,50 +41,3 @@ export function can(permission: string, user: UserPermissionsContext): boolean {
 export function hasRole(role: string, user: UserPermissionsContext): boolean {
   return user.roles.includes(role);
 }
-
-export const roleDefaults: Record<Role, Permission[]> = {
-  "ict-admin": [
-    "projects.create",
-    "projects.view",
-    "projects.update",
-    "projects.delete",
-    "tasks.create",
-    "tasks.view",
-    "tasks.update",
-    "tasks.delete",
-    "wbs.create",
-    "wbs.view",
-    "wbs.update",
-    "wbs.delete",
-    "users.create",
-    "users.view",
-    "users.update",
-    "users.delete",
-  ],
-  "ict-manager": [
-    "projects.create",
-    "projects.view",
-    "projects.update",
-    "tasks.create",
-    "tasks.view",
-    "tasks.update",
-    "wbs.create",
-    "wbs.view",
-    "wbs.update",
-    "users.view",
-  ],
-  "project-manager": [
-    "projects.create",
-    "projects.view",
-    "projects.update",
-    "tasks.create",
-    "tasks.view",
-    "tasks.update",
-    "tasks.delete",
-    "wbs.create",
-    "wbs.view",
-    "wbs.update",
-    "wbs.delete",
-  ],
-  "team-member": ["projects.view", "tasks.view", "tasks.update", "wbs.view"],
-};

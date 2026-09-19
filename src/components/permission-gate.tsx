@@ -3,10 +3,10 @@
 import type { ReactNode } from "react";
 
 import { getUserPermissionsContext } from "@/lib/auth/auth-service";
-import { can, hasRole } from "@/lib/auth/permissions";
+import { can, hasRole, type Permission } from "@/lib/auth/permissions";
 
 interface PermissionGateProps {
-  permission: string;
+  permission: Permission;
   children: ReactNode;
   fallback?: ReactNode;
 }

@@ -11,14 +11,7 @@ export type TaskType =
 
 export type TaskPriority = "critical" | "high" | "medium" | "low";
 
-export type TaskStatus =
-  | "draft"
-  | "not-started"
-  | "in-progress"
-  | "completed"
-  | "on-hold"
-  | "pending-approval"
-  | "cancelled";
+export type TaskStatus = "not-started" | "in-progress" | "completed" | "on-hold" | "pending-approval" | "cancelled";
 
 export interface TaskAssignment {
   id?: string;
