@@ -1,4 +1,4 @@
 {
   "name": "ITPMS",
-  "postStartCommand": "bash /workspaces/itpms/.amazonq/restore-mcp-approvals.sh"
+  "postStartCommand": "bash /workspaces/itpms/.amazonq/restore-mcp-approvals.sh && bash /workspaces/itpms/.devcontainer/setup-git-credentials.sh"
 }
